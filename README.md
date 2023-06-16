@@ -3,14 +3,15 @@
 
 # Dependencies 
 
+npm install to install dependencies
+
 - Nest.js 
 
  npm i @nestjs/cli
  //nest new project-u-know
  select npm for package manager
 
-- ESLint.js 
-
 - Swagger
+
 
 - TypeORM 
