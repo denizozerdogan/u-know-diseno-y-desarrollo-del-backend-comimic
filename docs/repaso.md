@@ -43,12 +43,17 @@ $ npm i @nestjs/typeorm typeorm mysql2
 - espacio.entity.ts (clase)
 ```
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags ('user')
 @Entity()
 export class Espacio {
+
+  @ApiProperty({ description: 'Primary key as User ID', example: 1 })
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty({ description: 'The name of the user', example: Yumi })
   @Column()
   nombre: string;
 
@@ -63,7 +68,9 @@ export class Espacio {
 
 
 ```
+import { ApiProperty } from "@nestjs/swagger";
 export class CreateEspacioDto {
+  @ApiProperty ({example: 1})
   nombre: string;
 
   // Agrega otras propiedades del DTO aquí
@@ -73,6 +80,8 @@ export class CreateEspacioDto {
 
 #### Crear un archivo de configuración de la base de datos en la carpeta src/config:
 - database.config.ts
+
+npm i @nestjs/config
 ```
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
@@ -93,17 +102,30 @@ export default registerAs('database', (): TypeOrmModuleOptions => ({
 #### Modificar el archivo app.module.ts para incluir la entidad y configuración de la base de datos:
 ```
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Espacio } from './entities/espacio.entity';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { UserModule } from './user/user.module';
+import { ContentModule } from './content/content.module';
 import databaseConfig from './config/database.config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      useFactory: () => databaseConfig(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [databaseConfig],
     }),
-    TypeOrmModule.forFeature([Espacio]),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => configService.get('db'),
+    }),
+    UserModule,
+    ContentModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
 

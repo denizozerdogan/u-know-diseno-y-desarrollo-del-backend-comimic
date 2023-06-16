@@ -18,7 +18,7 @@ module.exports = {
   ignorePatterns: ['.eslintrc.js'],
   rules: {
     'semi': ['error', 'always'],
-    'quotes': ['error', 'simple'],
+    'quotes': ['error', 'single'],
     'indent': ['error', 2],
     'comma-spacing': 'error',
     'space-infix-ops': 'error',
