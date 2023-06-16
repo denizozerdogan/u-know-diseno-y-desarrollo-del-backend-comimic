@@ -19,6 +19,9 @@ export class CreateUserDto {
   @ApiProperty({ example: 'yumi@example.com' })
   email: string;
 
+  @ApiProperty({ example: 'Hello my name is Yumi, I am a rockstar fullstack developer' })
+  bio: string;
+
   @ApiProperty({ example: '2023-06-16' })
   fecha_creacion: Date;
 

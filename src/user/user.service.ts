@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { InjectRepository} from '@nestjs/typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm'
 
@@ -15,22 +15,28 @@ export class UserService {
   ) {}
   
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    return this.userRepository.save(createUserDto);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  //findAll
+  async getUser(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  //findOne
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  //update
+  updateUser(id: number, updateUserDto: UpdateUserDto) {
+    const { password, bio } = updateUserDto;
+    
+    return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
+  };
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+  //remove
+  // remove(id: number) {
+  //   return `This action removes a #${id} user`;
+  // }
 }
