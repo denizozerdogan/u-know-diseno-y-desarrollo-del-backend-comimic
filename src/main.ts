@@ -10,7 +10,7 @@ async function bootstrap() {
   
   const config = new DocumentBuilder()
   .setTitle('U-KNOW API')
-  .setDescription('API for the U-KNOW platform')
+  .setDescription('API for the U-KNOW platform for Information Exchange and Content Sharing')
   .setVersion('1.0')
   //.addTag('user') 
   //endpoints para conectar c swagger

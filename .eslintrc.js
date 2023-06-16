@@ -17,6 +17,11 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
+    'semi': ['error', 'always'],
+    'quotes': ['error', 'simple'],
+    'indent': ['error', 2],
+    'comma-spacing': 'error',
+    'space-infix-ops': 'error',
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
