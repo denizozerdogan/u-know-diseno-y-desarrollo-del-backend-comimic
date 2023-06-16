@@ -5,7 +5,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Set the global route prefixapp.setGlobalPrefix('api');
+  // Set the global route prefix
+  app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
   .setTitle('U-KNOW API')
   .setDescription('API for the U-KNOW platform')
