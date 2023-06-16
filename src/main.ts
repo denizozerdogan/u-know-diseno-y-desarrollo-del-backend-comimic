@@ -19,4 +19,3 @@ async function bootstrap() {
   await app.listen(3000);
 }
 bootstrap();
-//En este ejemplo, app.enableCors() se coloca justo después de crear la instancia de la aplicación (NestFactory.create(AppModule)) y antes de iniciar el servidor (app.listen(3000)). Al habilitar CORS de esta manera, tu API permitirá solicitudes desde cualquier origen. Si deseas restringir los orígenes permitidos, puedes proporcionar opciones de configuración a app.enableCors().
