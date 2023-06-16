@@ -77,13 +77,5 @@
     "doc": "docs",
     "test": "test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/factoriaf5-p7/u-know-diseno-y-desarrollo-del-backend-comimic.git"
-  },
-  "keywords": [],
-  "bugs": {
-    "url": "https://github.com/factoriaf5-p7/u-know-diseno-y-desarrollo-del-backend-comimic/issues"
-  },
-  "homepage": "https://github.com/factoriaf5-p7/u-know-diseno-y-desarrollo-del-backend-comimic#readme"
+  "keywords": []
 }
