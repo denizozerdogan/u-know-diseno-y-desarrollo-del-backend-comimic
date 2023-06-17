@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { InjectRepository} from '@nestjs/typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm'
 
@@ -15,55 +15,28 @@ export class UserService {
   ) {}
   
   create(createUserDto: CreateUserDto) {
-    const { nombre, apellidos, saldo, password, email } = createUserDto;
-
-    const newUser = this.userRepository.create({
-      nombre,
-      apellidos,
-      saldo,
-      password,
-      email,
-      fecha_creacion: new Date(),
-      fecha_actualizacion: new Date(),
-    });
-
-    return this.userRepository.save(newUser);
+    return this.userRepository.save(createUserDto);
   }
 
-  findAll() {
+  //findAll
+  async getUser(): Promise<User[]> {
     return this.userRepository.find();
   }
 
-  async findOne(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-    return user;
+  //findOne
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(id);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
+  //update
+  updateUser(id: number, updateUserDto: UpdateUserDto) {
+    const { password, bio } = updateUserDto;
     
-    user.nombre = updateUserDto.nombre;
-    user.apellidos = updateUserDto.apellidos;
-    user.saldo = updateUserDto.saldo;
-    user.password = updateUserDto.password;
-    user.email = updateUserDto.email;
-    user.fecha_actualizacion = new Date();
+    return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
+  };
 
-
-    const updatedUser = await this.userRepository.save(user);
-
-    return updatedUser;
-  }
-
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+  //remove
+  // remove(id: number) {
+  //   return `This action removes a #${id} user`;
+  // }
 }

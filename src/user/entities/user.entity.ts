@@ -28,6 +28,10 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @ApiProperty({ description: 'Bio of User', example: 'Hello my name is Yumi, I am a rockstar fullstack developer' })
+  @Column({type: 'text'})
+  bio: string;
+
   @ApiProperty({
     description: 'Registration date of User',
     example: '2023-06-16',
