@@ -103,20 +103,16 @@ describe('UserService', () => {
   });
 
   it('should retrieve user by id and return the user with that id', async () => {
-    
-    const expectedUser = {
-    id: 1,
-    nombre: "Yumi",
-    apellidos: "Namie",
-    saldo: 1000,
-    password: "password1234",
-    email: "yumi@example.com",
-    bio: "I am Yumi",
-    fecha_creacion: new Date (2023-6-16),
-    fecha_actualizacion: new Date (2023-6-16),
-    };  
+  
+  const userId = 1;
+  const expectedUser = users.find((user: any) => user.id === userId);
 
-    expect(await service.getUserById(1)).toMatchObject(expectedUser);
+  //this makes everything work for findOne and update 
+  jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(expectedUser);
+
+  const user = await service.getUserById(userId);
+
+  expect(user).toEqual(expectedUser);
   });
   
   it('should update a user and return the updated user', async () => {
