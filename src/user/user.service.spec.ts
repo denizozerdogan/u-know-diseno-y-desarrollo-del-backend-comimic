@@ -4,6 +4,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt'
 
 
 //Mock data array
@@ -39,6 +40,13 @@ describe('UserService', () => {
       return Promise.resolve(user);
     }),
     update: jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
+      const updatedUser = {
+        id,
+        ...updateUserDto,
+      };
+      return Promise.resolve(updatedUser); })
+     }
+    /* jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
       const { password, bio } = updateUserDto;
       const user = users.find((user) => user.id === id);
     
@@ -49,8 +57,8 @@ describe('UserService', () => {
           bio,
         };
         Object.assign(user, updatedUser);
-        return Promise.resolve(updatedUser);
-      }
+        return Promise.resolve(updatedUser); */
+     
     
    /*  jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
       const { password, bio } = updateUserDto;
@@ -61,8 +69,7 @@ describe('UserService', () => {
         user.bio = bio;
         return Promise.resolve(mockUserRepositoryService.save(user));
       } */
-    }),
-  }
+
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -91,6 +98,10 @@ describe('UserService', () => {
       bio: "I am Future Diegooo",
       fecha_creacion: new Date (2023-6-16),
       fecha_actualizacion: new Date (2023-6-16),
+      async setPassword(password: string){
+        const salt = await bcrypt.genSalt();
+        this.password = await bcrypt.hash(password || this.password, salt);
+      }
     }
 
     expect(await service.createUser(newUser)).toMatchObject({

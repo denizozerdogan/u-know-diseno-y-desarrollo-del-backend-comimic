@@ -3,6 +3,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt'
 
 //Mock data array
 const users: any = [
@@ -72,6 +73,10 @@ describe('UserController', () => {
       bio: "I am Future Diegooo",
       fecha_creacion: new Date (2023-6-16),
       fecha_actualizacion: new Date (2023-6-16),
+      async setPassword(password: string) {
+        const salt = await bcrypt.genSalt();
+        this.password = await bcrypt.hash(password || this.password, salt);
+      }
     }
 
     expect(await controller.create(newUser)).toMatchObject({
