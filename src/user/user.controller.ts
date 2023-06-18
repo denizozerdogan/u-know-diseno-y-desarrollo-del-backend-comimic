@@ -14,6 +14,8 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { User } from './entities/user.entity';
+import { plainToClass } from 'class-transformer';
 
 @ApiTags('user')
 @Controller('user')
@@ -22,8 +24,16 @@ export class UserController {
 
   @Post('/register')
   @UsePipes(ValidationPipe)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+      const newUser = plainToClass(User, createUserDto);
+      await newUser.setPassword(createUserDto.password);
+      
+      // Save the user entity to the database
+      const createdUser = await this.userService.createUser(newUser);
+    
+      // Return the created user object with the hashed password in the response
+      return createdUser;
+    //return this.userService.createUser(createUserDto);
   }
 
   @Get()

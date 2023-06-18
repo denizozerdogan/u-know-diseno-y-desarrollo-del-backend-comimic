@@ -39,6 +39,7 @@ export class CreateUserDto {
   @BeforeInsert()
   async setPassword(password: string) {
     const salt = await bcrypt.genSalt();
-    this.password = await bcrypt.hash(password || this.password, salt)
+    this.password = await bcrypt.hash(this.password, salt)
+
   }
 }

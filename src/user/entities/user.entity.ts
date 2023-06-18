@@ -1,5 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
+import * as bcrypt from 'bcrypt'
+
+
 
 @ApiTags('user')
 @Entity()
@@ -42,4 +45,11 @@ export class User {
   @ApiProperty({ description: 'Update date of User', example: '2023-06-16' })
   @Column()
   fecha_actualizacion: Date;
+
+  @BeforeInsert()
+  async setPassword(password: string) {
+    const salt = await bcrypt.genSalt()
+    this.password = await bcrypt.hash(password || this.password, salt)
+
+  }
 }
