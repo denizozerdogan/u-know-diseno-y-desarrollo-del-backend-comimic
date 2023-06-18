@@ -14,7 +14,7 @@ export class UserService {
     @InjectRepository (User) private userRepository: Repository <User>,
   ) {}
   
-  create(createUserDto: CreateUserDto) {
+  createUser(createUserDto: CreateUserDto) {
     return this.userRepository.save(createUserDto);
   }
 
@@ -24,16 +24,38 @@ export class UserService {
   }
 
   //findOne
-  async getUserById(id: number): Promise<User | undefined> {
+  async getUserById(id: number): Promise<User> {
     return this.userRepository.findOne({ where: { id } });
   }
 
   //update
-  updateUser(id: number, updateUserDto: UpdateUserDto) {
-    const { password, bio } = updateUserDto;
+  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const toUpdate = await this.userRepository.findOne({ where: { id } });
+  
+    if (toUpdate) {
+      Object.assign(toUpdate, updateUserDto);
+      return this.userRepository.save(toUpdate);
+    }
+
+  }
+
+  // async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
+  //   const { password, bio } = updateUserDto;
+  //   const user = await this.userRepository.findOne({ where: { id } });
+  //   if (user) {
+  //     user.password = password;
+  //     user.bio = bio;
+  //     return this.userRepository.save(user);
+  //   }
     
-    return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
-  };
+  //   return undefined; 
+  // }
+  
+  // updateUser(id: number, updateUserDto: UpdateUserDto) {
+  //   const { password, bio } = updateUserDto;
+    
+  //   return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
+  // };
 
   //remove
   // remove(id: number) {
