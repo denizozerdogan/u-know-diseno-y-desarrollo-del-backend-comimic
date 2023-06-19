@@ -15,8 +15,8 @@ const users: any = [
     password: 'password1234',
     email: 'yumi@example.com',
     bio: 'I am Yumi',
-    created_at: '2023-06-16',
-    updated_at: '2023-06-16',
+    created_at: new Date(2023, 7, 16),
+    updated_at: new Date(2023, 7, 16),
   },
 ];
 
@@ -48,8 +48,8 @@ describe('UserController', () => {
         };
         return Promise.resolve(updatedUser);
       }),
-/*       remove: jest.fn()
- */
+    removeUser: jest.fn()
+ 
   };
 
   beforeEach(async () => {
@@ -100,8 +100,8 @@ describe('UserController', () => {
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      created_at: '2023-06-16',
-      updated_at: '2023-06-16',
+      created_at: new Date(2023, 7, 16),
+      updated_at: expect.any(Date),
     };
     expect(await controller.findOne(userId)).toMatchObject(expectedUser);
   });
@@ -144,9 +144,9 @@ describe('UserController', () => {
       });
   });
 
-  /*   it('should remove the user with the specified ID', async () => {
-      mockUserService.remove.mockReturnValue(5);
-      expect(controller.remove(5)).toEqual(5);
-  }); */
+  it('should remove the user with the specified ID', async () => {
+      mockUserService.removeUser.mockReturnValue(5);
+      expect(controller.removeUser(5)).toEqual(5);
+  }); 
    
 });

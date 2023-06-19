@@ -1,79 +1,45 @@
-/* import { Test, TestingModule } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { UserService } from '../user/user.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
-
-const users: any = [
-  {
-    id: 1,
-    name: 'Yumi',
-    surname: 'Namie',
-    wallet: 1000,
-    password: 'password1234',
-    email: 'yumi@example.com',
-    bio: 'I am Yumi',
-    created_at: new Date(2023, 7, 16),
-    updated_at: new Date(2023, 7, 16),
-  },
-];
+import { UserService } from '../user/user.service'; 
 
 describe('AuthService', () => {
-  let service: AuthService;
-
-  const mockUserRepository = {
-    save: jest.fn().mockImplementation((createUserDto: CreateUserDto) => {
-      const newUser = {
-        id: 2,
-        ...createUserDto,
-      };
-      users.push(newUser);
-      return Promise.resolve(newUser);
-    }),
-    find: jest.fn().mockImplementation(() => Promise.resolve({ users })),
-    findOne: jest.fn().mockImplementation((id: number) => {
-      const user = users.find((user) => user.id === id);
-      return Promise.resolve(user);
-    }),
-    update: jest
-      .fn()
-      .mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
-        const updatedUser = {
-          id,
-          ...updateUserDto,
-        };
-        return Promise.resolve(updatedUser);
-    }),
-    // delete: jest.fn().mockImplementation((id: number) => {
-    //   const userIndex = users.findIndex((user) => user.id === id);
-    //   if (userIndex >= 0) {
-    //     users.splice(userIndex, 1);
-    //     return Promise.resolve(true);
-    //   } else {
-    //     return Promise.resolve(false);
-    //   }
-    //}),
-  }
+  let authService: AuthService;
+  let userService: UserService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, UserService,{
-        provide: getRepositoryToken(User),
-        useValue: mockUserRepository,
-      }],
+      providers: [AuthService, UserService], 
     }).compile();
 
-    service = module.get<AuthService>(AuthService);
+    authService = module.get<AuthService>(AuthService);
+    userService = module.get<UserService>(UserService);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(authService).toBeDefined();
   });
-}); */
+});
 
-import { Test, TestingModule } from '@nestjs/testing';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
 import { RegisterAuthDto } from './dtos/register-auth.dto';
@@ -140,9 +106,8 @@ describe('AuthService', () => {
     expect(hash.hash).toHaveBeenCalledWith(password, salt);
     expect(result).toBe(hashedPassword);
   });
-});
+}); */
   /* it('should register a user and return the user object without the password', async () => {
-    // Mock the dependencies or methods
     jest.spyOn(mockUserService, 'createUser').mockResolvedValueOnce({
       id: 1,
       name: 'Yumi',

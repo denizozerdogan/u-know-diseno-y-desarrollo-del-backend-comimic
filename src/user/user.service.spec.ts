@@ -107,6 +107,8 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'diego@example.com',
       bio: 'I am Future Diegooo',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date (),
     };
 
     expect(await service.createUser(newUser)).toMatchObject({
@@ -146,7 +148,7 @@ describe('UserService', () => {
       email: 'yumi@example.com',
       bio: 'I am Yumi',
       created_at: new Date(2023, 7, 16),
-      updated_at: new Date (),
+      updated_at: expect.any(Date),
     };
 
     const updatedUser = {
