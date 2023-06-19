@@ -155,6 +155,64 @@ describe('UserService', () => {
 
     expect(result).toEqual(updatedUser);
   });
+
+  it('should update the password of user and return the updated user', async () => {
+    const userId = 1;
+    const updateUserDto: UpdateUserDto = {
+      password: 'newpassword',
+    };
+
+    const existingUser = {
+      id: 1,
+      nombre: 'Yumi',
+      apellidos: 'Namie',
+      saldo: 1000,
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      fecha_creacion: new Date (2023 - 6 - 16),
+      fecha_actualizacion: new Date (),
+    };
+
+    const updatedUser = {
+      id: userId,
+      ...existingUser,
+      ...updateUserDto,
+      fecha_actualizacion: expect.any(Date),
+    };
+    const result = await service.updateUser(userId, updateUserDto);
+
+    expect(result.password).toEqual(updatedUser.password);
+  });
+
+  it('should update the bio of user and return the updated user', async () => {
+    const userId = 1;
+    const updateUserDto: UpdateUserDto = {
+      bio: 'Updated bio',
+    };
+
+    const existingUser = {
+      id: 1,
+      nombre: 'Yumi',
+      apellidos: 'Namie',
+      saldo: 1000,
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      fecha_creacion: new Date (2023 - 6 - 16),
+      fecha_actualizacion: new Date (),
+    };
+
+    const updatedUser = {
+      id: userId,
+      ...existingUser,
+      ...updateUserDto,
+      fecha_actualizacion: expect.any(Date),
+    };
+    const result = await service.updateUser(userId, updateUserDto);
+
+    expect(result.bio).toEqual(updatedUser.bio);
+  });
   /*  it('should update a user and return the updated user', async () => {
     const userId = 1;
     const updatedUserDto: UpdateUserDto = {
