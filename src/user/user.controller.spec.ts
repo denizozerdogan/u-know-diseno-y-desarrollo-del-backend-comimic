@@ -3,20 +3,20 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
+
 
 //Mock data array
 const users: any = [
   {
     id: 1,
-    nombre: 'Yumi',
-    apellidos: 'Namie',
-    saldo: 1000,
+    name: 'Yumi',
+    surname: 'Namie',
+    wallet: 1000,
     password: 'password1234',
     email: 'yumi@example.com',
     bio: 'I am Yumi',
-    fecha_creacion: '2023-06-16',
-    fecha_actualizacion: '2023-06-16',
+    created_at: '2023-06-16',
+    updated_at: '2023-06-16',
   },
 ];
 
@@ -69,14 +69,14 @@ describe('UserController', () => {
   it('should create a new user and return the user', async () => {
     const newUser = {
       id: 2,
-      nombre: 'Diego',
-      apellidos: 'Monsalve',
-      saldo: 1000,
+      name: 'Diego',
+      surname: 'Monsalve',
+      wallet: 1000,
       password: 'password1234',
       email: 'diego@example.com',
       bio: 'I am Future Diegooo',
-      fecha_creacion: new Date(2023 - 6 - 16),
-      fecha_actualizacion: new Date(2023 - 6 - 16),
+      created_at: new Date(2023 - 6 - 16),
+      updated_at: new Date(2023 - 6 - 16)
     };
 
     expect(await controller.create(newUser)).toMatchObject({
@@ -92,14 +92,14 @@ describe('UserController', () => {
     const userId = 1;
     const expectedUser = {
       id: 1,
-      nombre: 'Yumi',
-      apellidos: 'Namie',
-      saldo: 1000,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 1000,
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      fecha_creacion: '2023-06-16',
-      fecha_actualizacion: '2023-06-16',
+      created_at: '2023-06-16',
+      updated_at: '2023-06-16',
     };
     expect(await controller.findOne(userId)).toMatchObject(expectedUser);
   });

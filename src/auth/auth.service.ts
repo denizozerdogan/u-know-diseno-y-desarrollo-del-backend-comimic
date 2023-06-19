@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -31,10 +30,7 @@ export class AuthService {
         password: hashedPassword,
       });
       
-
       const { password, ...rest } = createUser;
-
-      
 
       return rest;
     } catch (error) {
