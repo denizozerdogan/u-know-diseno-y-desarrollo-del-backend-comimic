@@ -17,7 +17,7 @@ export class User {
   apellidos: string;
 
   @ApiProperty({ description: 'The Wallet of the User', example: 1000 })
-  @Column()
+  @Column({default: 1000})
   saldo: number;
 
   @ApiProperty({ description: 'Password of User', example: 'password1234' })

@@ -9,14 +9,19 @@ import { Repository } from 'typeorm'
 @ApiTags('user')
 @Injectable()
 export class UserService {
-
-  constructor (
-    @InjectRepository (User) private userRepository: Repository <User>,
-  ) {}
+    constructor(
+      @InjectRepository(User) private userRepository: Repository<User>,
+    ) {}
+    async create(createUserDto: CreateUserDto): Promise<User> {
+      try {
+        const userCreated = await this.userRepository.save(createUserDto);
+        console.log(userCreated);
+        return userCreated;
+      } catch (error) {
+        console.log(error);
+      }
+    }
   
-  create(createUserDto: CreateUserDto) {
-    return this.userRepository.save(createUserDto);
-  }
 
   //findAll
   async getUser(): Promise<User[]> {
