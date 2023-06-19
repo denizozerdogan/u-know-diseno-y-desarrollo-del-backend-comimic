@@ -8,14 +8,14 @@ export class RegisterAuthDto {
   
     @IsNotEmpty()
     @ApiProperty({ example: 'Yumi' })
-    nombre: string;
+    name: string;
   
     @IsNotEmpty()
     @ApiProperty({ example: 'Namie' })
-    apellidos: string;
+    surname: string;
   
     @ApiProperty({ example: 1000 })
-    saldo: number;
+    wallet: number;
   
     @IsNotEmpty()
     @Length(8, 24)
@@ -32,8 +32,8 @@ export class RegisterAuthDto {
     bio: string;
   
     @ApiProperty({ example: '2023-06-16' })
-    fecha_creacion: Date;
+    created_at: Date;
   
     @ApiProperty({ example: '2023-06-16' })
-    fecha_actualizacion: Date;
+    updated_at: Date;
 }

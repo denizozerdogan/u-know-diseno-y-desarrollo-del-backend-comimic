@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
-import { ApiProperty, ApiTags } from '@nestjs/swagger';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { ApiTags } from '@nestjs/swagger';
 
 
 @ApiTags('user')
@@ -9,13 +9,13 @@ export class User {
   id: number;
 
   @Column()
-  nombre: string;
+  name: string;
 
   @Column()
-  apellidos: string;
+  surname: string;
 
   @Column({ default: 1000 })
-  saldo: number;
+  wallet: number;
 
   @Column()
   password: string;
@@ -27,9 +27,9 @@ export class User {
   bio: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
-  fecha_creacion: Date;
+  created_at: Date;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-  fecha_actualizacion: Date;
+  updated_at: Date;
 
 }
