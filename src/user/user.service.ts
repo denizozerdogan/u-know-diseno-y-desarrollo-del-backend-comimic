@@ -61,7 +61,7 @@ export class UserService {
   //   return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
   // };
 
-  remove(id: number) {
+  removeUser(id: number) {
     return this.userRepository.delete(id)
   };
 }

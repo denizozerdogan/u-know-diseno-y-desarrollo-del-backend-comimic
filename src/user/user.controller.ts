@@ -48,7 +48,7 @@ export class UserController {
 
     //TODO: This will be for admin access only once it is implemented
     @Delete(':id')
-    remove(@Param('id', ParseIntPipe) id: number) {
-      return this.userService.remove(id);
+    removeUser(@Param('id', ParseIntPipe) id: number) {
+      return this.userService.removeUser(id);
   }
 };

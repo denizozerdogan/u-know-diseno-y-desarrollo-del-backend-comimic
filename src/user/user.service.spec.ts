@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 
+
 //Mock data array
 const users: any = [
   {
@@ -16,6 +17,8 @@ const users: any = [
     password: 'password1234',
     email: 'yumi@example.com',
     bio: 'I am Yumi',
+    created_at: new Date(2023, 7, 16),
+    updated_at: new Date(2023, 7, 16),
   },
 ];
 
@@ -44,10 +47,40 @@ describe('UserService', () => {
           ...updateUserDto,
         };
         return Promise.resolve(updatedUser);
-  }),
-/*     delete: jest.fn().mockImplementation((id: number) => Promise.resolve({ affected: 1 })),
- */}
+    }),
+    delete: jest.fn().mockImplementation((id: number) => {
+      const userIndex = users.findIndex((user) => user.id === id);
+      if (userIndex >= 0) {
+        users.splice(userIndex, 1);
+        return Promise.resolve(true);
+      } else {
+        return Promise.resolve(false);
+      }
+    }),
 
+  /* jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
+      const { password, bio } = updateUserDto;
+      const user = users.find((user) => user.id === id);
+    
+      if (user) {
+        const updatedUser = {
+          ...user,
+          password,
+          bio,
+        };
+        Object.assign(user, updatedUser);
+        return Promise.resolve(updatedUser); */
+
+  /*  jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
+      const { password, bio } = updateUserDto;
+      const user = users.find((user) => user.id === id);
+  
+      if (user) {
+        user.password = password;
+        user.bio = bio;
+        return Promise.resolve(mockUserRepositoryService.save(user));
+      } */
+    }
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -112,6 +145,8 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date (),
     };
 
     const updatedUser = {
@@ -138,6 +173,8 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date (),
     };
 
     const updatedUser = {
@@ -164,6 +201,8 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date (),
     };
 
     const updatedUser = {
@@ -176,12 +215,32 @@ describe('UserService', () => {
     expect(result.bio).toEqual(updatedUser.bio);
   });
 
-  /* it('should delete a user', async () => {
+  it('should return false if the user with the given ID does not exist', async () => {
     const userId = 1;
-    const result = await service.remove(userId);
-    expect(result).toEqual({ affected: 1 });
+    jest.spyOn(mockUserRepositoryService, 'delete').mockResolvedValue(false);
+
+    const result = await service.removeUser(userId);
+
     expect(mockUserRepositoryService.delete).toHaveBeenCalledWith(userId);
-  }); */
+    expect(result).toBe(false);
+  });
+
+  // it('should remove the user by id', async () => {
+  //   const userId = 1;
+  //   const deleteResult: DeleteResult = {
+  //     affected: 1,
+  //     raw: null,
+  //   };
+  
+  //   jest.spyOn(mockUserService, 'removeUserById').mockResolvedValue(deleteResult);
+  
+  //   const result = await controller.remove(userId);
+  
+  //   expect(mockUserService.removeUserById).toHaveBeenCalledWith(userId);
+  //   expect(result).toEqual(deleteResult);
+  // });
+
+
   /*  it('should update a user and return the updated user', async () => {
     const userId = 1;
     const updatedUserDto: UpdateUserDto = {

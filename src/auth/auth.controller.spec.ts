@@ -1,50 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
-import { RegisterAuthDto } from './dtos/register-auth.dto';
-import { AuthService } from './auth.service';
-import { UserService } from 'src/user/user.service';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
-
-const users = []; 
 
 describe('AuthController', () => {
   let controller: AuthController;
 
-  const mockAuthService = {
-    registerUser: jest.fn().mockImplementation((userObject: RegisterAuthDto) => {
-      const newUser = {
-        id: 1,
-        ...RegisterAuthDto,
-      };
-      users.push(newUser);
-      return Promise.resolve(newUser);
-    }),
-  };
-
-  const mockUserService = {
-    createUser: jest.fn().mockImplementation((createUserDto: CreateUserDto) => {
-      const newUser = {
-        id: 1,
-        ...createUserDto,
-      };
-      users.push(newUser);
-      return Promise.resolve(newUser);
-    }),
-  }
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [
-        {
-          provide: AuthService,
-          useValue: mockAuthService,
-        },
-        {
-          provide: UserService,
-          useValue: mockUserService,
-        },
-      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
