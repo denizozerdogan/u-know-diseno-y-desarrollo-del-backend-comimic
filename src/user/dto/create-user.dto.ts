@@ -2,8 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, Length } from 'class-validator';
 
 export class CreateUserDto {
-  @ApiProperty({ example: 1 })
-  id: number;
 
   @IsNotEmpty()
   @ApiProperty({ example: 'Yumi' })
@@ -11,10 +9,11 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @ApiProperty({ example: 'Namie' })
-  apellidos: string;
+  apellidos?: string;
+
 
   @ApiProperty({ example: 1000 })
-  saldo: number;
+  saldo?: number;
 
   @IsNotEmpty()
   @Length(8, 24)
@@ -30,9 +29,9 @@ export class CreateUserDto {
   })
   bio: string;
 
-  @ApiProperty({ example: '2023-06-16' })
-  fecha_creacion: Date;
+  // @ApiProperty({ example: '2023-06-16' })
+  // fecha_creacion: Date;
 
-  @ApiProperty({ example: '2023-06-16' })
-  fecha_actualizacion: Date;
+  // @ApiProperty({ example: '2023-06-16' })
+  // fecha_actualizacion: Date;
 }
