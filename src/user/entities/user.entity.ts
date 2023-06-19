@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
-import * as bcrypt from 'bcrypt';
+
 
 @ApiTags('user')
 @Entity()
