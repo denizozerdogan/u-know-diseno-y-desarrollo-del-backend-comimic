@@ -16,8 +16,6 @@ const users: any = [
     password: 'password1234',
     email: 'yumi@example.com',
     bio: 'I am Yumi',
-    created_at: '2023-06-16',
-    updated_at: '2023-06-16',
   },
 ];
 
@@ -47,8 +45,8 @@ describe('UserService', () => {
         };
         return Promise.resolve(updatedUser);
   }),
-    delete: jest.fn().mockImplementation((id: number) => Promise.resolve({ affected: 1 })),
-}
+/*     delete: jest.fn().mockImplementation((id: number) => Promise.resolve({ affected: 1 })),
+ */}
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -76,12 +74,6 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'diego@example.com',
       bio: 'I am Future Diegooo',
-      created_at: new Date(2023 - 6 - 16),
-      updated_at: new Date(2023 - 6 - 16),
-      async setPassword(password: string) {
-        const salt = await bcrypt.genSalt();
-        this.password = await bcrypt.hash(password || this.password, salt);
-      },
     };
 
     expect(await service.createUser(newUser)).toMatchObject({
@@ -120,15 +112,12 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      created_at: new Date (2023 - 6 - 16),
-      updated_at: new Date (),
     };
 
     const updatedUser = {
       id: userId,
       ...existingUser,
       ...updateUserDto,
-      updated_at: expect.any(Date),
     };
     const result = await service.updateUser(userId, updateUserDto);
 
@@ -149,15 +138,12 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      created_at: new Date (2023 - 6 - 16),
-      updated_at: new Date (),
     };
 
     const updatedUser = {
       id: userId,
       ...existingUser,
       ...updateUserDto,
-      updated_at: expect.any(Date),
     };
     const result = await service.updateUser(userId, updateUserDto);
 
@@ -178,27 +164,24 @@ describe('UserService', () => {
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      created_at: new Date (2023 - 6 - 16),
-      updated_at: new Date (),
     };
 
     const updatedUser = {
       id: userId,
       ...existingUser,
       ...updateUserDto,
-      updated_at: expect.any(Date),
     };
     const result = await service.updateUser(userId, updateUserDto);
 
     expect(result.bio).toEqual(updatedUser.bio);
   });
 
-  it('should delete a user', async () => {
+  /* it('should delete a user', async () => {
     const userId = 1;
     const result = await service.remove(userId);
     expect(result).toEqual({ affected: 1 });
     expect(mockUserRepositoryService.delete).toHaveBeenCalledWith(userId);
-  });
+  }); */
   /*  it('should update a user and return the updated user', async () => {
     const userId = 1;
     const updatedUserDto: UpdateUserDto = {

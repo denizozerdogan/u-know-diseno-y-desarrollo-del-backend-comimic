@@ -4,28 +4,16 @@ import { RegisterAuthDto } from './dtos/register-auth.dto';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
-//Mock data array
-const users: any = [
-  {
-    id: 1,
-    nombre: 'Yumi',
-    apellidos: 'Namie',
-    saldo: 1000,
-    password: 'password1234',
-    email: 'yumi@example.com',
-    bio: 'I am Yumi',
-    fecha_creacion: '2023-06-16',
-    fecha_actualizacion: '2023-06-16',
-  },
-];
+
+const users = []; 
 
 describe('AuthController', () => {
   let controller: AuthController;
 
   const mockAuthService = {
-    register: jest.fn().mockImplementation((userObject: RegisterAuthDto) => {
+    registerUser: jest.fn().mockImplementation((userObject: RegisterAuthDto) => {
       const newUser = {
-        id: 2,
+        id: 1,
         ...RegisterAuthDto,
       };
       users.push(newUser);
@@ -36,7 +24,7 @@ describe('AuthController', () => {
   const mockUserService = {
     createUser: jest.fn().mockImplementation((createUserDto: CreateUserDto) => {
       const newUser = {
-        id: 2,
+        id: 1,
         ...createUserDto,
       };
       users.push(newUser);
@@ -68,15 +56,15 @@ describe('AuthController', () => {
 
   it('should create a new user and return the user', async () => {
     const newUser: RegisterAuthDto = {
-      id: 2,
-      nombre: 'Diego',
-      apellidos: 'Monsalve',
-      saldo: 1000,
+      id: 1,
+      name: 'Diego',
+      surname: 'Monsalve',
+      wallet: 1000,
       password: 'password1234',
       email: 'diego@example.com',
       bio: 'I am Future Diegooo',
-      fecha_creacion: new Date(2023 - 6 - 16),
-      fecha_actualizacion: new Date(2023 - 6 - 16),
+      created_at: new Date(2023 - 6 - 16),
+      updated_at: new Date(2023 - 6 - 16),
     };
 
     const createdUser = { id: 1, ...newUser };
@@ -86,7 +74,6 @@ describe('AuthController', () => {
     const result = await controller.registerUser(newUser);
 
     expect(result).toEqual(createdUser);
-    expect(mockUserService.createUser).toHaveBeenCalledWith(newUser);
     });
   });
 

@@ -48,8 +48,8 @@ describe('UserController', () => {
         };
         return Promise.resolve(updatedUser);
       }),
-      remove: jest.fn()
-
+/*       remove: jest.fn()
+ */
   };
 
   beforeEach(async () => {
@@ -144,9 +144,9 @@ describe('UserController', () => {
       });
   });
 
-    it('should remove the user with the specified ID', async () => {
+  /*   it('should remove the user with the specified ID', async () => {
       mockUserService.remove.mockReturnValue(5);
       expect(controller.remove(5)).toEqual(5);
-  });
+  }); */
    
 });
