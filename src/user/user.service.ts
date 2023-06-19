@@ -2,35 +2,60 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { InjectRepository} from '@nestjs/typeorm'
+import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm'
+import { Repository } from 'typeorm';
 
 @ApiTags('user')
 @Injectable()
 export class UserService {
-
-  constructor (
-    @InjectRepository (User) private userRepository: Repository <User>,
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
-  
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+
+  async createUser(createUserDto: CreateUserDto) {
+    return this.userRepository.save(createUserDto);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  //findAll
+  async getUser(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  //findOne
+  async getUserById(id: number): Promise<User> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  //update
+  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const toUpdate = await this.userRepository.findOne({ where: { id } });
+
+    if (toUpdate) {
+      Object.assign(toUpdate, updateUserDto);
+      return this.userRepository.save(toUpdate);
+    }
   }
+
+  // async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
+  //   const { password, bio } = updateUserDto;
+  //   const user = await this.userRepository.findOne({ where: { id } });
+  //   if (user) {
+  //     user.password = password;
+  //     user.bio = bio;
+  //     return this.userRepository.save(user);
+  //   }
+
+  //   return undefined;
+  // }
+
+  // updateUser(id: number, updateUserDto: UpdateUserDto) {
+  //   const { password, bio } = updateUserDto;
+
+  //   return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
+  // };
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+    return this.userRepository.delete(id)
+  };
 }
