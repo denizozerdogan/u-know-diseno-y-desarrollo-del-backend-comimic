@@ -23,25 +23,24 @@ export class AuthService {
 
   async register(userObject: RegisterAuthDto) {
     try {
-      if (!userObject.email || !userObject.password) {
-        throw new BadRequestException('El correo electrónico y la contraseña son requeridos');
-      }
+
 
       const hashedPassword = await this.encrypt(userObject.password);
       const createUser = await this.userService.createUser({
+        ...userObject,
         password: hashedPassword,
-        ...userObject
       });
       
-      console.log (userObject,hashedPassword)
+
       const { password, ...rest } = createUser;
 
       
 
       return rest;
     } catch (error) {
-      
-      throw new InternalServerErrorException('Error al registrar el usuario');
+      if (error?.erno == 1062) {
+        throw ConflictException;
     }
   }
+}
 }
