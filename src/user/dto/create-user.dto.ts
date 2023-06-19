@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsNumberString, Length } from 'class-validator';
-import * as bcrypt from 'bcrypt'
-import { BeforeInsert } from 'typeorm';
+import { IsEmail, IsNotEmpty, Length } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({ example: 1 })
@@ -27,7 +25,9 @@ export class CreateUserDto {
   @ApiProperty({ example: 'yumi@example.com' })
   email: string;
 
-  @ApiProperty({ example: 'Hello my name is Yumi, I am a rockstar fullstack developer' })
+  @ApiProperty({
+    example: 'Hello my name is Yumi, I am a rockstar fullstack developer',
+  })
   bio: string;
 
   @ApiProperty({ example: '2023-06-16' })
@@ -35,5 +35,4 @@ export class CreateUserDto {
 
   @ApiProperty({ example: '2023-06-16' })
   fecha_actualizacion: Date;
-
 }

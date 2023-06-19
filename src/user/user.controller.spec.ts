@@ -3,22 +3,22 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 
 //Mock data array
 const users: any = [
   {
     id: 1,
-    nombre: "Yumi",
-    apellidos: "Namie",
+    nombre: 'Yumi',
+    apellidos: 'Namie',
     saldo: 1000,
-    password: "password1234",
-    email: "yumi@example.com",
-    bio: "I am Yumi",
-    fecha_creacion: "2023-06-16",
-    fecha_actualizacion: "2023-06-16",
-  }
-]
+    password: 'password1234',
+    email: 'yumi@example.com',
+    bio: 'I am Yumi',
+    fecha_creacion: '2023-06-16',
+    fecha_actualizacion: '2023-06-16',
+  },
+];
 
 describe('UserController', () => {
   let controller: UserController;
@@ -30,30 +30,34 @@ describe('UserController', () => {
       const newUser = {
         id: 2,
         ...createUserDto,
-      }
+      };
       users.push(newUser);
       return Promise.resolve(newUser);
     }),
-    getUser: jest.fn().mockImplementation(() => Promise.resolve({users})),
+    getUser: jest.fn().mockImplementation(() => Promise.resolve({ users })),
     getUserById: jest.fn().mockImplementation((id: number) => {
       const user = users.find((user) => user.id === id);
       return Promise.resolve(user);
     }),
-    updateUser: jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
-      const updatedUser = {
-        id,
-        ...updateUserDto,
-      };
-      return Promise.resolve(updatedUser);
-    }),
-   
-  }
+    updateUser: jest
+      .fn()
+      .mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
+        const updatedUser = {
+          id,
+          ...updateUserDto,
+        };
+        return Promise.resolve(updatedUser);
+      }),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
       providers: [UserService],
-    }).overrideProvider(UserService).useValue(mockUserService).compile();
+    })
+      .overrideProvider(UserService)
+      .useValue(mockUserService)
+      .compile();
 
     controller = module.get<UserController>(UserController);
   });
@@ -65,19 +69,15 @@ describe('UserController', () => {
   it('should create a new user and return the user', async () => {
     const newUser = {
       id: 2,
-      nombre: "Diego",
-      apellidos: "Monsalve",
+      nombre: 'Diego',
+      apellidos: 'Monsalve',
       saldo: 1000,
-      password: "password1234",
-      email: "diego@example.com",
-      bio: "I am Future Diegooo",
-      fecha_creacion: new Date (2023-6-16),
-      fecha_actualizacion: new Date (2023-6-16),
-      async setPassword(password: string) {
-        const salt = await bcrypt.genSalt();
-        this.password = await bcrypt.hash(password || this.password, salt);
-      }
-    }
+      password: 'password1234',
+      email: 'diego@example.com',
+      bio: 'I am Future Diegooo',
+      fecha_creacion: new Date(2023 - 6 - 16),
+      fecha_actualizacion: new Date(2023 - 6 - 16),
+    };
 
     expect(await controller.create(newUser)).toMatchObject({
       id: expect.any(Number),
@@ -85,41 +85,41 @@ describe('UserController', () => {
   });
 
   it('should return a list of all users', async () => {
-    expect(await controller.findAll()).toMatchObject({users})
+    expect(await controller.findAll()).toMatchObject({ users });
   });
 
   it('should retrieve user by id and return the user with that id', async () => {
     const userId = 1;
     const expectedUser = {
       id: 1,
-      nombre: "Yumi",
-      apellidos: "Namie",
+      nombre: 'Yumi',
+      apellidos: 'Namie',
       saldo: 1000,
-      password: "password1234",
-      email: "yumi@example.com",
-      bio: "I am Yumi",
-      fecha_creacion: "2023-06-16",
-      fecha_actualizacion: "2023-06-16",
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      fecha_creacion: '2023-06-16',
+      fecha_actualizacion: '2023-06-16',
     };
-    expect(await controller.findOne(userId)).toMatchObject(expectedUser)
+    expect(await controller.findOne(userId)).toMatchObject(expectedUser);
   });
 
   it('should update the user bio and password', async () => {
     const userId = 1;
-  const updateUserDto: UpdateUserDto = {
-    password: 'newpassword',
-    bio: 'Updated bio',
-  };
+    const updateUserDto: UpdateUserDto = {
+      password: 'newpassword',
+      bio: 'Updated bio',
+    };
 
-  // Call the update method and retrieve the updated user
-  const updatedUser = await controller.update(userId, updateUserDto);
+    // Call the update method and retrieve the updated user
+    const updatedUser = await controller.update(userId, updateUserDto);
 
-  // Assert that only the specified fields are altered
-  expect(updatedUser).toMatchObject({
-    password: expect.any(String),
-    bio: 'Updated bio',
-   }); 
-   /*  const userId = 1;
+    // Assert that only the specified fields are altered
+    expect(updatedUser).toMatchObject({
+      password: expect.any(String),
+      bio: 'Updated bio',
+    });
+    /*  const userId = 1;
     const updateUserDto: UpdateUserDto = {
       password: 'newpassword',
       bio: 'Updated bio',

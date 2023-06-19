@@ -13,7 +13,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiProperty, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { plainToClass } from 'class-transformer';
 
@@ -22,20 +22,14 @@ import { plainToClass } from 'class-transformer';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/register')
+  @Post('')
   @UsePipes(ValidationPipe)
   async create(@Body() createUserDto: CreateUserDto) {
-      const newUser = plainToClass(User, createUserDto);
-      await newUser.setPassword(createUserDto.password);
-      
-      // Save the user entity to the database
-      const createdUser = await this.userService.createUser(newUser);
-    
-      // Return the created user object with the hashed password in the response
-      return createdUser;
-    //return this.userService.createUser(createUserDto);
+
+    return this.userService.createUser(createUserDto);
   }
 
+  //TODO: This will be for admin access only once it is implemented
   @Get()
   findAll() {
     return this.userService.getUser();
@@ -46,32 +40,15 @@ export class UserController {
     return this.userService.getUserById(+id);
   }
 
-  @Patch(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
-    const existingUser = await this.userService.getUserById(id);
-
-    const updatedUser = plainToClass(User, existingUser);
-  
-    if (updateUserDto.password) {
-      await updatedUser.setPassword(updateUserDto.password);
+  //TODO: need to be protected by a token
+    @Patch(':id')
+    async update(@Param('id', ParseIntPipe ) id: number, @Body() updateUserDto: UpdateUserDto) {
+      return await this.userService.updateUser(+id, updateUserDto);
     }
 
-    if (updateUserDto.bio) {
-      updatedUser.bio = updateUserDto.bio;
-    }
-
-    const savedUser = await this.userService.updateUser(id, updatedUser);
-    
-    return savedUser;
+    //TODO: This will be for admin access only once it is implemented
+    @Delete(':id')
+    remove(@Param('id', ParseIntPipe) id: number) {
+      return this.userService.remove(id);
   }
-
-  //update(@Param('id', ParseIntPipe ) id: number, @Body() updateUserDto: UpdateUserDto) {
-    
-   // return this.userService.updateUser(+id, updateUserDto);
-}
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
-
+};
