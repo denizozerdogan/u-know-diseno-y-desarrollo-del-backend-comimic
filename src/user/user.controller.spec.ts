@@ -3,7 +3,6 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
 
 //Mock data array
 const users: any = [
@@ -48,6 +47,8 @@ describe('UserController', () => {
         };
         return Promise.resolve(updatedUser);
       }),
+      remove: jest.fn()
+
   };
 
   beforeEach(async () => {
@@ -140,6 +141,11 @@ describe('UserController', () => {
       expect(updatedUser).toMatchObject({
         bio: 'Updated bio',
       });
+  });
+
+    it('should remove the user with the specified ID', async () => {
+      mockUserService.remove.mockReturnValue(5);
+      expect(controller.remove(5)).toEqual(5);
   });
    
 });

@@ -47,30 +47,9 @@ describe('UserService', () => {
         };
         return Promise.resolve(updatedUser);
   }),
+    delete: jest.fn().mockImplementation((id: number) => Promise.resolve({ affected: 1 })),
+}
 
-  /* jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
-      const { password, bio } = updateUserDto;
-      const user = users.find((user) => user.id === id);
-    
-      if (user) {
-        const updatedUser = {
-          ...user,
-          password,
-          bio,
-        };
-        Object.assign(user, updatedUser);
-        return Promise.resolve(updatedUser); */
-
-  /*  jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
-      const { password, bio } = updateUserDto;
-      const user = users.find((user) => user.id === id);
-  
-      if (user) {
-        user.password = password;
-        user.bio = bio;
-        return Promise.resolve(mockUserRepositoryService.save(user));
-      } */
-    }
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -99,10 +78,6 @@ describe('UserService', () => {
       bio: 'I am Future Diegooo',
       fecha_creacion: new Date(2023 - 6 - 16),
       fecha_actualizacion: new Date(2023 - 6 - 16),
-      async setPassword(password: string) {
-        const salt = await bcrypt.genSalt();
-        this.password = await bcrypt.hash(password || this.password, salt);
-      },
     };
 
     expect(await service.createUser(newUser)).toMatchObject({
@@ -212,6 +187,13 @@ describe('UserService', () => {
     const result = await service.updateUser(userId, updateUserDto);
 
     expect(result.bio).toEqual(updatedUser.bio);
+  });
+
+  it('should delete a user', async () => {
+    const userId = 1;
+    const result = await service.remove(userId);
+    expect(result).toEqual({ affected: 1 });
+    expect(mockUserRepositoryService.delete).toHaveBeenCalledWith(userId);
   });
   /*  it('should update a user and return the updated user', async () => {
     const userId = 1;
