@@ -13,8 +13,14 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async createUser(createUserDto: CreateUserDto) {
-    return this.userRepository.save(createUserDto);
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    try {
+      const userCreated = await this.userRepository.save(createUserDto);
+      console.log(userCreated);
+      return userCreated;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //findAll
