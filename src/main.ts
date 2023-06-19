@@ -8,7 +8,7 @@ async function bootstrap() {
 
   // Set the global route prefix
   app.setGlobalPrefix('api/v1');
-
+  app.useGlobalPipes(new ValidationPipe())
   const config = new DocumentBuilder()
     .setTitle('U-KNOW API')
     .setDescription(

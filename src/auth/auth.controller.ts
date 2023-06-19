@@ -1,17 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { loginAuthDto } from './dto/login-auth.dto';
-import { RegistrerAuthDto } from './dto/register-auth.dto';
-import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('auth')
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { RegisterAuthDto } from './dtos/register-auth.dto';
+
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  registerUser(@Body() userObjet: RegistrerAuthDto) {
-    return this.authService.register(userObjet);
-  }
+    constructor(private readonly authService:AuthService){}
+
+    @Post('register')
+    registerUser(@Body() userObject: RegisterAuthDto) {
+        return this.authService.register(userObject);
+      }
 
 }

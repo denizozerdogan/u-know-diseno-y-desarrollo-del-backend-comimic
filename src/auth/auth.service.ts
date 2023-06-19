@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { RegistrerAuthDto } from './dto/register-auth.dto';
+import { RegisterAuthDto } from './dtos/register-auth.dto';
 import { hash, genSalt } from 'bcrypt';
 import { UserService } from 'src/user/user.service';
 
@@ -18,15 +18,14 @@ export class AuthService {
       throw new InternalServerErrorException();
     }
   }
-  async register(user: RegistrerAuthDto) {
+  async register(userObject: RegisterAuthDto) {
     try {
-      const hashedPassword = await this.encrypt(user.password);
+      const hashedPassword = await this.encrypt(userObject.password);
     //   console.log(user, hashedPassword);
 
-      const createUser = await this.userService.create({
+      const createUser = await this.userService.createUser({
         password: hashedPassword,
-        nombre: '',
-        email: ''
+        ...userObject
       });
 
       const { password, ...rest } = createUser;

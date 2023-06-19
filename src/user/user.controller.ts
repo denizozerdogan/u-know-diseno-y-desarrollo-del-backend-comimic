@@ -6,39 +6,49 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiProperty, ApiTags } from '@nestjs/swagger';
+import { User } from './entities/user.entity';
+import { plainToClass } from 'class-transformer';
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Post('')
+  @UsePipes(ValidationPipe)
+  async create(@Body() createUserDto: CreateUserDto) {
+
+    return this.userService.createUser(createUserDto);
   }
 
+  //TODO: This will be for admin access only once it is implemented
   @Get()
   findAll() {
     return this.userService.getUser();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.getUserById(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(+id, updateUserDto);
-  }
+  //TODO: need to be protected by a token
+    @Patch(':id')
+    async update(@Param('id', ParseIntPipe ) id: number, @Body() updateUserDto: UpdateUserDto) {
+      return await this.userService.updateUser(+id, updateUserDto);
+    }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userService.remove(+id);
-  // }
-}
+    //TODO: This will be for admin access only once it is implemented
+    @Delete(':id')
+    remove(@Param('id', ParseIntPipe) id: number) {
+      return this.userService.remove(id);
+  }
+};
