@@ -110,25 +110,36 @@ describe('UserController', () => {
       password: 'newpassword',
       bio: 'Updated bio',
     };
-
-    // Call the update method and retrieve the updated user
     const updatedUser = await controller.update(userId, updateUserDto);
 
-    // Assert that only the specified fields are altered
     expect(updatedUser).toMatchObject({
       password: expect.any(String),
       bio: 'Updated bio',
     });
-    /*  const userId = 1;
-    const updateUserDto: UpdateUserDto = {
-      password: 'newpassword',
-      bio: 'Updated bio',
-    };
-    const expectedUpdatedUser = {
-      id: userId,
-      ...updateUserDto,
-    };
-
-    expect(await controller.update(userId, updateUserDto)).toEqual(expectedUpdatedUser); */
   });
+
+    it('should update the user password', async () => {
+      const userId = 1;
+      const updateUserDto: UpdateUserDto = {
+        password: 'newpassword',
+      };
+      const updatedUser = await controller.update(userId, updateUserDto);
+  
+      expect(updatedUser).toMatchObject({
+        password: expect.any(String),
+      });
+  });
+
+    it('should update the user password', async () => {
+      const userId = 1;
+      const updateUserDto: UpdateUserDto = {
+        bio: 'Updated bio',
+      };
+      const updatedUser = await controller.update(userId, updateUserDto);
+
+      expect(updatedUser).toMatchObject({
+        bio: 'Updated bio',
+      });
+  });
+   
 });
