@@ -20,7 +20,7 @@ export class User {
   apellidos: string;
 
   @ApiProperty({ description: 'The Wallet of the User', example: 1000 })
-  @Column()
+  @Column({ default: 1000 }) 
   saldo: number;
 
   @ApiProperty({ description: 'Password of User', example: 'password1234' })
@@ -35,15 +35,12 @@ export class User {
   @Column({type: 'text'})
   bio: string;
 
-  @ApiProperty({
-    description: 'Registration date of User',
-    example: '2023-06-16',
-  })
-  @Column()
+  @ApiProperty({ description: 'Registration date of User', example: '2023-06-16' })
+  @Column({ default: () => 'CURRENT_TIMESTAMP' }) // Automate the date creation
   fecha_creacion: Date;
 
   @ApiProperty({ description: 'Update date of User', example: '2023-06-16' })
-  @Column()
+  @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' }) // Automate the date update
   fecha_actualizacion: Date;
 
   @BeforeInsert()

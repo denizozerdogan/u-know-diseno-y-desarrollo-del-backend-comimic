@@ -36,10 +36,4 @@ export class CreateUserDto {
   @ApiProperty({ example: '2023-06-16' })
   fecha_actualizacion: Date;
 
-  @BeforeInsert()
-  async setPassword(password: string) {
-    const salt = await bcrypt.genSalt();
-    this.password = await bcrypt.hash(this.password, salt)
-
-  }
 }

@@ -47,12 +47,31 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe ) id: number, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(+id, updateUserDto);
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+    const existingUser = await this.userService.getUserById(id);
+
+    const updatedUser = plainToClass(User, existingUser);
+  
+    if (updateUserDto.password) {
+      await updatedUser.setPassword(updateUserDto.password);
+    }
+
+    if (updateUserDto.bio) {
+      updatedUser.bio = updateUserDto.bio;
+    }
+
+    const savedUser = await this.userService.updateUser(id, updatedUser);
+    
+    return savedUser;
   }
+
+  //update(@Param('id', ParseIntPipe ) id: number, @Body() updateUserDto: UpdateUserDto) {
+    
+   // return this.userService.updateUser(+id, updateUserDto);
+}
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {
   //   return this.userService.remove(+id);
   // }
-}
+
