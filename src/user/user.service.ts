@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -13,15 +13,31 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
+  
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     try {
+      const existingUser = await this.userRepository.findOne({ where: { email: createUserDto.email } });
+      if (existingUser) {
+      throw new BadRequestException('User with the same email already exists')      }
+  
       const userCreated = await this.userRepository.save(createUserDto);
       console.log(userCreated);
       return userCreated;
     } catch (error) {
       console.log(error);
+      throw error
     }
   }
+
+  /* async createUser(createUserDto: CreateUserDto): Promise<User> {
+    try {
+      const userCreated = await this.userRepository.save(createUserDto);
+      console.log(userCreated);
+      return userCreated;
+    } catch (error) {
+      throw new BadRequestException()
+    }
+  }  */
 
   //findAll
   async getUser(): Promise<User[]> {
@@ -33,6 +49,17 @@ export class UserService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+ /*  getUserByEmail(email: string) {
+    return this.userRepository.findOne({where: {email}}) */
+
+    getUserByEmail(email: string) {
+    if (!email) {
+      throw new NotFoundException('Email not found');
+    }
+  
+    return this.userRepository.findOne({where: {email}})
+  } 
+
   //update
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const toUpdate = await this.userRepository.findOne({ where: { id } });
@@ -42,24 +69,6 @@ export class UserService {
       return this.userRepository.save(toUpdate);
     }
   }
-
-  // async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
-  //   const { password, bio } = updateUserDto;
-  //   const user = await this.userRepository.findOne({ where: { id } });
-  //   if (user) {
-  //     user.password = password;
-  //     user.bio = bio;
-  //     return this.userRepository.save(user);
-  //   }
-
-  //   return undefined;
-  // }
-
-  // updateUser(id: number, updateUserDto: UpdateUserDto) {
-  //   const { password, bio } = updateUserDto;
-
-  //   return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
-  // };
 
   removeUser(id: number) {
     return this.userRepository.delete(id)
