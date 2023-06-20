@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   ValidationPipe,
   UsePipes,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -51,6 +52,10 @@ export class UserController {
     //TODO: This will be for admin access only once it is implemented
     @Delete(':id')
     removeUser(@Param('id', ParseIntPipe) id: number) {
-      return this.userService.removeUser(id);
+      const result =  this.userService.removeUser(id);
+      if (!result) {
+        throw new NotFoundException(`User with ID '${id}' not found`);
+      }
+      return result;
   }
 };
