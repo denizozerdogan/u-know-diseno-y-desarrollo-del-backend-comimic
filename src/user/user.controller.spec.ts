@@ -34,11 +34,13 @@ describe('UserController', () => {
       users.push(newUser);
       return Promise.resolve(newUser);
     }),
+    
     getUser: jest.fn().mockImplementation(() => Promise.resolve({ users })),
     getUserById: jest.fn().mockImplementation((id: number) => {
       const user = users.find((user) => user.id === id);
       return Promise.resolve(user);
     }),
+
     updateUser: jest
       .fn()
       .mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
@@ -48,8 +50,10 @@ describe('UserController', () => {
         };
         return Promise.resolve(updatedUser);
       }),
-    removeUser: jest.fn()
- 
+
+    removeUser: jest
+    .fn()
+    
   };
 
   beforeEach(async () => {
@@ -145,8 +149,9 @@ describe('UserController', () => {
   });
 
   it('should remove the user with the specified ID', async () => {
-      mockUserService.removeUser.mockReturnValue(5);
-      expect(controller.removeUser(5)).toEqual(5);
+    const userId = 1;
+    await controller.removeUser(userId)
+    expect(mockUserService.removeUser).toHaveBeenCalledWith(userId);
   }); 
    
 });

@@ -22,6 +22,8 @@ import { ApiTags } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  //@Post(':id/compra/:courseid')
+
   @Post('')
   @UsePipes(ValidationPipe)
   async create(@Body() createUserDto: CreateUserDto) {

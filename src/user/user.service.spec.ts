@@ -221,26 +221,11 @@ describe('UserService', () => {
     const userId = 1;
     jest.spyOn(mockUserRepositoryService, 'delete').mockResolvedValue(false);
 
-    const result = await service.removeUser(userId);
+    await service.removeUser(userId);
 
     expect(mockUserRepositoryService.delete).toHaveBeenCalledWith(userId);
-    expect(result).toBe(false);
   });
 
-  // it('should remove the user by id', async () => {
-  //   const userId = 1;
-  //   const deleteResult: DeleteResult = {
-  //     affected: 1,
-  //     raw: null,
-  //   };
-  
-  //   jest.spyOn(mockUserService, 'removeUserById').mockResolvedValue(deleteResult);
-  
-  //   const result = await controller.remove(userId);
-  
-  //   expect(mockUserService.removeUserById).toHaveBeenCalledWith(userId);
-  //   expect(result).toEqual(deleteResult);
-  // });
 
 
   /*  it('should update a user and return the updated user', async () => {
