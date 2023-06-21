@@ -74,8 +74,10 @@ describe('AuthService', () => {
 
     // check if all the fields of the found user are correct, meaning that they are the same as the user that you passed in the parameter.
     expect(savedUser.name).toEqual(user1.name);
-    //do same for other fields
-
+    expect(savedUser.surname).toEqual(user1.surname);
+    expect(savedUser.wallet).toEqual(user1.wallet);
+    expect(savedUser.email).toEqual(user1.email);
+   
     // check if the returned new user is the correct one, meaning that all the fields values are the same as the values that you passed in the parameter.
     expect(newUser).toEqual( {
       "bio": "I am Yumi", 
