@@ -5,6 +5,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { NotFoundException } from '@nestjs/common';
 
 
 //Mock data array
@@ -226,23 +227,30 @@ describe('UserService', () => {
     expect(mockUserRepositoryService.delete).toHaveBeenCalledWith(userId);
   });
 
+  it('should throw an error if the user ID does not exist', async () => {
+    const error = new Error('Failed to get user');
+
+    jest.spyOn(mockUserRepositoryService, 'findOne').mockRejectedValue(error);
+
+    await expect(service.getUserById(1)).rejects.toThrowError(error);
+    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+  });
+
+  it('should return an error if the user ID does not exist when updating a user', async () => {
+
+    const error = new Error('Failed to update user');
+
+    jest.spyOn(mockUserRepositoryService, 'update').mockResolvedValue(error);
+
+    await expect(service.updateUser).rejects.toThrowError(error);
+    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+  });
 
 
-  /*  it('should update a user and return the updated user', async () => {
-    const userId = 1;
-    const updatedUserDto: UpdateUserDto = {
-      password: 'newpassword',
-      bio: 'Updated bio',
-    };
-    const expectedUpdatedUser = {
-      id: userId,
-      ...updatedUserDto,
-    };
-  
-    const updatedUser = await service.updateUser(userId, updatedUserDto);
-  
-    expect(updatedUser).toMatchObject(expectedUpdatedUser);
-  }); */
+
+
+
+
 
   /*it('should retrieve user by id and return the user with that id', async () => {
     const userId = 1;
