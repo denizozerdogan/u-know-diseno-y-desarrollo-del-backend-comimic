@@ -5,7 +5,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { error } from 'console';
 
 
 //Mock data array
@@ -138,6 +139,15 @@ describe('UserService', () => {
     expect(await service.getUser()).toMatchObject({ users });
   });
 
+  it('should return forbidden error', async () => {
+    jest.spyOn(mockUserRepositoryService, 'find').mockImplementation(() => {
+      throw new Error('Some error'); // Simula un error al llamar a find()
+    });
+  
+    await expect(service.getUser()).rejects.toThrowError(ForbiddenException);
+  });
+  
+
   it('should retrieve user by id and return the user with that id', async () => {
     const userId = 1;
     const expectedUser = users.find((user: any) => user.id === userId);
@@ -255,4 +265,7 @@ describe('UserService', () => {
     expect(user).toEqual(expectedUser);
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } });
   })  
+
+  
 });
+
