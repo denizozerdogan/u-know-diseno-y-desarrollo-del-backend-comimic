@@ -11,7 +11,6 @@ export class CreateUserDto {
   @ApiProperty({ example: 'Namie' })
   surname?: string;
 
-
   @ApiProperty({ example: 1000 })
   wallet?: number;
 
@@ -20,6 +19,7 @@ export class CreateUserDto {
   @ApiProperty({ example: 'password1234' })
   password: string;
 
+  @IsNotEmpty()
   @IsEmail()
   @ApiProperty({ example: 'yumi@example.com' })
   email: string;
