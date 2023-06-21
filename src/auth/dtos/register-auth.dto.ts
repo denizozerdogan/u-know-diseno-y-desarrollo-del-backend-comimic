@@ -21,7 +21,8 @@ export class RegisterAuthDto {
     @Length(8, 24)
     @ApiProperty({ example: 'password1234' })
     password: string;
-  
+
+    @IsNotEmpty()
     @IsEmail()
     @ApiProperty({ example: 'yumi@example.com' })
     email: string;

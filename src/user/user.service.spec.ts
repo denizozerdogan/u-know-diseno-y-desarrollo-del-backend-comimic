@@ -6,6 +6,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
 
 //Mock data array
@@ -36,10 +37,13 @@ describe('UserService', () => {
       return Promise.resolve(newUser);
     }),
     find: jest.fn().mockImplementation(() => Promise.resolve({ users })),
-    findOne: jest.fn().mockImplementation((id: number) => {
-      const user = users.find((user: { id: number; }) => user.id === id);
+    findOne: jest.fn(),/* jest.fn().mockImplementation((id: number) => {
+      const user = users.find((user) => user.id === id);
       return Promise.resolve(user);
-    }),
+ /*    getUserByEmail: jest.fn().mockImplementation((email: string) => {
+      const user = users.find((user) => user.email === email);
+      return Promise.resolve(user);
+    }), */
     update: jest
       .fn()
       .mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
@@ -58,29 +62,7 @@ describe('UserService', () => {
         return Promise.resolve(false);
       }
     }),
-
-  /* jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
-      const { password, bio } = updateUserDto;
-      const user = users.find((user) => user.id === id);
     
-      if (user) {
-        const updatedUser = {
-          ...user,
-          password,
-          bio,
-        };
-        Object.assign(user, updatedUser);
-        return Promise.resolve(updatedUser); */
-
-  /*  jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
-      const { password, bio } = updateUserDto;
-      const user = users.find((user) => user.id === id);
-  
-      if (user) {
-        user.password = password;
-        user.bio = bio;
-        return Promise.resolve(mockUserRepositoryService.save(user));
-      } */
     }
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -99,7 +81,7 @@ describe('UserService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should create a new user and return the user', async () => {
+ /*  it('should create a new user and return the user', async () => {
     const newUser = {
       id: 2,
       name: 'Diego',
@@ -115,7 +97,43 @@ describe('UserService', () => {
     expect(await service.createUser(newUser)).toMatchObject({
       id: expect.any(Number),
     });
+  }); */
+
+  it('should create a new user and return the user', async () => {
+    const newUser = {
+      id: 2,
+      name: 'Diego',
+      surname: 'Monsalve',
+      wallet: 1000,
+      password: 'password1234',
+      email: 'diego@example.com',
+      bio: 'I am Future Diegooo',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date(),
+    };
+  
+    const createdUser = await service.createUser(newUser);
+    expect(createdUser).toMatchObject({
+      id: expect.any(Number),
+    });
   });
+
+  it('should throw an error when creating a user with an existing email', async () => {
+    const existingUser = {
+      id: 3,
+      name: 'John',
+      surname: 'Doe',
+      wallet: 2000,
+      password: 'password5678',
+      email: 'diego@example.com', // Same email as the newUser
+      bio: 'I am John Doe',
+      created_at: new Date(2023, 7, 17),
+      updated_at: new Date(),
+    };
+    jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(existingUser);
+    await expect(service.createUser(existingUser)).rejects.toThrowError('User with the same email already exists');
+  });
+
 
   it('should return a list of all users', async () => {
     expect(await service.getUser()).toMatchObject({ users });
@@ -227,6 +245,17 @@ describe('UserService', () => {
     expect(mockUserRepositoryService.delete).toHaveBeenCalledWith(userId);
   });
 
+  it('should return a user when a valid email is provided', async () => {
+    const email = 'diego@example.com';
+    const expectedUser = { id: 1, email: 'diego@example.com' };
+
+    jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(expectedUser);
+
+    const user = await mockUserRepositoryService.findOne(email);
+
+    expect(user).toEqual(expectedUser);
+    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } });
+  })  
   it('should throw an error if the user ID does not exist', async () => {
     const error = new Error('Failed to get user');
 
@@ -246,40 +275,4 @@ describe('UserService', () => {
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
   });
 
-
-
-
-
-
-
-  /*it('should retrieve user by id and return the user with that id', async () => {
-    const userId = 1;
-    const expectedUser = {
-      id: 1,
-      name: "Yumi",
-      surname: "Namie",
-      wallet: 1000,
-      password: "password1234",
-      email: "yumi@example.com",
-      bio: "I am Yumi",
-      created_at: "2023-06-16",
-      updated_at: "2023-06-16",
-    };
-    const user = await service.getUserById(userId);
-    expect(user).toMatchObject(expectedUser);
-
-  });
-  it('should update a user and return the updated user', async () => {
-    const userId = 1;
-    const updatedUserDto: UpdateUserDto = {
-      password: 'newpassword',
-      bio: 'Updated bio',
-    };
-    const expectedUpdatedUser = {
-      id: userId,
-      ...updatedUserDto,
-    };
-  
-    expect(await service.updateUser(userId, updatedUserDto)).toEqual(expectedUpdatedUser);
-  });*/
 });

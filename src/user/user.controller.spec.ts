@@ -18,6 +18,17 @@ const users: any = [
     created_at: new Date(2023, 7, 16),
     updated_at: new Date(2023, 7, 16),
   },
+  {
+    id: 2,
+    name: 'John',
+    surname: 'Toye',
+    wallet: 1000,
+    password: 'password5678',
+    email: 'john@example.com',
+    bio: 'I am John',
+    created_at: new Date(2023, 7, 17),
+    updated_at: new Date(2023, 7, 17),
+  },
 ];
 
 describe('UserController', () => {
@@ -53,6 +64,15 @@ describe('UserController', () => {
 
     removeUser: jest
     .fn()
+    .mockImplementation((id: number) => {
+      const index = users.findIndex((user) => user.id === id);
+      if (index !== -1) {
+      const removedUser = users.splice(index, 1)[0];
+      return Promise.resolve(removedUser);
+    } else {
+      return Promise.resolve(null)
+    }
+  })
     
   };
 
