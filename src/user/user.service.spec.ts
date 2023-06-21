@@ -36,7 +36,7 @@ describe('UserService', () => {
     }),
     find: jest.fn().mockImplementation(() => Promise.resolve({ users })),
     findOne: jest.fn().mockImplementation((id: number) => {
-      const user = users.find((user) => user.id === id);
+      const user = users.find((user: { id: number; }) => user.id === id);
       return Promise.resolve(user);
     }),
     update: jest
