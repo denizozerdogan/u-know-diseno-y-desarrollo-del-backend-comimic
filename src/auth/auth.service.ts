@@ -1,12 +1,13 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { RegisterAuthDto } from './dtos/register-auth.dto';
 import { hash, genSalt } from 'bcrypt';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
+
+
 
 @Injectable()
 export class AuthService {
@@ -31,10 +32,7 @@ export class AuthService {
         password: hashedPassword,
       });
       
-
       const { password, ...rest } = createUser;
-
-      
 
       return rest;
     } catch (error) {

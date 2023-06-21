@@ -29,21 +29,54 @@ export class UserService {
   }
 
   //findOne
-  async getUserById(id: number): Promise<User> {
-    return this.userRepository.findOne({ where: { id } });
+async getUserById(id: number): Promise<User> {
+  try {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (user) {
+      return user;
+    } else {
+      throw new NotFoundException;
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to get user');
   }
+}
+
 
   //update
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const toUpdate = await this.userRepository.findOne({ where: { id } });
-
-    if (toUpdate) {
+    try {
+      const toUpdate = await this.userRepository.findOne({ where: { id } });
+  
+      if (!toUpdate) {
+        throw new NotFoundException;
+      }
+  
       Object.assign(toUpdate, updateUserDto);
-      return this.userRepository.save(toUpdate);
+  
+      return await this.userRepository.save(toUpdate);
+    } catch (error) {
+      console.error(error);
+      throw new Error('Failed to update user');
     }
   }
 
-  // async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
+  //delete
+  async removeUser(id: number): Promise<void> {
+    try {
+      const deletionResult = await this.userRepository.delete(id);
+      if (deletionResult.affected === 0) {
+        throw new Error('User not found'); // Throw an exception if no user was deleted
+      }
+    } catch (error) {
+      // Handle the error appropriately
+      console.error(error);
+      throw new Error('Failed to delete user'); // Throw an exception or return an error response
+    }
+  };
+
+    // async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
   //   const { password, bio } = updateUserDto;
   //   const user = await this.userRepository.findOne({ where: { id } });
   //   if (user) {
@@ -60,8 +93,4 @@ export class UserService {
 
   //   return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
   // };
-
-  remove(id: number) {
-    return this.userRepository.delete(id)
-  };
 }

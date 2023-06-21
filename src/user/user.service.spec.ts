@@ -6,18 +6,19 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 
+
 //Mock data array
 const users: any = [
   {
     id: 1,
-    nombre: 'Yumi',
-    apellidos: 'Namie',
-    saldo: 1000,
+    name: 'Yumi',
+    surname: 'Namie',
+    wallet: 1000,
     password: 'password1234',
     email: 'yumi@example.com',
     bio: 'I am Yumi',
-    fecha_creacion: new Date(2023 - 6 - 16),
-    fecha_actualizacion: new Date(2023 - 6 - 16),
+    created_at: new Date(2023, 7, 16),
+    updated_at: new Date(2023, 7, 16),
   },
 ];
 
@@ -35,7 +36,7 @@ describe('UserService', () => {
     }),
     find: jest.fn().mockImplementation(() => Promise.resolve({ users })),
     findOne: jest.fn().mockImplementation((id: number) => {
-      const user = users.find((user) => user.id === id);
+      const user = users.find((user: { id: number; }) => user.id === id);
       return Promise.resolve(user);
     }),
     update: jest
@@ -46,7 +47,16 @@ describe('UserService', () => {
           ...updateUserDto,
         };
         return Promise.resolve(updatedUser);
-  }),
+    }),
+    delete: jest.fn().mockImplementation((id: number) => {
+      const userIndex = users.findIndex((user) => user.id === id);
+      if (userIndex >= 0) {
+        users.splice(userIndex, 1);
+        return Promise.resolve(true);
+      } else {
+        return Promise.resolve(false);
+      }
+    }),
 
   /* jest.fn().mockImplementation((id: number, updateUserDto: UpdateUserDto) => {
       const { password, bio } = updateUserDto;
@@ -91,18 +101,14 @@ describe('UserService', () => {
   it('should create a new user and return the user', async () => {
     const newUser = {
       id: 2,
-      nombre: 'Diego',
-      apellidos: 'Monsalve',
-      saldo: 1000,
+      name: 'Diego',
+      surname: 'Monsalve',
+      wallet: 1000,
       password: 'password1234',
       email: 'diego@example.com',
       bio: 'I am Future Diegooo',
-      fecha_creacion: new Date(2023 - 6 - 16),
-      fecha_actualizacion: new Date(2023 - 6 - 16),
-      async setPassword(password: string) {
-        const salt = await bcrypt.genSalt();
-        this.password = await bcrypt.hash(password || this.password, salt);
-      },
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date (),
     };
 
     expect(await service.createUser(newUser)).toMatchObject({
@@ -135,21 +141,20 @@ describe('UserService', () => {
 
     const existingUser = {
       id: 1,
-      nombre: 'Yumi',
-      apellidos: 'Namie',
-      saldo: 1000,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 1000,
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      fecha_creacion: new Date (2023 - 6 - 16),
-      fecha_actualizacion: new Date (),
+      created_at: new Date(2023, 7, 16),
+      updated_at: expect.any(Date),
     };
 
     const updatedUser = {
       id: userId,
       ...existingUser,
       ...updateUserDto,
-      fecha_actualizacion: expect.any(Date),
     };
     const result = await service.updateUser(userId, updateUserDto);
 
@@ -164,21 +169,20 @@ describe('UserService', () => {
 
     const existingUser = {
       id: 1,
-      nombre: 'Yumi',
-      apellidos: 'Namie',
-      saldo: 1000,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 1000,
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      fecha_creacion: new Date (2023 - 6 - 16),
-      fecha_actualizacion: new Date (),
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date (),
     };
 
     const updatedUser = {
       id: userId,
       ...existingUser,
       ...updateUserDto,
-      fecha_actualizacion: expect.any(Date),
     };
     const result = await service.updateUser(userId, updateUserDto);
 
@@ -193,26 +197,37 @@ describe('UserService', () => {
 
     const existingUser = {
       id: 1,
-      nombre: 'Yumi',
-      apellidos: 'Namie',
-      saldo: 1000,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 1000,
       password: 'password1234',
       email: 'yumi@example.com',
       bio: 'I am Yumi',
-      fecha_creacion: new Date (2023 - 6 - 16),
-      fecha_actualizacion: new Date (),
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date (),
     };
 
     const updatedUser = {
       id: userId,
       ...existingUser,
       ...updateUserDto,
-      fecha_actualizacion: expect.any(Date),
     };
     const result = await service.updateUser(userId, updateUserDto);
 
     expect(result.bio).toEqual(updatedUser.bio);
   });
+
+  it('should return false if the user with the given ID does not exist', async () => {
+    const userId = 1;
+    jest.spyOn(mockUserRepositoryService, 'delete').mockResolvedValue(false);
+
+    await service.removeUser(userId);
+
+    expect(mockUserRepositoryService.delete).toHaveBeenCalledWith(userId);
+  });
+
+
+
   /*  it('should update a user and return the updated user', async () => {
     const userId = 1;
     const updatedUserDto: UpdateUserDto = {
@@ -233,14 +248,14 @@ describe('UserService', () => {
     const userId = 1;
     const expectedUser = {
       id: 1,
-      nombre: "Yumi",
-      apellidos: "Namie",
-      saldo: 1000,
+      name: "Yumi",
+      surname: "Namie",
+      wallet: 1000,
       password: "password1234",
       email: "yumi@example.com",
       bio: "I am Yumi",
-      fecha_creacion: "2023-06-16",
-      fecha_actualizacion: "2023-06-16",
+      created_at: "2023-06-16",
+      updated_at: "2023-06-16",
     };
     const user = await service.getUserById(userId);
     expect(user).toMatchObject(expectedUser);

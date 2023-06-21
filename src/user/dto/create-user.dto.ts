@@ -5,15 +5,15 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @ApiProperty({ example: 'Yumi' })
-  nombre: string;
+  name: string;
 
   @IsNotEmpty()
   @ApiProperty({ example: 'Namie' })
-  apellidos?: string;
+  surname?: string;
 
 
   @ApiProperty({ example: 1000 })
-  saldo?: number;
+  wallet?: number;
 
   @IsNotEmpty()
   @Length(8, 24)

@@ -13,14 +13,16 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiProperty, ApiTags } from '@nestjs/swagger';
-import { User } from './entities/user.entity';
-import { plainToClass } from 'class-transformer';
+import { ApiTags } from '@nestjs/swagger';
+
+
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  //@Post(':id/compra/:courseid')
 
   @Post('')
   @UsePipes(ValidationPipe)
@@ -48,7 +50,7 @@ export class UserController {
 
     //TODO: This will be for admin access only once it is implemented
     @Delete(':id')
-    remove(@Param('id', ParseIntPipe) id: number) {
-      return this.userService.remove(id);
+    removeUser(@Param('id', ParseIntPipe) id: number) {
+      return this.userService.removeUser(id);
   }
 };
