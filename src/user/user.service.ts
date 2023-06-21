@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -94,18 +94,38 @@ async getUserById(id: number): Promise<User> {
   }
 
   //delete
-  async removeUser(id: number): Promise<void> {
-    try {
-      const deletionResult = await this.userRepository.delete(id);
-      if (deletionResult.affected === 0) {
-        throw new Error('User not found'); // Throw an exception if no user was deleted
-      }
-    } catch (error) {
-      // Handle the error appropriately
-      console.error(error);
-      throw new Error('Failed to delete user'); // Throw an exception or return an error response
+  async removeUser(id: number): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { id } });
+  
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-  };
+  
+    const result = await this.userRepository.delete(id);
+  
+    if (result.affected === 0) {
+      throw new InternalServerErrorException('Failed to delete user');
+    }
+  
+    return true;
+  }
+
+ 
+}
+
+  //delete
+  // async removeUser(id: number): Promise<void> {
+  //   try {
+  //     const deletionResult = await this.userRepository.delete(id);
+  //     if (deletionResult.affected === 0) {
+  //       throw new Error('User not found'); // Throw an exception if no user was deleted
+  //     }
+  //   } catch (error) {
+  //     // Handle the error appropriately
+  //     console.error(error);
+  //     throw new Error('Failed to delete user'); // Throw an exception or return an error response
+  //   }
+  // };
 
     // async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
   //   const { password, bio } = updateUserDto;
@@ -124,4 +144,3 @@ async getUserById(id: number): Promise<User> {
 
   //   return this.userRepository.createQueryBuilder().update(User).set({password, bio}).where('id = :id', { id }).execute()
   // };
-}
