@@ -23,8 +23,8 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ type: 'text' })
-  bio: string;
+  @Column({ default: ''})
+  bio?: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
