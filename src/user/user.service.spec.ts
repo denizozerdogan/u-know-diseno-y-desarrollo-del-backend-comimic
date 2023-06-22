@@ -4,9 +4,10 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { error } from 'console';
+import { NotFoundException } from '@nestjs/common';
+
 
 
 //Mock data array
@@ -265,6 +266,24 @@ describe('UserService', () => {
     expect(user).toEqual(expectedUser);
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } });
   })  
+  it('should throw an error if the user ID does not exist', async () => {
+    const error = new Error('Failed to get user');
+
+    jest.spyOn(mockUserRepositoryService, 'findOne').mockRejectedValue(error);
+
+    await expect(service.getUserById(1)).rejects.toThrowError(error);
+    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+  });
+
+  it('should return an error if the user ID does not exist when updating a user', async () => {
+
+    const error = new Error('Failed to update user');
+
+    jest.spyOn(mockUserRepositoryService, 'update').mockResolvedValue(error);
+
+    await expect(service.updateUser).rejects.toThrowError(error);
+    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+  });
 
   
 });
