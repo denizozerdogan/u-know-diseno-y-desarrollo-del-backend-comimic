@@ -13,12 +13,15 @@ import { JwtService } from '@nestjs/jwt';
 
 
 
+
+
+
 @Injectable()
 export class AuthService {
-  userModel: any;
-  jwtService: any;
-  constructor(
-    private userService: UserService) {}
+  
+  constructor(private readonly userService: UserService,
+    private jwtService: JwtService) {}
+
 
 
 async encrypt(password: string): Promise<string> {
@@ -49,9 +52,30 @@ async encrypt(password: string): Promise<string> {
     }
   }
 }
+// async validateUser(loggedUser: LoginDto) {
+//   try {
+//     const user = await this.userService.findOneByEmail(loggedUser.email);
+//     //verificar la password
+//     if (await this.passwordVerify(loggedUser.password, user.password))
+//       return {
+//         accessToken: await this.jwtService.signAsync({
+//           email: loggedUser.email,
+//         }), //'esto es un token', //to-do: generación del token
+//       };
+
+//     throw new UnauthorizedException();
+//   } catch (error) {
+//     throw error;
+//   }
+// }
+
+
+
+
+
   async login(userObjectLogin:LoginAuthDto){
     const {email, password} = userObjectLogin;
-      const findUser = await this.userModel.getUserByEmail({email});
+      const findUser = await this.userService.getUserByEmail(email);
       if(!findUser) throw new HttpException('User not Found', 404);
 
       const checkPassword = await compare(password, findUser.password);
@@ -59,7 +83,7 @@ async encrypt(password: string): Promise<string> {
       
       const payload = {id:findUser.id, name:findUser.name}
 
-const token = await this.jwtService.sign()
+const token = this.jwtService.sign(payload)
 
       const data = {
         user:findUser,

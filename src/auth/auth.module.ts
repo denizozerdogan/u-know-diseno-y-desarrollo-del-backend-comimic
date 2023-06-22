@@ -13,6 +13,7 @@ import { jwtConstants } from './entities/jwt.constants';
 @Module({
   imports:[TypeOrmModule.forFeature([User]), UserModule,
   JwtModule.register({
+    global: true,
     secret: jwtConstants.secret,
     signOptions: { expiresIn: '20h' },
   }),],
