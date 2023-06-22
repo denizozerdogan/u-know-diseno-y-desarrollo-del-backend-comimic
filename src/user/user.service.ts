@@ -16,10 +16,6 @@ export class UserService {
   
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const existingUser = await this.userRepository.findOne({ where: { email: createUserDto.email } });
-      if (existingUser) {
-      throw new BadRequestException('User with the same email already exists')      }
-  
       const userCreated = await this.userRepository.save(createUserDto);
       console.log(userCreated);
       return userCreated;
@@ -67,8 +63,6 @@ async getUserById(id: number): Promise<User> {
     throw new Error('Failed to get user');
   }
 }
-
-
 
  /*  getUserByEmail(email: string) {
     return this.userRepository.findOne({where: {email}}) */
