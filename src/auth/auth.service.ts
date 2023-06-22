@@ -48,7 +48,7 @@ async encrypt(password: string): Promise<string> {
         throw ConflictException;
     }
   }
-}
+} // !!!!! WHY ARE WE USING USERMODEL HERE??? 
   async login(userObjectLogin:LoginAuthDto){
     const {email, password} = userObjectLogin;
       const findUser = await this.userModel.getUserByEmail({email});
@@ -56,10 +56,10 @@ async encrypt(password: string): Promise<string> {
 
       const checkPassword = await compare(password, findUser.password);
       if(!checkPassword) throw new HttpException('Password invalid', 403);
-      
+      // ! add user role here for the admin guard
       const payload = {id:findUser.id, name:findUser.name}
 
-const token = await this.jwtService.sign()
+      const token = await this.jwtService.sign()
 
       const data = {
         user:findUser,

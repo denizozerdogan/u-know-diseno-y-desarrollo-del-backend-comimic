@@ -29,6 +29,7 @@ export class CreateUserDto {
   })
   bio?: string;
 
+
   // @ApiProperty({ example: '2023-06-16' })
   // fecha_creacion: Date;
 
