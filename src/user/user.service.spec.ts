@@ -275,4 +275,5 @@ describe('UserService', () => {
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
   });
 
+  
 });
