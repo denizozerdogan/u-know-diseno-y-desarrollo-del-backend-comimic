@@ -2,12 +2,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { RegisterAuthDto } from './dtos/register-auth.dto';
+import { LoginAuthDto } from './dtos/login-auth.dto';
 
 
 describe('AuthController', () => {
   let controller: AuthController;
 
-  const mockUserService = {
+  const mockAuthService = {
+    register: jest.fn(),
+    login: jest.fn()
   }
 
   beforeEach(async () => {
@@ -16,7 +20,7 @@ describe('AuthController', () => {
       providers: [
         {
           provide: AuthService,
-          useValue: mockUserService,
+          useValue: mockAuthService,
         },
       ],
     }).compile();
@@ -27,6 +31,32 @@ describe('AuthController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('should call the AuthService register a user that does not exist in the database', () => {
+    const userObject = new RegisterAuthDto(); 
+    userObject.email = 'testuser@example.com';
+    userObject.password = 'password123';
+    userObject.name = 'testuser';
+    userObject.surname = 'testsurname';
+
+    const registerSpy = jest.spyOn(mockAuthService, 'register');
+      
+    controller.registerUser(userObject);
+      
+    expect(registerSpy).toHaveBeenCalledWith(userObject);
+  });
+
+  it('should call the AuthService to signin a user into the system', () => {
+    const userObjectLogin: LoginAuthDto = new LoginAuthDto();
+    userObjectLogin.email = 'testuser@example.com';
+    userObjectLogin.password = 'password123';
+    
+    const loginSpy = jest.spyOn(mockAuthService, 'login');
+    
+    controller.loginUser(userObjectLogin);
+    
+    expect(loginSpy).toHaveBeenCalledWith(userObjectLogin);
+  }); 
 });
 
 
