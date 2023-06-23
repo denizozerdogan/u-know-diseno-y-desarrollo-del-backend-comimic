@@ -1,20 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Req, ParseIntPipe } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Course } from './entities/course.entity';
+import { Course, courseDifficulty } from './entities/course.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
-  @Post(':courseId/star')
+ /*  @Post(':courseId/rate')
   @UsePipes(ValidationPipe)
-  async updateCourseStar(@Param('courseId') courseId: number, @Body('star') star: number, ParseIntPipe): Promise<Course> {
-    return this.courseService.updateCourseStar(courseId, star);
+  async updateCourseStar(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Body('star') star: number,
+    @GetUser() user: User, // Assuming you have an authentication system to get the current user
+  ): Promise<Course> {
+    const userId = user.id;
+    return this.courseService.updateCourseStar(courseId, star, userId);
   }
+ */
+  //we will protected for after login need to implement AuthGuard?
+ /*  @Post()
+  async createCourse(@Body() createCourseDto: CreateCourseDto, @Req() request: Request) {
+    const { id } = request.user; // Assuming the authenticated user ID is available in the request
+
+    const course = await this.courseService.createCourse(createCourseDto, id);
+
+    return course;
+  } */
 
 
   @Post()

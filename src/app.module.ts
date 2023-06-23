@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { ContentModule } from './content/content.module';
 import databaseConfig from './config/database.config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -21,7 +20,6 @@ import { CourseModule } from './course/course.module';
       useFactory: (configService: ConfigService) => configService.get('db'),
     }),
     UserModule,
-    ContentModule,
     AuthModule,
     CourseModule,
   ],

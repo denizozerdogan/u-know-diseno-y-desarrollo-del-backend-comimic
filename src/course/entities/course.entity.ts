@@ -1,7 +1,7 @@
 import { ApiTags } from "@nestjs/swagger";
 import { IsInt, Min, Max } from "class-validator";
 import { User } from "src/user/entities/user.entity";
-import { ManyToMany, JoinTable, Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate } from "typeorm";
+import { ManyToMany, JoinTable, Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, JoinColumn, ManyToOne } from "typeorm";
 
 export enum courseDifficulty {
     Easy = 'Easy',
@@ -40,24 +40,27 @@ export class Course {
     })
     difficulty: courseDifficulty;
 
-    @Column()
+    @Column({ nullable: true })
     topic: string;
 
     @Column({ type: 'decimal', precision: 2, scale: 1, default: 5 })
     rating: number;
 
-    @Column({ type: 'simple-array', default: [], array: true })
+    @Column({ type: 'simple-array', default: [], array: true, nullable: true })
     @IsInt({ each: true })
     @Min(1, { each: true })
     @Max(5, { each: true })
     star: number[];
 
-    @ManyToMany(() => User, user => user.createdCourses)
-    @JoinTable()
-    creator: User[];
+    @ManyToOne(() => User, user => user.created_courses)
+    @JoinColumn({ name: 'creatorId' })
+    creator: User;
+  
+    @Column({ nullable: true })
+    creatorId: number;
 
-    @ManyToMany(() => User, user => user.boughtCourses)
-    @JoinTable()
+    @ManyToMany(() => User, user => user.bought_courses)
+    @JoinColumn()
     buyers: User[];
 
     @BeforeUpdate()

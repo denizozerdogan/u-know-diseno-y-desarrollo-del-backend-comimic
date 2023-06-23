@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany, JoinColumn } from 'typeorm';
 import { ApiTags } from '@nestjs/swagger';
 import { Course } from 'src/course/entities/course.entity';
 
@@ -43,14 +43,14 @@ export class User {
       enum: UserRole,
       default: UserRole.User,
     })
-    role: UserRole;
+  role: UserRole;
 
   @ManyToMany(() => Course, course => course.creator)
-  @JoinTable()
-  createdCourses: Course[];
+  @JoinColumn()
+  created_courses: Course[];
 
   @ManyToMany(() => Course, course => course.buyers)
-  @JoinTable()
-  boughtCourses: Course[];
+  @JoinColumn()
+  bought_courses: Course[];
 
   }

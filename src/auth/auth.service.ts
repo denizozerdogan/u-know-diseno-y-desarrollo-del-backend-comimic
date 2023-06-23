@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -10,6 +11,7 @@ import { hash, genSalt, compare } from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { LoginAuthDto } from './dtos/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/user/entities/user.entity';
 
 
 
@@ -48,7 +50,7 @@ async encrypt(password: string): Promise<string> {
         throw ConflictException;
     }
   }
-} // !!!!! WHY ARE WE USING USERMODEL HERE??? 
+} 
   async login(userObjectLogin:LoginAuthDto){
     const {email, password} = userObjectLogin;
       const findUser = await this.userModel.getUserByEmail({email});
@@ -68,4 +70,24 @@ async encrypt(password: string): Promise<string> {
       return data;
 
 }
-}
+/* 
+async getCurrentUser(req: Request): Promise<User> {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) {
+    throw new UnauthorizedException('No token provided.');
+  }
+
+  try {
+    const decodedToken = this.jwtService.verify(token);
+    const userId = decodedToken.sub; // Assuming the user ID is stored in the 'sub' claim of the JWT
+    // Fetch the user from the database based on the user ID
+    const user = await this.userService.getUserById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Invalid token.');
+    }
+    return user;
+  } catch (error) {
+    throw new UnauthorizedException('Invalid token.');
+  }
+}*/
+} 
