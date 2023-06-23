@@ -7,6 +7,9 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { error } from 'console';
 
+
+
+
 @ApiTags('user')
 @Injectable()
 export class UserService {
@@ -74,6 +77,9 @@ async getUserById(id: number): Promise<User> {
   
     return this.userRepository.findOne({where: {email}})
   } 
+
+
+
 
   //update
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {

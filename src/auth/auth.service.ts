@@ -15,12 +15,15 @@ import { User } from 'src/user/entities/user.entity';
 
 
 
+
+
+
 @Injectable()
 export class AuthService {
-  userModel: any;
-  jwtService: any;
-  constructor(
-    private userService: UserService) {}
+  
+  constructor(private readonly userService: UserService,
+    private jwtService: JwtService) {}
+
 
 
 async encrypt(password: string): Promise<string> {
@@ -50,25 +53,47 @@ async encrypt(password: string): Promise<string> {
         throw ConflictException;
     }
   }
-} 
-  async login(userObjectLogin:LoginAuthDto){
-    const {email, password} = userObjectLogin;
-      const findUser = await this.userModel.getUserByEmail({email});
-      if(!findUser) throw new HttpException('User not Found', 404);
+}
+// async validateUser(loggedUser: LoginDto) {
+//   try {
+//     const user = await this.userService.findOneByEmail(loggedUser.email);
+//     //verificar la password
+//     if (await this.passwordVerify(loggedUser.password, user.password))
+//       return {
+//         accessToken: await this.jwtService.signAsync({
+//           email: loggedUser.email,
+//         }), //'esto es un token', //to-do: generación del token
+//       };
 
-      const checkPassword = await compare(password, findUser.password);
-      if(!checkPassword) throw new HttpException('Password invalid', 403);
-      // ! add user role here for the admin guard
-      const payload = {id:findUser.id, name:findUser.name}
+//     throw new UnauthorizedException();
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
-      const token = await this.jwtService.sign()
 
-      const data = {
-        user:findUser,
-        token,
-      };
-      return data;
 
+
+async login(userObjectLogin: LoginAuthDto) {
+  const { email, password } = userObjectLogin;
+  const findUser = await this.userService.getUserByEmail(email);
+  if (!findUser) throw new HttpException('User not Found', 404);
+
+  const checkPassword = await compare(password, findUser.password);
+  if (!checkPassword) throw new HttpException('Password invalid', 403);
+
+  // TODO Add user role
+  const payload = { id: findUser.id, name: findUser.name };
+  const token = this.jwtService.sign(payload);
+
+  const { password: _, ...userWithoutPassword } = findUser; // Excluir el campo "password" en la desestructuración
+
+  const data = {
+    user: userWithoutPassword, // Utilizar el objeto sin el campo "password"
+    token,
+  };
+
+  return data;
 }
 /* 
 async getCurrentUser(req: Request): Promise<User> {
@@ -91,3 +116,29 @@ async getCurrentUser(req: Request): Promise<User> {
   }
 }*/
 } 
+
+
+
+
+//   async login(userObjectLogin:LoginAuthDto){
+//     const {email, password} = userObjectLogin;
+//       const findUser = await this.userService.getUserByEmail(email);
+//       if(!findUser) throw new HttpException('User not Found', 404);
+
+//       const checkPassword = await compare(password, findUser.password);
+//       if(!checkPassword) throw new HttpException('Password invalid', 403);
+      
+//       const payload = {id:findUser.id, name:findUser.name}
+
+// const token = this.jwtService.sign(payload)
+
+
+
+//       const data = {
+//         user:findUser,
+//         token,
+//       };
+//       return data;
+
+// }
+

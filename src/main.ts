@@ -10,6 +10,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe())
   const config = new DocumentBuilder()
+  .addBearerAuth()
     .setTitle('U-KNOW API')
     .setDescription(
       'API for the U-KNOW platform for Information Exchange and Content Sharing',

@@ -10,14 +10,16 @@ import {
   ValidationPipe,
   UsePipes,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 
-
+@ApiBearerAuth()
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -33,11 +35,15 @@ export class UserController {
   }
 
   //TODO: This will be for admin access only once it is implemented
+  
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.userService.getUser();
   }
 
+
+  
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.getUserById(+id);
@@ -58,4 +64,5 @@ export class UserController {
       }
       return result;
   }
+ 
 };
