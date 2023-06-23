@@ -21,7 +21,7 @@ export class Course {
     @Column()
     description: string;
 
-    @Column()
+    @Column({default: 200})
     price: number;
 
     @Column()
