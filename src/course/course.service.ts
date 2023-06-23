@@ -40,23 +40,23 @@ export class CourseService {
   }  */
 
   // TODO check if the calculateRating is instantiated
-  async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
-    const course = await this.courseRepository
-      .createQueryBuilder('course')
-      .leftJoinAndSelect('course.buyers', 'buyer')
-      .where('course.courseId = :courseId', { courseId })
-      .getOne();
+  // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
+  //   const course = await this.courseRepository
+  //     .createQueryBuilder('course')
+  //     .leftJoinAndSelect('course.buyers', 'buyer')
+  //     .where('course.courseId = :courseId', { courseId })
+  //     .getOne();
   
-    // Check if the user has bought the course
-    const userHasBoughtCourse = course.buyers.some((buyer) => buyer.id === id);
-    if (!userHasBoughtCourse) {
-      throw new UnauthorizedException('User has not bought the course.');
-    }
+  //   // Check if the user has bought the course
+  //   const userHasBoughtCourse = course.buyers.some((buyer) => buyer.id === id);
+  //   if (!userHasBoughtCourse) {
+  //     throw new UnauthorizedException('User has not bought the course.');
+  //   }
   
-    course.star.push(star); // Add the new star to the array
-    await this.courseRepository.save(course); // Save the updated course to trigger the @BeforeUpdate hook
-    return course;
-  }
+  //   course.star.push(star); // Add the new star to the array
+  //   await this.courseRepository.save(course); // Save the updated course to trigger the @BeforeUpdate hook
+  //   return course;
+  // }
  
   /*  async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
     const course = await this.courseRepository.findOne(courseId, { relations: ['buyers'] });
