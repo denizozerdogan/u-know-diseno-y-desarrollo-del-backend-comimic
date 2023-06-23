@@ -72,24 +72,49 @@ async encrypt(password: string): Promise<string> {
 
 
 
+async login(userObjectLogin: LoginAuthDto) {
+  const { email, password } = userObjectLogin;
+  const findUser = await this.userService.getUserByEmail(email);
+  if (!findUser) throw new HttpException('User not Found', 404);
 
-  async login(userObjectLogin:LoginAuthDto){
-    const {email, password} = userObjectLogin;
-      const findUser = await this.userService.getUserByEmail(email);
-      if(!findUser) throw new HttpException('User not Found', 404);
+  const checkPassword = await compare(password, findUser.password);
+  if (!checkPassword) throw new HttpException('Password invalid', 403);
 
-      const checkPassword = await compare(password, findUser.password);
-      if(!checkPassword) throw new HttpException('Password invalid', 403);
-      
-      const payload = {id:findUser.id, name:findUser.name}
+  const payload = { id: findUser.id, name: findUser.name };
+  const token = this.jwtService.sign(payload);
 
-const token = this.jwtService.sign(payload)
+  const { password: _, ...userWithoutPassword } = findUser; // Excluir el campo "password" en la desestructuración
 
-      const data = {
-        user:findUser,
-        token,
-      };
-      return data;
+  const data = {
+    user: userWithoutPassword, // Utilizar el objeto sin el campo "password"
+    token,
+  };
 
+  return data;
 }
+
+
+
+
+//   async login(userObjectLogin:LoginAuthDto){
+//     const {email, password} = userObjectLogin;
+//       const findUser = await this.userService.getUserByEmail(email);
+//       if(!findUser) throw new HttpException('User not Found', 404);
+
+//       const checkPassword = await compare(password, findUser.password);
+//       if(!checkPassword) throw new HttpException('Password invalid', 403);
+      
+//       const payload = {id:findUser.id, name:findUser.name}
+
+// const token = this.jwtService.sign(payload)
+
+
+
+//       const data = {
+//         user:findUser,
+//         token,
+//       };
+//       return data;
+
+// }
 }
