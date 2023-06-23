@@ -40,7 +40,7 @@ export class CourseService {
   }  */
 
   // TODO check if the calculateRating is instantiated
-  async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
+/*   async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
     const course = await this.courseRepository
       .createQueryBuilder('course')
       .leftJoinAndSelect('course.buyers', 'buyer')
@@ -56,7 +56,7 @@ export class CourseService {
     course.star.push(star); // Add the new star to the array
     await this.courseRepository.save(course); // Save the updated course to trigger the @BeforeUpdate hook
     return course;
-  }
+  } */
  
   /*  async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
     const course = await this.courseRepository.findOne(courseId, { relations: ['buyers'] });

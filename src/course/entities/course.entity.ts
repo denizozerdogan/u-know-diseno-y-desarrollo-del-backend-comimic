@@ -46,21 +46,21 @@ export class Course {
     @Column({ type: 'decimal', precision: 2, scale: 1, default: 5 })
     rating: number;
 
-    @Column({ type: 'simple-array', default: [], array: true, nullable: true })
+    @Column({ type: 'json', default: [], array: true, /* nullable: true  */})
     @IsInt({ each: true })
     @Min(1, { each: true })
     @Max(5, { each: true })
     star: number[];
 
-    @ManyToOne(() => User, user => user.created_courses)
-    @JoinColumn({ name: 'creatorId' })
-    creator: User;
+   /*  @ManyToOne(() => User, user => user.created_courses)
+    @JoinColumn({ name: 'creatorId', referencedColumnName: 'id' })
+    creator: User; */
   
-    @Column({ nullable: true })
-    creatorId: number;
-
+   /*  @Column({ nullable: true })
+    creatorId: number; */
+/* 
     @ManyToMany(() => User, user => user.bought_courses)
-    @JoinColumn()
+    @JoinColumn({name: 'buyers_id', referencedColumnName: 'id'})
     buyers: User[];
 
     @BeforeUpdate()
@@ -72,6 +72,6 @@ export class Course {
         const ratingFromFifthStar = (sum - 4.8 * 4) / (this.star.length - 4);
         this.rating = parseFloat(ratingFromFifthStar.toFixed(1));
       } 
-    } 
+    }  */
   }
-}
+
