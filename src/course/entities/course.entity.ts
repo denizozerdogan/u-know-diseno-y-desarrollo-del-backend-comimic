@@ -46,32 +46,29 @@ export class Course {
     @Column({ type: 'decimal', precision: 2, scale: 1, default: 5 })
     rating: number;
 
-    @Column({ type: 'json', default: [], array: true, /* nullable: true  */})
-    @IsInt({ each: true })
-    @Min(1, { each: true })
-    @Max(5, { each: true })
-    star: number[];
+  //   @Column({ type: 'simple-array', default: [], array: true, nullable: true })
+  //   @IsInt({ each: true })
+  //   @Min(1, { each: true })
+  //   @Max(5, { each: true })
+  //   star: number[];
 
-   /*  @ManyToOne(() => User, user => user.created_courses)
-    @JoinColumn({ name: 'creatorId', referencedColumnName: 'id' })
-    creator: User; */
+    @ManyToOne(() => User, user => user.created_courses)
+    @JoinColumn({ name: 'creatorId' })
+    creator: User;
   
-   /*  @Column({ nullable: true })
-    creatorId: number; */
-/* 
     @ManyToMany(() => User, user => user.bought_courses)
     @JoinColumn({name: 'buyers_id', referencedColumnName: 'id'})
     buyers: User[];
 
-    @BeforeUpdate()
-    @BeforeInsert()
-    calculateRating() {
-    if (this.star && this.star.length > 0) {
-      if (this.star.length >= 5) {
-        const sum = this.star.reduce((total, current) => total + current, 0);
-        const ratingFromFifthStar = (sum - 4.8 * 4) / (this.star.length - 4);
-        this.rating = parseFloat(ratingFromFifthStar.toFixed(1));
-      } 
-    }  */
-  }
-
+  //   @BeforeUpdate()
+  //   @BeforeInsert()
+  //   calculateRating() {
+  //   if (this.star && this.star.length > 0) {
+  //     if (this.star.length >= 5) {
+  //       const sum = this.star.reduce((total, current) => total + current, 0);
+  //       const ratingFromFifthStar = (sum - 4.8 * 4) / (this.star.length - 4);
+  //       this.rating = parseFloat(ratingFromFifthStar.toFixed(1));
+  //     } 
+  //   } 
+  // }
+}
