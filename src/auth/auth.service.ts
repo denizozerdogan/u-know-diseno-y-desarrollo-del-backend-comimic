@@ -12,6 +12,7 @@ import { UserService } from '../user/user.service';
 import { LoginAuthDto } from './dtos/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/user/entities/user.entity';
+import { Role } from 'src/user/entities/role.enum';
 
 
 
@@ -96,6 +97,9 @@ async login(userObjectLogin: LoginAuthDto) {
 
   return data;
 }
+}
+
+
 /* 
 async getCurrentUser(req: Request): Promise<User> {
   const token = req.headers.authorization?.replace('Bearer ', '');
@@ -116,7 +120,7 @@ async getCurrentUser(req: Request): Promise<User> {
     throw new UnauthorizedException('Invalid token.');
   }
 }*/
-} 
+ 
 
 
 

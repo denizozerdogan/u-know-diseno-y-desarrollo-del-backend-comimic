@@ -39,15 +39,12 @@ export class User {
   @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
-  @Column({default: Role.USER})
-  role: Role[];
-
-  // @Column({
-  //     type: 'enum',
-  //     enum: UserRole,
-  //     default: UserRole.User,
-  //   })
-  // role: UserRole;
+  @Column({
+      type: 'enum',
+      enum: Role,
+      default: Role.USER,
+    })
+  role: Role;
 
   @ManyToMany(() => Course, course => course.creator)
   @JoinColumn()

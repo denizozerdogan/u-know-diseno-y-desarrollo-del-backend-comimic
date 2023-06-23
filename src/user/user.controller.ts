@@ -12,6 +12,7 @@ import {
   NotFoundException,
   UseGuards,
   SetMetadata,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,9 +21,11 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Role } from './entities/role.enum';
 import { Roles } from './roles.decorator';
+import { RolesGuard } from './roles.guard';
 
 
 @ApiBearerAuth()
+@UseGuards(RolesGuard)
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -31,7 +34,6 @@ export class UserController {
   //@Post(':id/compra/:courseid')
 
   @Post('')
-  @Roles(Role.USER)
   @UsePipes(ValidationPipe)
   async create(@Body() createUserDto: CreateUserDto) {
 
@@ -47,18 +49,18 @@ export class UserController {
     return this.userService.getUser();
   }
 
-
+  
   @UseGuards(JwtAuthGuard)
   @Get(':id/profile')
-  @Roles(Role.ADMIN, Role.USER)
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.getUserById(+id);
+  //@Roles(Role.ADMIN)
+  findOne(@Req() req, @Param('id', ParseIntPipe) id: number) {
+    return this.userService.getUserById(+id), req.user;
   }
 
   //TODO: need to be protected by a token
     @UseGuards(JwtAuthGuard)
     @Patch(':id/profile')
-    @Roles(Role.ADMIN, Role.USER)
+    @Roles(Role.ADMIN)
     async update(@Param('id', ParseIntPipe ) id: number, @Body() updateUserDto: UpdateUserDto) {
       return await this.userService.updateUser(+id, updateUserDto);
     }

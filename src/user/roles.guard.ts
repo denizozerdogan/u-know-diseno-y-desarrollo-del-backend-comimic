@@ -9,20 +9,22 @@ export class RolesGuard implements CanActivate {
     // does it have access?
     canActivate(context: ExecutionContext): boolean {
         //What the require role?
-        const requireRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
+        const requireRole = this.reflector.getAllAndOverride<Role>('role', [
             context.getHandler(),
             context.getClass(),
         ]);
 
         //Libera acceso para los users que no sean ADMIN 
-        if (!requireRoles) {
+        if (!requireRole) {
             return true;
         }
 
-        const { User } = context.switchToHttp().getRequest();
+        const { user } = context.switchToHttp().getRequest();
 
 
         // does the current user making req have those req role?
-        return requireRoles.some((role) => User.roles.includes(role))
+        return requireRole === user.role; 
+        //return requireRole.some((role) => User.role.includes(role))
+       
     }
 }
