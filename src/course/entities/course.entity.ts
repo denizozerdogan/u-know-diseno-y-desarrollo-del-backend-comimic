@@ -53,14 +53,14 @@ export class Course {
     star: number[];
 
     @ManyToOne(() => User, user => user.created_courses)
-    @JoinColumn({ name: 'creatorId' })
+    @JoinTable({ name: 'creatorId' })
     creator: User;
   
     @Column({ nullable: true })
     creatorId: number;
 
     @ManyToMany(() => User, user => user.bought_courses)
-    @JoinColumn()
+    @JoinTable()
     buyers: User[];
 
     @BeforeUpdate()

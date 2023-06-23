@@ -7,6 +7,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { CourseModule } from './course/course.module';
+import { RolesGuard } from './user/roles.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -24,6 +26,11 @@ import { CourseModule } from './course/course.module';
     CourseModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+  {
+    provide: APP_GUARD,
+    useClass: RolesGuard,
+  }
+],
 })
 export class AppModule {}

@@ -1,11 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany, JoinColumn } from 'typeorm';
 import { ApiTags } from '@nestjs/swagger';
 import { Course } from 'src/course/entities/course.entity';
+import { Role } from './role.enum';
 
-export enum UserRole {
-  Admin = 'admin',
-  User = 'user',
-}
+// export enum UserRole {
+//   Admin = 'admin',
+//   User = 'user',
+// }
 
 
 @ApiTags('user')
@@ -38,12 +39,15 @@ export class User {
   @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
-  @Column({
-      type: 'enum',
-      enum: UserRole,
-      default: UserRole.User,
-    })
-  role: UserRole;
+  @Column({default: Role.USER})
+  role: Role[];
+
+  // @Column({
+  //     type: 'enum',
+  //     enum: UserRole,
+  //     default: UserRole.User,
+  //   })
+  // role: UserRole;
 
   @ManyToMany(() => Course, course => course.creator)
   @JoinColumn()

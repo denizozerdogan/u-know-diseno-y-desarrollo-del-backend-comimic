@@ -83,7 +83,7 @@ async login(userObjectLogin: LoginAuthDto) {
   if (!checkPassword) throw new HttpException('Password invalid', 403);
 
   // TODO Add user role
-  const payload = { id: findUser.id, name: findUser.name };
+  const payload = { id: findUser.id, name: findUser.name, role: findUser.role };
   const token = this.jwtService.sign(payload);
 
   const { password: _, ...userWithoutPassword } = findUser; // Excluir el campo "password" en la desestructuración
@@ -91,6 +91,7 @@ async login(userObjectLogin: LoginAuthDto) {
   const data = {
     user: userWithoutPassword, // Utilizar el objeto sin el campo "password"
     token,
+    role: findUser.role,
   };
 
   return data;
