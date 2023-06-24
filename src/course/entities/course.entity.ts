@@ -53,7 +53,7 @@ export class Course {
     content: string;
 
     @ManyToOne(() => User, user => user.created_courses)
-    @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
+    @JoinColumn({ name: 'creatorId', referencedColumnName: 'id' })
     creator: User;
   
     @ManyToMany(() => User, user => user.bought_courses)

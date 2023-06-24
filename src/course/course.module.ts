@@ -4,11 +4,11 @@ import { CourseController } from './course.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
 import { UserModule } from 'src/user/user.module';
-import { JwtService } from '@nestjs/jwt';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Course]), UserModule],
   controllers: [CourseController],
-  providers: [CourseService, JwtService]
+  providers: [CourseService, JwtAuthGuard]
 })
 export class CourseModule {}

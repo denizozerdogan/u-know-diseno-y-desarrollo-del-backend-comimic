@@ -36,6 +36,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   
           if (user) {
             request.user = user;
+            request.user['userId'] = decodedToken.id;
             return true;
           }
         } catch (error) {

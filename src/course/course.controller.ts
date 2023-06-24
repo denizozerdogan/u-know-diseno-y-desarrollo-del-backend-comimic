@@ -8,12 +8,16 @@ import { User } from 'src/user/entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+import { UserService } from 'src/user/user.service';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
-
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('course')
 @Controller('course')
 export class CourseController {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(private readonly courseService: CourseService,
+    private readonly userService: UserService) {}
 
 /*   @UseGuards(JwtAuthGuard)
   @Post()
@@ -30,15 +34,25 @@ export class CourseController {
       const user: User =  request.user as User;
       return this.courseService.createCourse(createCourseDto, user);
     } */
-
-    @UseGuards(AuthGuard('jwt')) 
-    // @UseGuards(JwtAuthGuard)
+/* //!!!!!!!!!!!
     @Post(':id/course-creation')
     async createCourse(
       @Body() createCourseDto: CreateCourseDto,
       @Req() req: Request,
     ): Promise<Course> {
       const user: User = request.user as User;
+      return this.courseService.createCourse(createCourseDto, user);
+    } 
+ */
+
+    @Post(':id/course-creation')
+    @UseGuards(JwtAuthGuard)
+    async createCourse(
+      @Body() createCourseDto: CreateCourseDto,
+      @Req() req: Request,
+    ): Promise<Course> {
+      const user: User = req['user']['userId'];
+      createCourseDto.creatorId = user.id;
       return this.courseService.createCourse(createCourseDto, user);
     }
 
