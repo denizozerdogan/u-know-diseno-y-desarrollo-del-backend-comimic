@@ -36,12 +36,12 @@ export class CourseController {
     return course;
   } */
 
-  @UseGuards(JwtAuthGuard)
-  @Post()
+  //@UseGuards(JwtAuthGuard)
+  /*@Post()
   async createCourse(
     @Body() createCourseDto: CreateCourseDto): Promise<Course> {
     return this.courseService.createCourse(createCourseDto);
-  }
+  }*/
 
   /* @Post()
   create(@Body() createCourseDto: CreateCourseDto) {

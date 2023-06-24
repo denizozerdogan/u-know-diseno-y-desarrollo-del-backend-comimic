@@ -53,7 +53,7 @@ export class Course {
   //   star: number[];
 
     @ManyToOne(() => User, user => user.created_courses)
-    @JoinTable({ name: 'creatorId' })
+    @JoinColumn({ name: 'creatorId', referencedColumnName: 'id' })
     creator: User;
   
     @ManyToMany(() => User, user => user.bought_courses)

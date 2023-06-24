@@ -13,6 +13,7 @@ import {
   UseGuards,
   Req,
   UnauthorizedException,
+  SetMetadata,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -32,19 +33,29 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   //@Post(':id/compra/:courseid')
-  @Post('')
-  @UsePipes(ValidationPipe)
-  async create(@Body() createUserDto: CreateUserDto) {
+  // @Post('')
+  // @UsePipes(ValidationPipe)
+  // async create(@Body() createUserDto: CreateUserDto) {
 
-    return this.userService.createUser(createUserDto);
-  }
+  //   return this.userService.createUser(createUserDto);
+  // }
 
   @Get('')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  findAll() {
+  @UseGuards(JwtAuthGuard)
+  findAll(@Req() req) {
+    if (req.user.role !== Role.ADMIN) {
+      throw new UnauthorizedException('Unauthorized');
+    }
     return this.userService.getUser();
   }
+  // @Get('')
+  // @UseGuards(JwtAuthGuard)
+  // @Roles(Role.ADMIN)
+  // findAll() {
+  //   console.log(Role.ADMIN  + " admin??")
+  //   console.log("teste + JwtAuthGuard", JwtAuthGuard)
+  //   return this.userService.getUser();
+  // }
 
   @Get(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -59,7 +70,6 @@ export class UserController {
 
   @Patch(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.USER)
   async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto, @Req() req) {
     if (req.user.role === Role.ADMIN || req.user.id === id) {
       return await this.userService.updateUser(id, updateUserDto);
@@ -69,13 +79,26 @@ export class UserController {
   }
 
   @Delete(':id/profile')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  removeUser(@Param('id', ParseIntPipe) id: number) {
-    const result =  this.userService.removeUser(id);
+  @UseGuards(JwtAuthGuard)
+  removeUser(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    if (req.user.role !== Role.ADMIN) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+    const result = this.userService.removeUser(id);
     if (!result) {
       throw new NotFoundException(`User with ID '${id}' not found`);
     }
     return result;
   }
+
+  // @Delete(':id/profile')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // removeUser(@Param('id', ParseIntPipe) id: number) {
+  //   const result =  this.userService.removeUser(id);
+  //   if (!result) {
+  //     throw new NotFoundException(`User with ID '${id}' not found`);
+  //   }
+  //   return result;
+  // }
 };

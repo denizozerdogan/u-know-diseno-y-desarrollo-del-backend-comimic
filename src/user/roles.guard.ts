@@ -7,7 +7,9 @@ import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/jwt.constants';
 import { User } from './entities/user.entity';
 
+
 //Access controll by roles
+
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -23,15 +25,100 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const user: User = request.user;
+    console.log(user)
+    const hasPermission = requireRoles.some(role => user.role === role);
 
-    if (!user || !user.role || !requireRoles.includes(user.role)) {
+    console.log(requireRoles + " teste de require")
+
+    if (!hasPermission) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    const routeParams = context.getArgs()[0]; // Obter parâmetros da rota
+    const requestedUserId = routeParams?.id; // Obter o ID do usuário da rota
+
+    // Verificar permissão do usuário para acessar seu próprio perfil
+    if (requestedUserId && user.role !== Role.ADMIN && user.id.toString() !== requestedUserId) {
       throw new UnauthorizedException('Unauthorized');
     }
 
     return true;
   }
 }
+// @Injectable()
+// export class RolesGuard implements CanActivate {
+//   constructor(private reflector: Reflector) {}
+
+//   canActivate(context: ExecutionContext): boolean {
+//     const requireRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
+//       context.getHandler(),
+//       context.getClass(),
+//     ]);
+//     console.log(requireRoles + " teste de requireRole")
+//     if (!requireRoles || requireRoles.length === 0) {
+//       console.log("es true?")
+//       return true;
+//     }
+
+//     const request = context.switchToHttp().getRequest();
+//     const user: User = request.user;
+//     console.log("teste de roleguards", request.user)
+//     const routeRoles = this.reflector.get<Role[]>('roles', context.getHandler());
+
+//     if (routeRoles && routeRoles.length > 0) {
+//       // Verificar permissões especificadas no decorador @Roles da rota
+//       const hasPermission = requireRoles.some(role => user.role === role);
+//       console.log(hasPermission + "teste!!!!!!!")
+//       if (!hasPermission) {
+//         throw new UnauthorizedException('Unauthorized');
+//       }
+//     }
+
+//     const routeParams = context.getArgs()[0]; // Obter parâmetros da rota
+//     const requestedUserId = routeParams?.id; // Obter o ID do usuário da rota
+//     console.log(user.role + "teste 2!!")
+//     // Verificar permissão do usuário para acessar seu próprio perfil
+//     if (requestedUserId && user.role !== Role.ADMIN && user.id.toString() !== requestedUserId) {
+//       throw new UnauthorizedException('Unauthorized');
+//     }
+
+//     return true;
+//   }
+// }
+
+
+
+
+
+
+
+
+
+// @Injectable()
+// export class RolesGuard implements CanActivate {
+//   constructor(private reflector: Reflector) {}
+
+//   canActivate(context: ExecutionContext): boolean {
+//     const requireRoles = this.reflector.getAllAndOverride<Role[]>('roles', [
+//       context.getHandler(),
+//       context.getClass(),
+//     ]);
+
+//     if (!requireRoles || requireRoles.length === 0) {
+//       return true;
+//     }
+
+//     const request = context.switchToHttp().getRequest();
+//     const user: User = request.user.id;
+
+//     if (user.role !== Role.ADMIN  || !requireRoles.includes(Role.ADMIN)) {
+//       throw new UnauthorizedException('Unauthorized');
+//     }
+
+//     return true;
+//   }
+// }
 
 
 
