@@ -18,7 +18,7 @@ import { Role } from 'src/user/entities/role.enum';
 
 
 
-
+// Generate Token
 @Injectable()
 export class AuthService {
   

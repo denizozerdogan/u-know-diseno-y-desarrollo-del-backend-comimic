@@ -11,8 +11,8 @@ import {
   UsePipes,
   NotFoundException,
   UseGuards,
-  SetMetadata,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -32,7 +32,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   //@Post(':id/compra/:courseid')
-
   @Post('')
   @UsePipes(ValidationPipe)
   async create(@Body() createUserDto: CreateUserDto) {
@@ -40,41 +39,43 @@ export class UserController {
     return this.userService.createUser(createUserDto);
   }
 
-  //TODO: This will be for admin access only once it is implemented
-  
-  //@UseGuards(JwtAuthGuard)
   @Get('')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   findAll() {
     return this.userService.getUser();
   }
 
-  
-  @UseGuards(JwtAuthGuard)
   @Get(':id/profile')
-  //@Roles(Role.ADMIN)
-  findOne(@Req() req, @Param('id', ParseIntPipe) id: number) {
-    return this.userService.getUserById(+id), req.user;
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.USER)
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
+  if (req.user.role === Role.ADMIN || req.user.id === id) {
+    return this.userService.getUserById(id);
+  } else {
+    throw new UnauthorizedException('Unauthorized');
   }
+}
 
-  //TODO: need to be protected by a token
-    @UseGuards(JwtAuthGuard)
-    @Patch(':id/profile')
-    @Roles(Role.ADMIN)
-    async update(@Param('id', ParseIntPipe ) id: number, @Body() updateUserDto: UpdateUserDto) {
-      return await this.userService.updateUser(+id, updateUserDto);
+  @Patch(':id/profile')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.USER)
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto, @Req() req) {
+    if (req.user.role === Role.ADMIN || req.user.id === id) {
+      return await this.userService.updateUser(id, updateUserDto);
+    } else {
+      throw new UnauthorizedException('Unauthorized');
     }
-
-    //TODO: This will be for admin access only once it is implemented
-    //@UseGuards(JwtAuthGuard)
-    @Delete(':id/profile')
-    @Roles(Role.ADMIN)
-    removeUser(@Param('id', ParseIntPipe) id: number) {
-      const result =  this.userService.removeUser(id);
-      if (!result) {
-        throw new NotFoundException(`User with ID '${id}' not found`);
-      }
-      return result;
   }
- 
+
+  @Delete(':id/profile')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  removeUser(@Param('id', ParseIntPipe) id: number) {
+    const result =  this.userService.removeUser(id);
+    if (!result) {
+      throw new NotFoundException(`User with ID '${id}' not found`);
+    }
+    return result;
+  }
 };
