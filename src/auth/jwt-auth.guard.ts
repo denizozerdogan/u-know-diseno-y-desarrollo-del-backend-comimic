@@ -4,12 +4,13 @@ import { jwtConstants } from './jwt.constants';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { UserService } from 'src/user/user.service';
-import { User } from 'src/user/entities/user.entity';
+
 
 // Validate Token
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+
   constructor(
       private jwtService: JwtService,
       private userService: UserService,
@@ -18,6 +19,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+    
       const request = context.switchToHttp().getRequest();
       return this.validateRequest(request);
     }

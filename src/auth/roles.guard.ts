@@ -26,10 +26,10 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user: User = request.user;
-    console.log(user)
-    const hasPermission = requireRoles.some(role => user.role === role);
+    
+    const hasPermission = user && user.role && requireRoles.some(role => user.role === role);
 
-    console.log(requireRoles + " teste de require")
+   
 
     if (!hasPermission) {
       throw new UnauthorizedException('Unauthorized');

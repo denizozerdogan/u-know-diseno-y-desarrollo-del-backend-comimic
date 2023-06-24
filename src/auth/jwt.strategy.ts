@@ -13,8 +13,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: jwtConstants.secret,
     });
   }
-  //!!! SHOULD THIS BE ID INSTEAD OF USERID ALSO WE DONT HAVE A USERNAME FIELD
-  async validate(payload: any) {
-    return { userId: payload.sub, username: payload.username };
-  }
+
+  // async validate(payload: any) {
+  //   return { userId: payload.sub, username: payload.username };
+  // }
 }

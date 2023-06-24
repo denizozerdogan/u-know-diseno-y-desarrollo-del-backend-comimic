@@ -8,7 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { CourseModule } from './course/course.module';
 import { RolesGuard } from './auth/roles.guard';
-import { APP_GUARD } from '@nestjs/core';
+
 
 @Module({
   imports: [
@@ -27,10 +27,6 @@ import { APP_GUARD } from '@nestjs/core';
   ],
   controllers: [AppController],
   providers: [AppService,
-  {
-    provide: APP_GUARD,
-    useClass: RolesGuard,
-  }
 ],
 })
 export class AppModule {}
