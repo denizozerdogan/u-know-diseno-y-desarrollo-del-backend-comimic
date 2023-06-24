@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class CourseService {
@@ -12,32 +13,34 @@ export class CourseService {
     private readonly courseRepository: Repository<Course>,
   ) {}
 
-  create(createCourseDto: CreateCourseDto) {
+ /*  createCourse(createCourseDto: CreateCourseDto) {
     return 'This action adds a new course';
-  }
+  } */
 
   
 
   findAll() {
     return `This action returns all course`;
   }
+  
+  async createCourse(
+    createCourseDto: CreateCourseDto,
+    context: ExecutionContext,
+  ): Promise<Course> {
+    const { title, description, difficulty, topic } = createCourseDto;
 
-/*    async createCourse(courseDto: CreateCourseDto, creatorId: number): Promise<Course> {
+    const request = context.switchToHttp().getRequest();
+    const user: User = request.user.id; // Assuming the currently authenticated user is attached to the request
+
     const course = new Course();
-    course.title = courseDto.title;
-    course.description = courseDto.description;
-    course.price = courseDto.price;
-    course.created_at = new Date();
-    course.updated_at = new Date();
-    course.approved = false;
-    course.difficulty = courseDto.difficulty;
-    course.topic = courseDto.topic;
-    course.rating = 5;
-    course.star = [];
-    course.creatorId = creatorId;
+    course.title = title;
+    course.description = description;
+    course.difficulty = difficulty;
+    course.topic = topic;
+    course.creator = user; // Assign the current user as the creator of the course
 
     return this.courseRepository.save(course);
-  }  */
+  }
 
   // TODO check if the calculateRating is instantiated
   // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {

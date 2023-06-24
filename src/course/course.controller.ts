@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Req, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Req, ParseIntPipe, UseGuards, ExecutionContext } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -6,7 +6,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course, courseDifficulty } from './entities/course.entity';
 import { User } from 'src/user/entities/user.entity';
+import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
 
+@ApiTags('course')
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
@@ -32,11 +36,17 @@ export class CourseController {
     return course;
   } */
 
-
+  @UseGuards(JwtAuthGuard)
   @Post()
+  async createCourse(
+    @Body() createCourseDto: CreateCourseDto): Promise<Course> {
+    return this.courseService.createCourse(createCourseDto);
+  }
+
+  /* @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
     return this.courseService.create(createCourseDto);
-  }
+  } */
 
   @Get()
   findAll() {

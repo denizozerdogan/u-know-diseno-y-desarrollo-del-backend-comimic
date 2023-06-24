@@ -21,7 +21,7 @@ export class Course {
     @Column()
     description: string;
 
-    @Column()
+    @Column({default: 200})
     price: number;
 
     @Column()
@@ -57,7 +57,7 @@ export class Course {
     creator: User;
   
     @ManyToMany(() => User, user => user.bought_courses)
-    @JoinTable()
+    @JoinColumn({name: 'buyers_id', referencedColumnName: 'id'})
     buyers: User[];
 
   //   @BeforeUpdate()
