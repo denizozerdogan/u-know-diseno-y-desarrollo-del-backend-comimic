@@ -26,7 +26,7 @@ import { RolesGuard } from './roles.guard';
 
 
 @ApiBearerAuth()
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -40,22 +40,19 @@ export class UserController {
   //   return this.userService.createUser(createUserDto);
   // }
 
-  @Get('')
-  @UseGuards(JwtAuthGuard)
-  findAll(@Req() req) {
-    if (req.user.role !== Role.ADMIN) {
-      throw new UnauthorizedException('Unauthorized');
-    }
-    return this.userService.getUser();
-  }
   // @Get('')
   // @UseGuards(JwtAuthGuard)
-  // @Roles(Role.ADMIN)
-  // findAll() {
-  //   console.log(Role.ADMIN  + " admin??")
-  //   console.log("teste + JwtAuthGuard", JwtAuthGuard)
+  // findAll(@Req() req) {
+  //   if (req.user.role !== Role.ADMIN) {
+  //     throw new UnauthorizedException('Unauthorized');
+  //   }
   //   return this.userService.getUser();
   // }
+  @Get('')
+  @Roles(Role.ADMIN)
+  findAll() {
+    return this.userService.getUser();
+  }
 
   @Get(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
