@@ -24,13 +24,13 @@ export class Course {
     @Column({default: 200})
     price: number;
 
-    @Column()
+    @Column({ default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 
-    @Column()
+    @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updated_at: Date;
 
-    @Column()
+    @Column({ default: false})
     approved: boolean;
 
     @Column({
@@ -40,20 +40,20 @@ export class Course {
     })
     difficulty: courseDifficulty;
 
-    @Column({ nullable: true })
+    @Column()
     topic: string;
 
     @Column({ type: 'decimal', precision: 2, scale: 1, default: 5 })
     rating: number;
 
-  //   @Column({ type: 'simple-array', default: [], array: true, nullable: true })
-  //   @IsInt({ each: true })
-  //   @Min(1, { each: true })
-  //   @Max(5, { each: true })
-  //   star: number[];
+    @Column({ type: 'json', nullable: true })
+    stars: Array<{ value: number }>;
+
+    @Column({ type: 'text', nullable: true })
+    content: string;
 
     @ManyToOne(() => User, user => user.created_courses)
-    @JoinColumn({ name: 'creatorId', referencedColumnName: 'id' })
+    @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
     creator: User;
   
     @ManyToMany(() => User, user => user.bought_courses)

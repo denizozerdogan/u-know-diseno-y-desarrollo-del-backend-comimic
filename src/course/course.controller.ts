@@ -1,19 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Req, ParseIntPipe, UseGuards, ExecutionContext } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, ExecutionContext, Inject } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Course, courseDifficulty } from './entities/course.entity';
-import { User } from 'src/user/entities/user.entity';
+import { Course } from './entities/course.entity';
 import { ApiTags } from '@nestjs/swagger';
+import { User } from 'src/user/entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Request } from 'express';
+import { request } from 'express';
+import { AuthGuard } from '@nestjs/passport';
+
 
 @ApiTags('course')
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
+
+/*   @UseGuards(JwtAuthGuard)
+  @Post()
+  async createCourse(
+    @Body() createCourseDto: CreateCourseDto,
+    @Req() req: Request,
+  ): Promise<Course> {
+    const user: User = req.user as User;
+    return this.courseService.createCourse(createCourseDto, user);
+  } */
+  /* @UseGuards(JwtAuthGuard)
+  @Post()
+    async createCourse(@Body() createCourseDto: CreateCourseDto, @Req() req: Request): Promise<Course> {
+      const user: User =  request.user as User;
+      return this.courseService.createCourse(createCourseDto, user);
+    } */
+
+    @UseGuards(AuthGuard('jwt')) 
+    // @UseGuards(JwtAuthGuard)
+    @Post(':id/course-creation')
+    async createCourse(
+      @Body() createCourseDto: CreateCourseDto,
+      @Req() req: Request,
+    ): Promise<Course> {
+      const user: User = request.user as User;
+      return this.courseService.createCourse(createCourseDto, user);
+    }
 
  /*  @Post(':courseId/rate')
   @UsePipes(ValidationPipe)
@@ -27,21 +54,22 @@ export class CourseController {
   }
  */
   //we will protected for after login need to implement AuthGuard?
- /*  @Post()
+/*    @Post()
   async createCourse(@Body() createCourseDto: CreateCourseDto, @Req() request: Request) {
     const { id } = request.user; // Assuming the authenticated user ID is available in the request
 
     const course = await this.courseService.createCourse(createCourseDto, id);
 
     return course;
-  } */
+  }  */
 
-  //@UseGuards(JwtAuthGuard)
-  /*@Post()
+
+ /*   @Post()
   async createCourse(
-    @Body() createCourseDto: CreateCourseDto): Promise<Course> {
-    return this.courseService.createCourse(createCourseDto);
-  }*/
+    @Body() createCourseDto: CreateCourseDto, @Req() request: Request): Promise<Course> {
+ 
+      return this.courseService.createCourse(createCourseDto, request.user.id);
+} */
 
   /* @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
@@ -68,3 +96,5 @@ export class CourseController {
     return this.courseService.remove(+courseId);
   }
 }
+
+

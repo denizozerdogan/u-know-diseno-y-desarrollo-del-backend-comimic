@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { User } from 'src/user/entities/user.entity';
 
+
 @Injectable()
 export class CourseService {
   constructor(
@@ -18,30 +19,40 @@ export class CourseService {
   } */
 
   
-
-  findAll() {
-    return `This action returns all course`;
-  }
-  
   async createCourse(
     createCourseDto: CreateCourseDto,
-    context: ExecutionContext,
+    user: User
   ): Promise<Course> {
-    const { title, description, difficulty, topic } = createCourseDto;
-
-    const request = context.switchToHttp().getRequest();
-    const user: User = request.user.id; // Assuming the currently authenticated user is attached to the request
+    const { title, description, difficulty, topic , content} = createCourseDto;
 
     const course = new Course();
     course.title = title;
     course.description = description;
     course.difficulty = difficulty;
     course.topic = topic;
+    course.content = content;
     course.creator = user; // Assign the current user as the creator of the course
-
     return this.courseRepository.save(course);
   }
+  
 
+
+
+  findAll() {
+    return `This action returns all course`;
+  }
+
+  /* async createCourse(
+    createCourseDto: CreateCourseDto,
+    user: User,
+  ): Promise<Course> {
+    const course = this.courseRepository.create({
+      ...createCourseDto,
+      creator: user.id,
+    });
+    return this.courseRepository.save(course);
+  } */
+ 
   // TODO check if the calculateRating is instantiated
   // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
   //   const course = await this.courseRepository

@@ -2,10 +2,10 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { UnauthorizedException } from '@nestjs/common';
-import { Role } from './entities/role.enum';
+import { Role } from '../user/entities/role.enum';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/jwt.constants';
-import { User } from './entities/user.entity';
+import { User } from '../user/entities/user.entity';
 
 
 //Access controll by roles

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, Length } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { courseDifficulty } from '../entities/course.entity';
 
 export class CreateCourseDto {
@@ -19,4 +19,9 @@ export class CreateCourseDto {
     @ApiProperty({ example: 'Personal Development' })
     topic: string;
 
+    @IsNotEmpty()
+    @ApiProperty({ example: 'Lorem Ipsum' })
+    content: string;
+
+    creatorId: number;
 }
