@@ -19,7 +19,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Role } from './entities/role.enum';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -48,9 +48,19 @@ export class UserController {
   //   }
   //   return this.userService.getUser();
   // }
-  @Get('')
+  /// !!! ADDED UNAUTHORIZED EXCEPTION TO THIS
+ /*  @Get('')
   @Roles(Role.ADMIN)
   findAll() {
+    return this.userService.getUser();
+  } */
+  @Get('')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  findAll(@Req() req) {
+    if (req.user.role !== Role.ADMIN) {
+      throw new UnauthorizedException('Unauthorized')   
+     }
     return this.userService.getUser();
   }
 
@@ -74,9 +84,10 @@ export class UserController {
       throw new UnauthorizedException('Unauthorized');
     }
   }
-
+// !!! MAYBE ADDED the guards here? Not sure i remember doing something xD
   @Delete(':id/profile')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   removeUser(@Param('id', ParseIntPipe) id: number, @Req() req) {
     if (req.user.role !== Role.ADMIN) {
       throw new UnauthorizedException('Unauthorized');

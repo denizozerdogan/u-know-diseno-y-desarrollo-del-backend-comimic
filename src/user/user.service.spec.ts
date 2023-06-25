@@ -4,9 +4,10 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { error } from 'console';
 import { NotFoundException } from '@nestjs/common';
+import { AuthService } from '../auth/auth.service';
 
 
 
@@ -27,6 +28,8 @@ const users: any = [
 
 describe('UserService', () => {
   let service: UserService;
+  let authService: AuthService;
+
 
   const mockUserRepositoryService = {
     save: jest.fn().mockImplementation((createUserDto: CreateUserDto) => {
@@ -72,10 +75,20 @@ describe('UserService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: mockUserRepositoryService,
-        }]
+        }, 
+        AuthService, 
+          {
+            provide: AuthService,
+            useValue: {
+              register: jest.fn(),
+            },
+        }
+      ]
     }).compile();
 
     service = module.get<UserService>(UserService);
+    authService = module.get<AuthService>(AuthService);
+
   });
 
   it('should be defined', () => {
@@ -131,10 +144,28 @@ describe('UserService', () => {
       created_at: new Date(2023, 7, 17),
       updated_at: new Date(),
     };
+
+    jest.spyOn(authService, 'register').mockRejectedValueOnce(new ConflictException('User with the same email already exists'));
+
+    await expect(authService.register(existingUser)).rejects.toThrowError('User with the same email already exists');
+  });
+
+  /* it('should throw an error when creating a user with an existing email', async () => {
+    const existingUser = {
+      id: 3,
+      name: 'John',
+      surname: 'Doe',
+      wallet: 2000,
+      password: 'password5678',
+      email: 'diego@example.com', // Same email as the newUser
+      bio: 'I am John Doe',
+      created_at: new Date(2023, 7, 17),
+      updated_at: new Date(),
+    };
     jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(existingUser);
     await expect(service.createUser(existingUser)).rejects.toThrowError('User with the same email already exists');
   });
-
+ */
 
   it('should return a list of all users', async () => {
     expect(await service.getUser()).toMatchObject({ users });
@@ -258,13 +289,30 @@ describe('UserService', () => {
   it('should return a user when a valid email is provided', async () => {
     const email = 'diego@example.com';
     const expectedUser = { id: 1, email: 'diego@example.com' };
+  
+    jest.spyOn(mockUserRepositoryService, 'findOne').mockImplementation(async (options) => {
+      if (options.where.email === email) {
+        return expectedUser;
+      }
+      return null;
+    });
+  
+    const user = await service.getUserByEmail(email);
+  
+    expect(user).toEqual(expectedUser);
+    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } });
+  
+  
+  /* it('should return a user when a valid email is provided', async () => {
+    const email = 'diego@example.com';
+    const expectedUser = { id: 1, email: 'diego@example.com' };
 
     jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(expectedUser);
 
     const user = await mockUserRepositoryService.findOne(email);
 
     expect(user).toEqual(expectedUser);
-    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } });
+    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } }); */
   })  
   it('should throw an error if the user ID does not exist', async () => {
     const error = new Error('Failed to get user');

@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { jwtConstants } from './jwt.constants';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
 
 
 // Validate Token

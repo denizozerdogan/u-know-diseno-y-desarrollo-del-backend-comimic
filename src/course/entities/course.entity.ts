@@ -1,6 +1,6 @@
 import { ApiTags } from "@nestjs/swagger";
 import { IsInt, Min, Max } from "class-validator";
-import { User } from "src/user/entities/user.entity";
+import { User } from "../../user/entities/user.entity";
 import { ManyToMany, JoinTable, Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, JoinColumn, ManyToOne } from "typeorm";
 
 
