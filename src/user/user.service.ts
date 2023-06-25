@@ -20,11 +20,10 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     try {
       const userCreated = await this.userRepository.save(createUserDto);
-      console.log(userCreated);
       return userCreated;
     } catch (error) {
-      console.log(error);
-      throw error
+      //console.error(error);
+      throw new Error('Failed to create user');
     }
   }
 
@@ -59,10 +58,10 @@ async getUserById(id: number): Promise<User> {
     if (user) {
       return user;
     } else {
-      throw new NotFoundException;
+      throw new NotFoundException();
     }
   } catch (error) {
-    console.error(error);
+    //console.error(error);
     throw new Error('Failed to get user');
   }
 }
@@ -94,7 +93,7 @@ async getUserById(id: number): Promise<User> {
   
       return await this.userRepository.save(toUpdate);
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       throw new Error('Failed to update user');
     }
   }

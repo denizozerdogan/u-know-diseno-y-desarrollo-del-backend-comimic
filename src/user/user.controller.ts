@@ -32,28 +32,6 @@ import { RolesGuard } from '../auth/roles.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  //@Post(':id/compra/:courseid')
-  // @Post('')
-  // @UsePipes(ValidationPipe)
-  // async create(@Body() createUserDto: CreateUserDto) {
-
-  //   return this.userService.createUser(createUserDto);
-  // }
-
-  // @Get('')
-  // @UseGuards(JwtAuthGuard)
-  // findAll(@Req() req) {
-  //   if (req.user.role !== Role.ADMIN) {
-  //     throw new UnauthorizedException('Unauthorized');
-  //   }
-  //   return this.userService.getUser();
-  // }
-  /// !!! ADDED UNAUTHORIZED EXCEPTION TO THIS
- /*  @Get('')
-  @Roles(Role.ADMIN)
-  findAll() {
-    return this.userService.getUser();
-  } */
   @Get('')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
@@ -84,6 +62,7 @@ export class UserController {
       throw new UnauthorizedException('Unauthorized');
     }
   }
+
 // !!! MAYBE ADDED the guards here? Not sure i remember doing something xD
   @Delete(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -98,15 +77,4 @@ export class UserController {
     }
     return result;
   }
-
-  // @Delete(':id/profile')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(Role.ADMIN)
-  // removeUser(@Param('id', ParseIntPipe) id: number) {
-  //   const result =  this.userService.removeUser(id);
-  //   if (!result) {
-  //     throw new NotFoundException(`User with ID '${id}' not found`);
-  //   }
-  //   return result;
-  // }
 };

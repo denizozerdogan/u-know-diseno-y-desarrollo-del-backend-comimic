@@ -4,6 +4,7 @@ import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm'; 
 import { User } from '../user/entities/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 
 const users: any = [
@@ -23,6 +24,7 @@ const users: any = [
 describe('AuthService', () => {
   let authService: AuthService;
 
+  const mockJwtService = {};
 
   const mockUserService = {
     //should have all the methods from service and use them in the test
@@ -39,11 +41,17 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, {
+      providers: [AuthService,
+        {
         //class type that you are mocking (use mockUserService as UserService)
         provide: UserService,
         useValue: mockUserService,
-      }], 
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+    ], 
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
