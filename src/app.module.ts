@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { HttpException, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { CourseModule } from './course/course.module';
 import { RolesGuard } from './auth/roles.guard';
+import { APP_FILTER } from '@nestjs/core';
 
 
 @Module({
@@ -27,6 +28,10 @@ import { RolesGuard } from './auth/roles.guard';
   ],
   controllers: [AppController],
   providers: [AppService,
+    {
+      provide: APP_FILTER,
+      useClass: HttpException,
+    },
 ],
 })
 export class AppModule {}

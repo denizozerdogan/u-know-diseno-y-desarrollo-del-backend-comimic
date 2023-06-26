@@ -76,12 +76,11 @@ describe('UserService', () => {
           provide: getRepositoryToken(User),
           useValue: mockUserRepositoryService,
         }, 
-        AuthService, 
-          {
-            provide: AuthService,
-            useValue: {
-              register: jest.fn(),
-            },
+        {
+          provide: AuthService,
+          useValue: {
+            register: jest.fn(),
+          },
         }
       ]
     }).compile();

@@ -20,11 +20,10 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     try {
       const userCreated = await this.userRepository.save(createUserDto);
-      console.log(userCreated);
       return userCreated;
     } catch (error) {
-      console.log(error);
-      throw error
+      //console.error(error);
+      throw new Error('Failed to create user');
     }
   }
 
@@ -59,10 +58,10 @@ async getUserById(id: number): Promise<User> {
     if (user) {
       return user;
     } else {
-      throw new NotFoundException;
+      throw new NotFoundException();
     }
   } catch (error) {
-    console.error(error);
+    //console.error(error);
     throw new Error('Failed to get user');
   }
 }
@@ -94,7 +93,7 @@ async getUserById(id: number): Promise<User> {
   
       return await this.userRepository.save(toUpdate);
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       throw new Error('Failed to update user');
     }
   }
@@ -115,6 +114,28 @@ async getUserById(id: number): Promise<User> {
   
     return true;
   }
+  
+  async updateUserWallet(id: number, amount: number): Promise<User> {
+    const user = await this.getUserById(id);
+  
+    user.wallet += amount;
+    
+    return this.userRepository.save(user);
+  }
+
+/* 
+  async updateUserWallet(id: number, amount: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+  
+    if (user) {
+      user.wallet += amount;
+      
+      return this.userRepository.save(user);
+
+    } else {
+      throw new NotFoundException('User not found');
+    }
+  }  */
 
  
 }

@@ -1,10 +1,11 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
 
 
 @Injectable()
@@ -12,14 +13,12 @@ export class CourseService {
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
-    
-  ) {}
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private userService: UserService, // Inject the UserService
 
- /*  createCourse(createCourseDto: CreateCourseDto) {
-    return 'This action adds a new course';
-  } */
+ ) {}
 
-  
   async createCourse(
     createCourseDto: CreateCourseDto,
     user: User
@@ -33,15 +32,80 @@ export class CourseService {
     course.topic = topic;
     course.content = content;
     course.creator = user; // Assign the current user as the creator of the course
+ 
+    // Update the user's wallet
+    //await this.userService.updateUserWallet(user.id, 200);
+
     return this.courseRepository.save(course);
   }
   
+/*   async findAll(): Promise<Course[]> {
+    try {
+      const courses = await this.courseRepository.find();
+      return courses;
+    } catch (error) {
+      throw new Error('Error while fetching the courses.');
+    }
+  } */
 
-
-
-  findAll() {
-    return `This action returns all course`;
+  async findAll(): Promise<Course[]> {
+    try {
+      const courses = await this.courseRepository.find({
+        order: { rating: 'DESC' },
+      });
+      return courses;
+    } catch (error) {
+      throw new Error('Error while fetching the courses.');
+    }
   }
+
+
+
+  async findOne(courseId: number): Promise<Course> {
+    try {
+      const course = await this.courseRepository.findOne({ where: { courseId } });
+      if (!course) {
+        throw new NotFoundException(`Course ${courseId} not found.`);
+      }
+      return course;
+    } catch (error) {
+      throw new Error('Error while fetching the course.');
+    }
+  }
+
+  async update(courseId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
+    try {
+      const course = await this.courseRepository.findOne({ where: { courseId } });
+      if (!course) {
+        throw new Error('Course not found.');
+      }
+      // Perform the update on the course entity
+      course.title = updateCourseDto.title;
+      course.description = updateCourseDto.description;
+      course.difficulty = updateCourseDto.difficulty
+      course.topic = updateCourseDto.topic 
+      course.content = updateCourseDto.content
+    
+      const updatedCourse = await this.courseRepository.save(course);
+      return updatedCourse;
+    } catch (error) {
+      throw new Error('Error while updating the course.');
+    }
+  }
+
+  async remove(courseId: number): Promise<void> {
+    try {
+      const course = await this.courseRepository.findOne({ where: { courseId } });
+      if (!course) {
+        throw new Error('Course not found.');
+      }
+  
+      await this.courseRepository.remove(course);
+    } catch (error) {
+      throw new Error('Error while removing the course.');
+    }
+  }
+}
 
   /* async createCourse(
     createCourseDto: CreateCourseDto,
@@ -94,15 +158,4 @@ export class CourseService {
     return course;
   } */
   
-  findOne(courseId: number) {
-    return `This action returns a #${courseId} course`;
-  }
 
-  update(courseId: number, updateCourseDto: UpdateCourseDto) {
-    return `This action updates a #${courseId} course`;
-  }
-
-  remove(courseId: number) {
-    return `This action removes a #${courseId} course`;
-  }
-}
