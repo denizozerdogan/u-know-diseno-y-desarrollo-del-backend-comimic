@@ -111,8 +111,24 @@ export class CourseController {
       throw new NotFoundException('Course not found.');
     }
   }
-}
 
+  @Patch(':courseId/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async approveCourse(
+    @Param('courseId') courseId: string,
+  ): Promise<Course> {
+    try {
+      const updatedCourse = await this.courseService.updateApproval(+courseId, true);
+      if (!updatedCourse) {
+        throw new NotFoundException('Course not found.');
+      }
+      return updatedCourse;
+    } catch (error) {
+      throw new Error('Failed to update the course.');
+    }
+}
+}
 
 
 

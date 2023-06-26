@@ -84,6 +84,18 @@ export class CourseService {
       throw new Error('Error while removing the course.');
     }
   }
+
+
+  async updateApproval(courseId: number, approval: boolean): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    course.approved = approval;
+    const updatedCourse = await this.courseRepository.save(course);
+    return updatedCourse;
+  }
 }
 
   /* async createCourse(
