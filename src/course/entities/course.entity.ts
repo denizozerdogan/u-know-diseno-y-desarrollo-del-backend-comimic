@@ -50,6 +50,9 @@ export class Course {
     @Column({ type: 'json', nullable: true })
     stars: Array<{ value: number }>;
 
+    @Column({ type: 'json', nullable: true })
+    comments: Array<{ value: string }>;
+
     @Column({ type: 'text', nullable: true })
     content: string;
 

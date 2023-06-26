@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
 import { UserModule } from 'src/user/user.module';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Course]), UserModule],
+  imports:[TypeOrmModule.forFeature([Course, User]), UserModule],
   controllers: [CourseController],
   providers: [CourseService, JwtAuthGuard]
 })

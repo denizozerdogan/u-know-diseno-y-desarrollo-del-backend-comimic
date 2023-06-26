@@ -18,7 +18,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { request, response } from 'express';
+import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 
 import { CourseService } from './course.service';
@@ -50,8 +50,27 @@ export class CourseController {
     ): Promise<Course> {
       const user: User = req['user']['userId'];
       createCourseDto.creatorId = user.id;
+      
       return this.courseService.createCourse(createCourseDto, user);
-    }
+    } 
+
+
+   /*   @Post(':id/course-creation')
+    @UseGuards(JwtAuthGuard)
+    async createCourse(
+      @Body() createCourseDto: CreateCourseDto,
+      @Req() req: Request,
+    ): Promise<Course> {
+      const user: User = req['user']['userId'];
+    
+      // Update the user's wallet
+       this.userService.updateUserWallet(user.id, 200);
+    
+      createCourseDto.creatorId = user.id;
+    
+      return this.courseService.createCourse(createCourseDto, user);
+    }  */
+
 
     @Get('')
     async findAll(@Res() response) {
