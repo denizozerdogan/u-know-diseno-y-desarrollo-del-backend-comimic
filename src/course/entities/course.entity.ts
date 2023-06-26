@@ -63,6 +63,8 @@ export class Course {
     @ManyToMany(() => User, user => user.bought_courses)
     @JoinColumn({name: 'buyers_id', referencedColumnName: 'id'})
     buyers: User[];
+    //affected: number;
+}
 
   //   @BeforeUpdate()
   //   @BeforeInsert()
@@ -75,4 +77,4 @@ export class Course {
   //     } 
   //   } 
   // }
-}
+

@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -48,10 +48,12 @@ export class CourseService {
     }
   } */
 
+  //Todo los cursos pero sin contenido (publico)
   async findAll(): Promise<Course[]> {
     try {
       const courses = await this.courseRepository.find({
-      order: { rating: 'DESC' }
+      order: { rating: 'DESC' },
+      select: ['title','topic', 'price', 'rating']
       });
       return courses;
     } catch (error) {
@@ -60,10 +62,11 @@ export class CourseService {
   }
 
 
-
+  // Curso sin contenido (publico)
   async findOne(courseId: number): Promise<Course> {
     try {
-      const course = await this.courseRepository.findOne({ where: { courseId } });
+      const course = await this.courseRepository.findOne({ where: { courseId }, select: ['title','topic', 'price', 'rating', 'description', 'stars', 'comments'] });
+      
       if (!course) {
         throw new NotFoundException(`Course ${courseId} not found.`);
       }
@@ -77,12 +80,16 @@ export class CourseService {
 
 
 
-  async update(courseId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
-    try {
-      const course = await this.courseRepository.findOne({ where: { courseId } });
-      if (!course) {
-        throw new Error('Course not found.');
-      }
+  async update(courseId: number, updateCourseDto: UpdateCourseDto, id: number): Promise<Course> {
+    const course = await this.courseRepository.findOne( {  where: { courseId}, relations: ['creator']} );
+  
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+  
+    if (course.creator.id !== id) {
+      throw new UnauthorizedException('You are not authorized to update this course.');
+    }
       // Perform the update on the course entity
       course.title = updateCourseDto.title;
       course.description = updateCourseDto.description;
@@ -91,25 +98,71 @@ export class CourseService {
       course.content = updateCourseDto.content
     
       const updatedCourse = await this.courseRepository.save(course);
-      return updatedCourse;
-    } catch (error) {
-      throw new Error('Error while updating the course.');
-    }
+
+    return updatedCourse;
   }
 
-  async remove(courseId: number): Promise<void> {
-    try {
-      const course = await this.courseRepository.findOne({ where: { courseId } });
-      if (!course) {
-        throw new Error('Course not found.');
-      }
-  
-      await this.courseRepository.remove(course);
-    } catch (error) {
-      throw new Error('Error while removing the course.');
+
+  async removeCourse(courseId: number): Promise<boolean> {
+
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID '${courseId}' not found`);
+    } const result = await this.courseRepository.delete(courseId);
+
+    if (result.affected === 0) {
+      throw new InternalServerErrorException('Failed to delete course');
     }
+
+    return true;
   }
 }
+
+// async update(courseId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
+//   try {
+//     const course = await this.courseRepository.findOne({ where: { courseId } });
+//     if (!course) {
+//       throw new Error('Course not found.');
+//     }
+//     // Perform the update on the course entity
+//     course.title = updateCourseDto.title;
+//     course.description = updateCourseDto.description;
+//     course.difficulty = updateCourseDto.difficulty
+//     course.topic = updateCourseDto.topic 
+//     course.content = updateCourseDto.content
+  
+//     const updatedCourse = await this.courseRepository.save(course);
+//     return updatedCourse;
+//   } catch (error) {
+//     throw new Error('Error while updating the course.');
+//   }
+// }
+
+// async remove(courseId: number): Promise<boolean> {
+
+//   const course = await this.courseRepository.findOne({ where: { courseId } });
+//   if (!course) {
+//     throw new NotFoundException('Course not found.');
+//   }
+
+//   await this.courseRepository.remove(course);
+
+//   return true;
+// }
+
+// async remove(courseId: number): Promise<void> {
+//   try {
+//     const course = await this.courseRepository.findOne({ where: { courseId } });
+//     if (!course) {
+//       throw new NotFoundException('Course not found.');
+//     }
+
+//     await this.courseRepository.remove(course);
+//   } catch (error) {
+//     throw new Error('Error while removing the course.');
+//   }
+// }
 
   /* async createCourse(
     createCourseDto: CreateCourseDto,

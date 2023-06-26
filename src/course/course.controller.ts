@@ -15,6 +15,8 @@ import {
   HttpException,
   UseFilters,
   Res,
+  UnauthorizedException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -34,7 +36,7 @@ import { Role } from '../user/entities/role.enum';
 
 
 @ApiBearerAuth()
-//@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('course')
 @Controller('course')
 export class CourseController {
@@ -42,7 +44,7 @@ export class CourseController {
     private readonly userService: UserService) {}
 
 
-    @Post(':id/course-creation')
+    @Post('course-creation')
     @UseGuards(JwtAuthGuard)
     async createCourse(
       @Body() createCourseDto: CreateCourseDto,
@@ -73,7 +75,7 @@ export class CourseController {
 
 
     @Get('')
-    async findAll(@Res() response) {
+    async findAll() {
       try {
         const courses = await this.courseService.findAll();
         if (!courses) {
@@ -87,26 +89,21 @@ export class CourseController {
     
 
     @Get(':courseId')
-    async findOne(@Res() response, @Param('courseId') courseId: string) {
-      try {
-        const course = await this.courseService.findOne(+courseId);
-    
-        if (!course) {
-          return response.status(HttpStatus.NOT_FOUND).send(`Course ${courseId} not found.`);
-        }
-    
-        return course;
-      } catch (error) {
-        return response.status(HttpStatus.NOT_FOUND).send(`Course ${courseId} not found.`);
-      }
+    async findOne(@Param('courseId', ParseIntPipe) courseId: number) {
+        return this.courseService.findOne(courseId);
     }
     
 
     @Patch(':courseId')
-    @UseGuards(JwtAuthGuard)
-    async update(@Param('courseId') courseId: string, @Body() updateCourseDto: UpdateCourseDto) {
+    @UseGuards(JwtAuthGuard,RolesGuard)
+    @Roles(Role.USER)
+    async update(
+      @Param('courseId', ParseIntPipe) courseId: number,
+      @Body() updateCourseDto: UpdateCourseDto,
+      @Req() req) {
       try {
-        const updatedCourse = await this.courseService.update(+courseId, updateCourseDto);
+        const userId = req.user.id;
+        const updatedCourse = await this.courseService.update(courseId, updateCourseDto, userId);
         if (!updatedCourse) {
           throw new NotFoundException('Course not found.');
         }
@@ -119,20 +116,34 @@ export class CourseController {
     @Delete(':courseId')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
-    async remove(@Param('courseId') courseId: string) {
-    try {
-      const deletedCourse = await this.courseService.remove(+courseId);
-      if (deletedCourse === undefined) {
-        throw new NotFoundException('Course not found.');
+    removeCourse(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
+      if (req.user.role !== Role.ADMIN) {
+        throw new UnauthorizedException('Unauthorized');
       }
-      return deletedCourse;
-    } catch (error) {
-      throw new NotFoundException('Course not found.');
+      return this.courseService.removeCourse(courseId);
     }
   }
 
+  // @Delete(':courseId')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // async remove(@Param('courseId', ParseIntPipe) courseId: number,  @Req() req) {
+  //   if (req.user.role !== Role.ADMIN) {
+  //     throw new UnauthorizedException('Unauthorized');
+  //   }
+  //   const deletedCourse = await this.courseService.remove(courseId);
+  //   if (!deletedCourse) {
+  //     throw new NotFoundException(`User with ID '${courseId}' not found`);
+  //   }
+  //   return deletedCourse;
+
+  // @Patch(':courseId')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(Role.ADMIN)
+  // async approveCourse(@Req)
+
   
-}
+
 
 
 
