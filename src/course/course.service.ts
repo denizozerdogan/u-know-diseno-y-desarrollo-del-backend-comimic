@@ -117,6 +117,22 @@ export class CourseService {
 
     return true;
   }
+
+
+  async updateApproval(courseId: number, approval: boolean): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    course.approved = approval;
+    const updatedCourse = await this.courseRepository.save(course);
+
+    // Llama a la función updateUserWallet del UserService
+    await this.userService.updateUserWallet(course.courseId, 100); 
+
+    return updatedCourse;
+  }
 }
 
 // async update(courseId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {

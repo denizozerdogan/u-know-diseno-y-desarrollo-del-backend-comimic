@@ -46,5 +46,4 @@ export class User {
     })
   role: Role;
 
-
   }
