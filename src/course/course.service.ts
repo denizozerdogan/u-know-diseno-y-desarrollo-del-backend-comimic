@@ -82,12 +82,12 @@ export class CourseService {
 
   async update(courseId: number, updateCourseDto: UpdateCourseDto, id: number): Promise<Course> {
     const course = await this.courseRepository.findOne( {  where: { courseId}, relations: ['creator']} );
-  
     if (!course) {
       throw new NotFoundException('Course not found.');
     }
-  
+    console.log(course.creator.id)
     if (course.creator.id !== id) {
+      
       throw new UnauthorizedException('You are not authorized to update this course.');
     }
       // Perform the update on the course entity
