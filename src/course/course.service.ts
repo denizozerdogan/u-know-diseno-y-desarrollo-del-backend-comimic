@@ -51,7 +51,7 @@ export class CourseService {
   async findAll(): Promise<Course[]> {
     try {
       const courses = await this.courseRepository.find({
-        order: { rating: 'DESC' },
+      order: { rating: 'DESC' }
       });
       return courses;
     } catch (error) {
@@ -72,6 +72,10 @@ export class CourseService {
       throw new Error('Error while fetching the course.');
     }
   }
+
+
+
+
 
   async update(courseId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
     try {

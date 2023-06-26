@@ -36,3 +36,8 @@ lerna-debug.log*
 
 # Enviroment
 .env
+jwt.constants.ts
+jwt.constants.js
+jwt.constants.js.map
+
+
