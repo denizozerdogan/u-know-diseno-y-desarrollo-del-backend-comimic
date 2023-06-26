@@ -56,15 +56,10 @@ export class Course {
     @Column({ type: 'text', nullable: true })
     content: string;
 
-    @ManyToOne(() => User, user => user.created_courses)
+    @ManyToOne(() => User, user => user.id)
     @JoinColumn({ name: 'creatorId', referencedColumnName: 'id' })
     creator: User;
   
-    @ManyToMany(() => User, user => user.bought_courses)
-    @JoinColumn({name: 'buyers_id', referencedColumnName: 'id'})
-    buyers: User[];
-    //affected: number;
-}
 
   //   @BeforeUpdate()
   //   @BeforeInsert()

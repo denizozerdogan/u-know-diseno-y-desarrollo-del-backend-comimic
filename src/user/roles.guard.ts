@@ -1,8 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UnauthorizedException } from '@nestjs/common';
-import { Role } from '../user/entities/role.enum';
-import { User } from '../user/entities/user.entity';
+import { Role } from './entities/role.enum';
+import { User } from './entities/user.entity';
 
 
 //Access controll by roles
