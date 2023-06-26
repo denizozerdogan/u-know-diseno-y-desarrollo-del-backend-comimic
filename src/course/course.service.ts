@@ -4,7 +4,8 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
 
 
 @Injectable()
@@ -12,8 +13,11 @@ export class CourseService {
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
-    
-  ) {}
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private userService: UserService, // Inject the UserService
+
+ ) {}
 
   async createCourse(
     createCourseDto: CreateCourseDto,
@@ -28,17 +32,34 @@ export class CourseService {
     course.topic = topic;
     course.content = content;
     course.creator = user; // Assign the current user as the creator of the course
+ 
+    // Update the user's wallet
+    //await this.userService.updateUserWallet(user.id, 200);
+
     return this.courseRepository.save(course);
   }
   
-  async findAll(): Promise<Course[]> {
+/*   async findAll(): Promise<Course[]> {
     try {
       const courses = await this.courseRepository.find();
       return courses;
     } catch (error) {
       throw new Error('Error while fetching the courses.');
     }
+  } */
+
+  async findAll(): Promise<Course[]> {
+    try {
+      const courses = await this.courseRepository.find({
+        order: { rating: 'DESC' },
+      });
+      return courses;
+    } catch (error) {
+      throw new Error('Error while fetching the courses.');
+    }
   }
+
+
 
   async findOne(courseId: number): Promise<Course> {
     try {
