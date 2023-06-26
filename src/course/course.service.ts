@@ -119,6 +119,10 @@ export class CourseService {
 
     course.approved = approval;
     const updatedCourse = await this.courseRepository.save(course);
+
+    // Llama a la función updateUserWallet del UserService
+    await this.userService.updateUserWallet(course.courseId, 100); 
+
     return updatedCourse;
   }
 }
