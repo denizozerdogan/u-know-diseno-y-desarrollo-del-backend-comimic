@@ -46,12 +46,6 @@ export class User {
     })
   role: Role;
 
-  @ManyToMany(() => Course, course => course.creator)
-  @JoinColumn({referencedColumnName: 'courseId' })
-  created_courses: Course[];
 
-  @ManyToMany(() => Course, course => course.buyers)
-  @JoinColumn({referencedColumnName: 'courseId' })
-  bought_courses: Course[];
 
   }
