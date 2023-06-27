@@ -99,7 +99,7 @@ export class CourseController {
     const deleted = await this.courseService.deleteAllUnapprovedCourses();
     return deleted;
   }
-  
+
 
     @Get('')
     async findAll() {
@@ -136,6 +136,9 @@ export class CourseController {
         }
         return updatedCourse;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw new NotFoundException('Course not found.');
+        }
         throw new Error('Failed to update the course.');
       }
     }

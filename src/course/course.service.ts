@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -83,26 +83,36 @@ export class CourseService {
 
 
   async update(courseId: number, updateCourseDto: UpdateCourseDto, id: number): Promise<Course> {
-    const course = await this.courseRepository.findOne( {  where: { courseId}, relations: ['creator']} );
+    const course = await this.courseRepository.findOne({ where: { courseId }, relations: ['creator'] });
+
     if (!course) {
       throw new NotFoundException('Course not found.');
     }
-    console.log(course.creator.id)
+  
     if (course.creator.id !== id) {
-      
       throw new UnauthorizedException('You are not authorized to update this course.');
     }
-      // Perform the update on the course entity
-      course.title = updateCourseDto.title;
-      course.description = updateCourseDto.description;
-      course.difficulty = updateCourseDto.difficulty
-      course.topic = updateCourseDto.topic 
-      course.content = updateCourseDto.content
-    
-      const updatedCourse = await this.courseRepository.save(course);
-
+  
+    const allowedProperties = ['title', 'description', 'topic', 'content', 'difficulty'];
+  
+    Object.keys(updateCourseDto).forEach((property) => {
+      if (!allowedProperties.includes(property)) {
+        throw new BadRequestException(`Updating the '${property}' field is not allowed.`);
+      }
+    });
+  
+    // Perform the update on the course entity
+    course.title = updateCourseDto.title;
+    course.description = updateCourseDto.description;
+    course.topic = updateCourseDto.topic;
+    course.content = updateCourseDto.content;
+    course.difficulty = updateCourseDto.difficulty;
+  
+    const updatedCourse = await this.courseRepository.save(course);
+  
     return updatedCourse;
   }
+  
 
 
   async removeCourse(courseId: number): Promise<boolean> {
