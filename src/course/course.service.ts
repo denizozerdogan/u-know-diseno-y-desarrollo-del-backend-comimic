@@ -39,14 +39,6 @@ export class CourseService {
     return this.courseRepository.save(course);
   }
   
-/*   async findAll(): Promise<Course[]> {
-    try {
-      const courses = await this.courseRepository.find();
-      return courses;
-    } catch (error) {
-      throw new Error('Error while fetching the courses.');
-    }
-  } */
 
   //Todo los cursos pero sin contenido (publico)
   async findAll(): Promise<Course[]> {
@@ -282,10 +274,21 @@ export class CourseService {
   } */
   
   /*  async updateCourseStar(courseId: number, star: number): Promise<Course> {
-    const course = await this.courseRepository.findOne({ where: { courseId } });
-    course.star.push(star); // Add the new star to the array
-    await this.courseRepository.save(course); // Save the updated course to trigger the @BeforeUpdate hook
-    return course;
-  } */
-  
 
+//!! WARNING arreglar wallet!
+  async updateApproval(courseId: number, approval: boolean): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+    
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    course.approved = approval;
+    const updatedCourse = await this.courseRepository.save(course);
+
+    //Llama a la función updateUserWallet del UserService
+    await this.userService.updateUserWallet(course.creator.id, 100); 
+
+    return updatedCourse;
+  }
+}

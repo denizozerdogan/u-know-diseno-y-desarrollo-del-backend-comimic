@@ -1,11 +1,12 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UnauthorizedException } from '@nestjs/common';
-import { Role } from '../user/entities/role.enum';
-import { User } from '../user/entities/user.entity';
+import { Role } from './entities/role.enum';
+import { User } from './entities/user.entity';
 
 
 //Access controll by roles
+
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -31,10 +32,10 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('Unauthorized');
     }
 
-    const routeParams = context.getArgs()[0];
-    const requestedUserId = routeParams?.id;
+    const routeParams = context.getArgs()[0]; // Obter parâmetros da rota
+    const requestedUserId = routeParams?.id; // Obter o ID do usuário da rota
 
-    // Verificar permision del usuário para acceder su próprio perfil
+    // Verificar permissão do usuário para acessar seu próprio perfil
     if (requestedUserId && user.role !== Role.ADMIN && user.id.toString() !== requestedUserId) {
       throw new UnauthorizedException('Unauthorized');
     }
@@ -42,12 +43,6 @@ export class RolesGuard implements CanActivate {
     return true;
   }
 }
-
-
-
-
-
-
 // @Injectable()
 // export class RolesGuard implements CanActivate {
 //   constructor(private reflector: Reflector) {}
