@@ -57,23 +57,6 @@ export class CourseController {
     } 
 
 
-   /*   @Post(':id/course-creation')
-    @UseGuards(JwtAuthGuard)
-    async createCourse(
-      @Body() createCourseDto: CreateCourseDto,
-      @Req() req: Request,
-    ): Promise<Course> {
-      const user: User = req['user']['userId'];
-    
-      // Update the user's wallet
-       this.userService.updateUserWallet(user.id, 200);
-    
-      createCourseDto.creatorId = user.id;
-    
-      return this.courseService.createCourse(createCourseDto, user);
-    }  */
-
-
     @Get('')
     async findAll() {
       try {
@@ -142,6 +125,15 @@ export class CourseController {
 }
 }
 
+
+
+
+
+
+// * IMPORTANT / WORKED
+//TODO
+//!! WARNING error - dont touch!!
+// ? QUESTION
 
 
 

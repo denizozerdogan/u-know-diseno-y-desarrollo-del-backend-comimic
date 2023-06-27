@@ -61,6 +61,26 @@ export class Course {
     creator: User;
   
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   //   @BeforeUpdate()
   //   @BeforeInsert()
   //   calculateRating() {
