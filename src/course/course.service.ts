@@ -74,6 +74,8 @@ export class CourseService {
     } catch (error) {
       throw new Error('Error while fetching the course.');
     }
+
+    
   }
 
 
@@ -117,7 +119,68 @@ export class CourseService {
 
     return true;
   }
+
+  // !! COURSES NOT APPROVED
+  async getUnapprovedCourses(): Promise<Course[]> {
+    console.log("teste desde service")
+    try {
+      const unapprovedCourses = await this.courseRepository.createQueryBuilder('course')
+        .where('course.approved = :approved', { approved: false })
+        .getMany();
+        console.log("service" + unapprovedCourses)
+      return unapprovedCourses;
+    } catch (error) {
+      throw new Error('Error while fetching unapproved courses.');
+    }
+  }
+
+  async deleteUnapprovedCourse(courseId: number): Promise<boolean> {
+    try {
+      const course = await this.courseRepository.createQueryBuilder('course')
+        .where('course.courseId = :courseId', { courseId })
+        .andWhere('course.approved = :approved', { approved: false })
+        .getOne();
+
+      if (!course) {
+        throw new NotFoundException(`Unapproved course with ID '${courseId}' not found.`);
+      }
+
+      const result = await this.courseRepository.delete(courseId);
+
+      if (result.affected === 0) {
+        throw new InternalServerErrorException('Failed to delete unapproved course.');
+      }
+
+      return true;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error('Error while deleting unapproved course.');
+    }
+  }
+
+  async deleteAllUnapprovedCourses(): Promise<boolean> {
+    try {
+      const result = await this.courseRepository.delete({ approved: false });
+
+      if (result.affected === 0) {
+        throw new NotFoundException('No unapproved courses found.');
+      }
+
+      return true;
+    } catch (error) {
+      throw new Error('Error while deleting unapproved courses.');
+    }
+  }
 }
+
+
+
+
+
+
+
 
 // async update(courseId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
 //   try {

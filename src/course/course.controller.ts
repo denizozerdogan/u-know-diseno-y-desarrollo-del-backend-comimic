@@ -72,7 +72,34 @@ export class CourseController {
     
       return this.courseService.createCourse(createCourseDto, user);
     }  */
+    
+  // !! COURSES NOT APPROVED
+  @Get('unapproved')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async getUnapprovedCourses(): Promise<Course[]> {
+    console.log("teste desde controller")
+    const unapprovedCourses = await this.courseService.getUnapprovedCourses();
+    console.log("controller" + unapprovedCourses)
+    return unapprovedCourses;
+  }
 
+  @Delete('unapproved/:courseId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async deleteUnapprovedCourse(@Param('courseId', ParseIntPipe) courseId: number): Promise<boolean> {
+    const deleted = await this.courseService.deleteUnapprovedCourse(courseId);
+    return deleted;
+  }
+
+  @Delete('unapproved/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async deleteAllUnapprovedCourses(): Promise<boolean> {
+    const deleted = await this.courseService.deleteAllUnapprovedCourses();
+    return deleted;
+  }
+  
 
     @Get('')
     async findAll() {
@@ -122,7 +149,8 @@ export class CourseController {
       }
       return this.courseService.removeCourse(courseId);
     }
-  }
+
+}
 
   // @Delete(':courseId')
   // @UseGuards(JwtAuthGuard, RolesGuard)
