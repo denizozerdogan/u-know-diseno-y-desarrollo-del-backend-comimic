@@ -175,6 +175,23 @@ export class CourseService {
       throw new Error('Error while deleting unapproved courses.');
     }
   }
+
+  //!! WARNING arreglar wallet!
+  async updateApproval(courseId: number, approval: boolean): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+    
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    course.approved = approval;
+    const updatedCourse = await this.courseRepository.save(course);
+
+    //Llama a la función updateUserWallet del UserService
+    await this.userService.updateUserWallet(course.creator.id, 100); 
+
+    return updatedCourse;
+  }
 }
 
 
@@ -275,20 +292,4 @@ export class CourseService {
   
   /*  async updateCourseStar(courseId: number, star: number): Promise<Course> {
 
-//!! WARNING arreglar wallet!
-  async updateApproval(courseId: number, approval: boolean): Promise<Course> {
-    const course = await this.courseRepository.findOne({ where: { courseId } });
-    
-    if (!course) {
-      throw new NotFoundException('Course not found.');
-    }
 
-    course.approved = approval;
-    const updatedCourse = await this.courseRepository.save(course);
-
-    //Llama a la función updateUserWallet del UserService
-    await this.userService.updateUserWallet(course.creator.id, 100); 
-
-    return updatedCourse;
-  }
-}
