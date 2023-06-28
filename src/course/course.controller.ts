@@ -128,33 +128,36 @@ export class CourseController {
       return this.courseService.removeCourse(courseId);
     }
 
-}
-
-  @Patch(':courseId/approve')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async approveCourse(
-    @Param('courseId') courseId: string,
-  ): Promise<Course> {
-    try {
-      const updatedCourse = await this.courseService.updateApproval(+courseId, true);
-      if (!updatedCourse) {
-        throw new NotFoundException('Course not found.');
+    @Patch(':courseId/approve')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async approveCourse(
+      @Param('courseId') courseId: string,
+    ): Promise<Course> {
+      try {
+        const updatedCourse = await this.courseService.updateApproval(+courseId, true);
+        if (!updatedCourse) {
+          throw new NotFoundException('Course not found.');
+        }
+        return updatedCourse;
+      } catch (error) {
+        throw new Error('Failed to update the course.');
+   
       }
-      return updatedCourse;
-    } catch (error) {
-      throw new Error('Failed to update the course.');
     }
+      @Get(':id/mycourses')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
+    return this.courseService.findUserCourses(userId);
+  }
 }
 
-@Get(':id/mycourses')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.USER)
-async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
-  return this.courseService.findUserCourses(userId);
-}
 
-}
+
+
+
+
 
 
 
