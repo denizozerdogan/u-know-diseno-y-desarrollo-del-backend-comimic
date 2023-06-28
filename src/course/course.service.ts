@@ -45,13 +45,26 @@ export class CourseService {
   
 
   //Todo los cursos pero sin contenido (publico)
-  async findAll(): Promise<Course[]> {
+  async findAll(userRole: string): Promise<Course[]> {
     try {
-      const courses = await this.courseRepository.find({
-      order: { rating: 'DESC' },
-      select: ['title','topic', 'price', 'rating']
-      });
-      return courses;
+      if (userRole === 'admin') {
+        return this.courseRepository.find({
+          order: { rating: 'DESC' },
+          select: ['title', 'topic', 'price', 'rating'],
+        });
+      } else {
+        const courses = await this.courseRepository.find({
+          where: { approved: true },
+          order: { rating: 'DESC' },
+          select: ['title', 'topic', 'price', 'rating'],
+        });
+  
+        if (!courses || courses.length === 0) {
+          throw new NotFoundException('No approved courses found.');
+        }
+  
+        return courses;
+      }
     } catch (error) {
       throw new Error('Error while fetching the courses.');
     }

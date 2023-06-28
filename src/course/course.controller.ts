@@ -76,18 +76,21 @@ export class CourseController {
   }
 
 
-    @Get('')
-    async findAll() {
-      try {
-        const courses = await this.courseService.findAll();
-        if (!courses) {
-          throw new NotFoundException('No courses found.');
-        }
-        return courses;
-      } catch (error) {
+  @Get('')
+  @UseGuards(JwtAuthGuard)
+  async findAll(@Req() req: Request): Promise<Course[]> {
+    try {
+      const user = req.user as User;
+      const userRole = user.role;
+      const courses = await this.courseService.findAll(userRole);
+      if (!courses) {
         throw new NotFoundException('No courses found.');
       }
+      return courses;
+    } catch (error) {
+      throw new NotFoundException('No courses found.');
     }
+  }
     
 
     @Get(':courseId')
