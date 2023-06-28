@@ -231,6 +231,33 @@ export class CourseService {
       throw new Error('Error while fetching the user courses.');
     }
   }
+
+  async searchByKeyword(keyword: string): Promise<Course[]> {
+    try {
+      const courses = await this.courseRepository.createQueryBuilder('course')
+        .select(['course.title', 'course.topic', 'course.price', 'course.rating'])
+        .where('course.content LIKE :keyword', { keyword: `%${keyword}%` })
+        .getMany();
+  
+      return courses;
+    } catch (error) {
+      throw new NotFoundException('No courses found.');
+    }
+  }
+  
+  // async searchCourses(keyword: string): Promise<Course[]> {
+  //   try {
+    
+  //     const courses = await this.courseRepository
+  //       .createQueryBuilder('course')
+  //       .where('course.content ILIKE :keyword', { keyword: `%${keyword}%` })
+  //       .getMany();
+  
+  //     return courses;
+  //   } catch (error) {
+  //     throw new Error('Error while searching courses by content.');
+  //   }
+  // }
 }
 
   /* async createCourse(

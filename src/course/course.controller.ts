@@ -13,6 +13,7 @@ import {
   Res,
   UnauthorizedException,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -90,6 +91,26 @@ export class CourseController {
     }
   }
     
+    @Get('search')
+    async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
+      try {
+        const courses = await this.courseService.searchByKeyword(keyword);
+        if (!courses || courses.length === 0) {
+          throw new NotFoundException('No courses found.');
+        }
+        return courses;
+      } catch (error) {
+        
+        throw new NotFoundException('No courses found.');
+      }
+    }
+    // @Get('search')
+    // async searchCoursesByContent(@Query('keyword') keyword: string): Promise<Course[]> {
+      
+    //   const courses = await this.courseService.searchCourses(keyword);
+      
+    //   return courses;
+    // }
 
     @Get(':courseId')
     async findOne(@Param('courseId', ParseIntPipe) courseId: number) {
@@ -146,12 +167,15 @@ export class CourseController {
    
       }
     }
-      @Get(':id/mycourses')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.USER)
-  async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
-    return this.courseService.findUserCourses(userId);
-  }
+
+    @Get(':id/mycourses')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.USER)
+    async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
+      return this.courseService.findUserCourses(userId);
+    }
+
+
 }
 
 
