@@ -123,7 +123,7 @@ export class CourseService {
   }
 
   // !! COURSES NOT APPROVED
-  async getUnapprovedCourses(): Promise<Course[]> {
+  async getUnapproved(): Promise<Course[]> {
     console.log("teste desde service")
     try {
       const unapprovedCourses = await this.courseRepository.createQueryBuilder('course')
@@ -136,7 +136,7 @@ export class CourseService {
     }
   }
 
-  async deleteUnapprovedCourse(courseId: number): Promise<boolean> {
+  async deleteUnapproved(courseId: number): Promise<boolean> {
     try {
       const course = await this.courseRepository.createQueryBuilder('course')
         .where('course.courseId = :courseId', { courseId })
@@ -162,19 +162,6 @@ export class CourseService {
     }
   }
 
-  async deleteAllUnapprovedCourses(): Promise<boolean> {
-    try {
-      const result = await this.courseRepository.delete({ approved: false });
-
-      if (result.affected === 0) {
-        throw new NotFoundException('No unapproved courses found.');
-      }
-
-      return true;
-    } catch (error) {
-      throw new Error('Error while deleting unapproved courses.');
-    }
-  }
 
   //!! WARNING arreglar wallet!
   async updateApproval(courseId: number, approval: boolean): Promise<Course> {

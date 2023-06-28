@@ -62,7 +62,7 @@ export class CourseController {
   @Roles(Role.ADMIN)
   async getUnapprovedCourses(): Promise<Course[]> {
     console.log("teste desde controller")
-    const unapprovedCourses = await this.courseService.getUnapprovedCourses();
+    const unapprovedCourses = await this.courseService.getUnapproved();
     console.log("controller" + unapprovedCourses)
     return unapprovedCourses;
   }
@@ -71,18 +71,9 @@ export class CourseController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async deleteUnapprovedCourse(@Param('courseId', ParseIntPipe) courseId: number): Promise<boolean> {
-    const deleted = await this.courseService.deleteUnapprovedCourse(courseId);
+    const deleted = await this.courseService.deleteUnapproved(courseId);
     return deleted;
   }
-
-  @Delete('unapproved/all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async deleteAllUnapprovedCourses(): Promise<boolean> {
-    const deleted = await this.courseService.deleteAllUnapprovedCourses();
-    return deleted;
-  }
-
 
     @Get('')
     async findAll() {
