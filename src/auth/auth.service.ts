@@ -1,8 +1,6 @@
 import {
   ConflictException,
-  ForbiddenException,
   HttpException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -11,8 +9,6 @@ import { hash, genSalt, compare } from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { LoginAuthDto } from './dtos/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/user/entities/user.entity';
-import { Role } from 'src/user/entities/role.enum';
 
 
 

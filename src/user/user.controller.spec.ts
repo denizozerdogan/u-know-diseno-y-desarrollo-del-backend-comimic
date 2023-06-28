@@ -252,7 +252,7 @@ describe('UserController', () => {
     };
     const req = { user: { role: Role.USER, id: 1 } }; // User ID 1 is logged in
   
-    await expect(controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
+     expect(await controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
   });
 
 /*     it('should update the user password', async () => {
@@ -349,7 +349,7 @@ describe('UserController', () => {
     const req = { user: { role: Role.ADMIN } };
     mockUserService.removeUser.mockRejectedValue(new NotFoundException(`User with ID '${userId}' not found`));
   
-    await expect(controller.removeUser(userId, req)).rejects.toThrow(NotFoundException);
+     expect(await controller.removeUser(userId, req)).rejects.toThrow(NotFoundException);
     expect(mockUserService.removeUser).toHaveBeenCalledWith(userId);
   });
 

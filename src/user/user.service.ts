@@ -115,6 +115,7 @@ async getUserById(id: number): Promise<User> {
     return true;
   }
   
+  //!! WARNING arreglar wallet!
   async updateUserWallet(id: number, amount: number): Promise<User> {
     const user = await this.getUserById(id);
   

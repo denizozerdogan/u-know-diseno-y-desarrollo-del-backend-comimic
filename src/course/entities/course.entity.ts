@@ -60,8 +60,27 @@ export class Course {
     @JoinColumn({ name: 'creatorId', referencedColumnName: 'id' })
     creator: User;
   
+  }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   //   @BeforeUpdate()
   //   @BeforeInsert()
   //   calculateRating() {
@@ -73,4 +92,4 @@ export class Course {
   //     } 
   //   } 
   // }
-}
+
