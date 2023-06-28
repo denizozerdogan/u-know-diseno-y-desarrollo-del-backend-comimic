@@ -140,20 +140,39 @@ export class CourseService {
   }
 
   // !! COURSES NOT APPROVED
-  async getUnapprovedCourses(): Promise<Course[]> {
-    console.log("teste desde service")
+  async getAllUnapproved(): Promise<Course[]> {
     try {
       const unapprovedCourses = await this.courseRepository.createQueryBuilder('course')
         .where('course.approved = :approved', { approved: false })
         .getMany();
-        console.log("service" + unapprovedCourses)
       return unapprovedCourses;
     } catch (error) {
       throw new Error('Error while fetching unapproved courses.');
     }
   }
 
-  async deleteUnapprovedCourse(courseId: number): Promise<boolean> {
+  async getUnapprovedCourseById(courseId: number): Promise<Course> {
+    try {
+      const unapprovedCourse = await this.courseRepository.createQueryBuilder('course')
+        .where('course.courseId = :courseId', { courseId })
+        .andWhere('course.approved = :approved', { approved: false })
+        .getOne();
+  
+      if (!unapprovedCourse) {
+        throw new NotFoundException(`Unapproved course with ID '${courseId}' not found.`);
+      }
+  
+      return unapprovedCourse;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error('Error while fetching unapproved course.');
+    }
+  }
+  
+
+  async deleteUnapproved(courseId: number): Promise<boolean> {
     try {
       const course = await this.courseRepository.createQueryBuilder('course')
         .where('course.courseId = :courseId', { courseId })
@@ -179,19 +198,6 @@ export class CourseService {
     }
   }
 
-  async deleteAllUnapprovedCourses(): Promise<boolean> {
-    try {
-      const result = await this.courseRepository.delete({ approved: false });
-
-      if (result.affected === 0) {
-        throw new NotFoundException('No unapproved courses found.');
-      }
-
-      return true;
-    } catch (error) {
-      throw new Error('Error while deleting unapproved courses.');
-    }
-  }
 
   //!! WARNING arreglar wallet!
   async updateApproval(courseId: number, approval: boolean): Promise<Course> {

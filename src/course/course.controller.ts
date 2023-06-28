@@ -53,25 +53,23 @@ export class CourseController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async getUnapprovedCourses(): Promise<Course[]> {
-    console.log("teste desde controller")
-    const unapprovedCourses = await this.courseService.getUnapprovedCourses();
-    console.log("controller" + unapprovedCourses)
+    const unapprovedCourses = await this.courseService.getAllUnapproved();
     return unapprovedCourses;
+  }
+
+  @Get('unapproved/:courseId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async getUnapCourseById(@Param('courseId', ParseIntPipe) courseId: number): Promise<Course> {
+    const unapprovedCourse = await this.courseService.getUnapprovedCourseById(courseId);
+    return unapprovedCourse;
   }
 
   @Delete('unapproved/:courseId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async deleteUnapprovedCourse(@Param('courseId', ParseIntPipe) courseId: number): Promise<boolean> {
-    const deleted = await this.courseService.deleteUnapprovedCourse(courseId);
-    return deleted;
-  }
-
-  @Delete('unapproved/all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async deleteAllUnapprovedCourses(): Promise<boolean> {
-    const deleted = await this.courseService.deleteAllUnapprovedCourses();
+    const deleted = await this.courseService.deleteUnapproved(courseId);
     return deleted;
   }
 
