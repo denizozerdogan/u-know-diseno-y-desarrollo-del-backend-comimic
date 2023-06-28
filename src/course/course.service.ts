@@ -21,32 +21,29 @@ export class CourseService {
   const { title, description, difficulty, topic, content } = createCourseDto;
 
 
-  const existingCourseWithTitle = await this.courseRepository.findOne({ where: { title } });
-  if (existingCourseWithTitle) {
-    throw new ConflictException('A course with the same title already exists.');
-  }
-
-  
-  const existingCourseWithContent = await this.courseRepository.findOne({ where: { content } });
-  if (existingCourseWithContent) {
-    throw new ConflictException('A course with the same content already exists.');
-  }
-
-
   // Check if a course with the same description already exists
   const existingCourseWithDescription = await this.courseRepository.findOne({ where: { description } });
   if (existingCourseWithDescription) {
     throw new ConflictException('A course with the same description already exists.');
   }
+  const existingCourseWithTitle = await this.courseRepository.findOne({ where: { title } });
+  if (existingCourseWithTitle) {
+    throw new ConflictException('A course with the same title already exists.');
+  }
+  const existingCourseWithContent = await this.courseRepository.findOne({ where: { content } });
+  if (existingCourseWithContent) {
+    throw new ConflictException('A course with the same content already exists.');
+  }
 
-  const course = new Course();
-  course.title = title;
-  course.description = description;
-  course.difficulty = difficulty;
-  course.topic = topic;
-  course.content = content;
-  course.creator = user;
-
+    const course = new Course();
+    course.title = title;
+    course.description = description;
+    course.difficulty = difficulty;
+    course.topic = topic;
+    course.content = content;
+    course.creator = user; // Assign the current user as the creator of the course
+  
+ 
   return this.courseRepository.save(course);
 }
   

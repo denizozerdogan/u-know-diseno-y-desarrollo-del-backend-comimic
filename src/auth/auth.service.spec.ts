@@ -5,6 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { HttpException } from '@nestjs/common';
 
 
 const users: any = [
@@ -97,6 +98,73 @@ describe('AuthService', () => {
       "updated_at": new Date(2023, 7, 16),
       "wallet": 1000});
     // do same for other fields
-  }
-);
+  });
+
+  it('should encrypt the password when register function is called', async () => {
+    const user = {
+      id: 2,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 1000,
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date(2023, 7, 16),
+    };
+  
+    const encryptedPassword = 'hashedpassword'; // Replace with the expected hashed password
+  
+    // Mock the encrypt function to return the expected hashed password
+    jest.spyOn(authService, 'encrypt').mockResolvedValue(encryptedPassword);
+  
+    // Call the register function
+    const newUser = await authService.register(user);
+  
+    // Ensure that the encrypt function was called with the correct password
+    expect(authService.encrypt).toHaveBeenCalledWith(user.password);
+  
+  });
+
+  it('should throw an exception for duplicate email during registration', async () => {
+    const user = {
+      id: 2,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 1000,
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date(2023, 7, 16),
+    };
+  
+    // Mock the createUser function to throw an exception with status code 409
+    jest.spyOn(mockUserService, 'createUser').mockRejectedValue({ status: 409 });
+  
+    // Call the register function and expect it to throw an exception with status code 409
+    await expect(authService.register(user)).rejects.toThrow(HttpException);
+    await expect(authService.register(user)).rejects.toHaveProperty('status', 409);
+  });
+
+  it('should throw an exception for internal server error during registration', async () => {
+    const user = {
+      id: 2,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 1000,
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date(2023, 7, 16),
+    };
+  
+    // Mock the createUser function to throw a generic error
+    jest.spyOn(mockUserService, 'createUser').mockRejectedValue(new Error('Internal Server Error'));
+  
+    // Call the register function and expect it to throw an exception with status code 500
+    await expect(authService.register(user)).rejects.toThrow(HttpException);
+  });
+
 });
