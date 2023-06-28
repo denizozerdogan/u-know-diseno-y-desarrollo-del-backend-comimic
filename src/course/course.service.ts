@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,6 +24,18 @@ export class CourseService {
     user: User
   ): Promise<Course> {
     const { title, description, difficulty, topic , content} = createCourseDto;
+
+      // Check if a course with the same title already exists
+  const existingCourse = await this.courseRepository.findOne({ where: { title } });
+  if (existingCourse) {
+    throw new ConflictException('A course with the same title already exists.');
+  }
+
+  // Check if a course with the same description already exists
+  const existingCourseWithDescription = await this.courseRepository.findOne({ where: { description } });
+  if (existingCourseWithDescription) {
+    throw new ConflictException('A course with the same description already exists.');
+  }
 
     const course = new Course();
     course.title = title;
@@ -56,16 +68,16 @@ export class CourseService {
 
   // Curso sin contenido (publico)
   async findOne(courseId: number): Promise<Course> {
-    try {
+    //try {
       const course = await this.courseRepository.findOne({ where: { courseId }, select: ['title','topic', 'price', 'rating', 'description', 'stars', 'comments'] });
       
       if (!course) {
         throw new NotFoundException(`Course ${courseId} not found.`);
       }
       return course;
-    } catch (error) {
-      throw new Error('Error while fetching the course.');
-    }
+   // } catch (error) {
+   //   throw new Error('Error while fetching the course.');
+   // }
   }
 
 

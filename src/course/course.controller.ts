@@ -17,6 +17,7 @@ import {
   Res,
   UnauthorizedException,
   ParseIntPipe,
+  ConflictException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -52,10 +53,15 @@ export class CourseController {
     ): Promise<Course> {
       const user: User = req['user']['userId'];
       createCourseDto.creatorId = user.id;
-      
+      try {
       return this.courseService.createCourse(createCourseDto, user);
-    } 
-
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      throw error;
+    }
+  }
 
     @Get('')
     async findAll() {
@@ -73,7 +79,16 @@ export class CourseController {
 
     @Get(':courseId')
     async findOne(@Param('courseId', ParseIntPipe) courseId: number) {
-        return this.courseService.findOne(courseId);
+
+      try {
+        return await this.courseService.findOne(courseId);
+      }   
+      catch (error) { 
+        if (error instanceof NotFoundException) {
+          throw new NotFoundException(error.message);
+      }
+        throw error;
+      }
     }
     
 
