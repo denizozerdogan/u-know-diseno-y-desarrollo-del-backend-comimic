@@ -5,8 +5,7 @@ export class LoginAuthDto{
     @IsEmail()
     email: string;
 
-    @IsNotEmpty()
-    @Length(8, 24)
-    @ApiProperty({ example: 'password1234' })
+    @MinLength(8)
+    @MaxLength(24)
     password: string;
 }

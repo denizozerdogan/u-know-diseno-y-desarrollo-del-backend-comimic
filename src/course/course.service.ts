@@ -1,4 +1,4 @@
-import { BadRequestException, ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,31 +13,35 @@ export class CourseService {
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private userService: UserService, // Inject the UserService
 
  ) {}
 
-  async createCourse(
-    createCourseDto: CreateCourseDto,
-    user: User
-  ): Promise<Course> {
-    const { title, description, difficulty, topic , content} = createCourseDto;
+ async createCourse(createCourseDto: CreateCourseDto, user: User): Promise<Course> {
+  const { title, description, difficulty, topic, content } = createCourseDto;
 
-    const course = new Course();
-    course.title = title;
-    course.description = description;
-    course.difficulty = difficulty;
-    course.topic = topic;
-    course.content = content;
-    course.creator = user; // Assign the current user as the creator of the course
- 
-    // Update the user's wallet
-    //await this.userService.updateUserWallet(user.id, 200);
 
-    return this.courseRepository.save(course);
+  const existingCourseWithTitle = await this.courseRepository.findOne({ where: { title } });
+  if (existingCourseWithTitle) {
+    throw new ConflictException('A course with the same title already exists.');
   }
+
+  
+  const existingCourseWithContent = await this.courseRepository.findOne({ where: { content } });
+  if (existingCourseWithContent) {
+    throw new ConflictException('A course with the same content already exists.');
+  }
+
+  const course = new Course();
+  course.title = title;
+  course.description = description;
+  course.difficulty = difficulty;
+  course.topic = topic;
+  course.content = content;
+  course.creator = user;
+
+  return this.courseRepository.save(course);
+}
   
 
   //Todo los cursos pero sin contenido (publico)
@@ -198,59 +202,23 @@ export class CourseService {
 
     return updatedCourse;
   }
+
+  async findUserCourses(userId: number): Promise<Course[]> {
+    try {
+      const courses = await this.courseRepository
+        .createQueryBuilder('course')
+        .where('course.creatorId = :userId', { userId })
+        .getMany();
+
+      if (!courses || courses.length === 0) {
+        throw new NotFoundException('No courses found for the user.');
+      }
+      return courses;
+    } catch (error) {
+      throw new Error('Error while fetching the user courses.');
+    }
+  }
 }
-
-
-
-
-
-
-
-
-// async update(courseId: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
-//   try {
-//     const course = await this.courseRepository.findOne({ where: { courseId } });
-//     if (!course) {
-//       throw new Error('Course not found.');
-//     }
-//     // Perform the update on the course entity
-//     course.title = updateCourseDto.title;
-//     course.description = updateCourseDto.description;
-//     course.difficulty = updateCourseDto.difficulty
-//     course.topic = updateCourseDto.topic 
-//     course.content = updateCourseDto.content
-  
-//     const updatedCourse = await this.courseRepository.save(course);
-//     return updatedCourse;
-//   } catch (error) {
-//     throw new Error('Error while updating the course.');
-//   }
-// }
-
-// async remove(courseId: number): Promise<boolean> {
-
-//   const course = await this.courseRepository.findOne({ where: { courseId } });
-//   if (!course) {
-//     throw new NotFoundException('Course not found.');
-//   }
-
-//   await this.courseRepository.remove(course);
-
-//   return true;
-// }
-
-// async remove(courseId: number): Promise<void> {
-//   try {
-//     const course = await this.courseRepository.findOne({ where: { courseId } });
-//     if (!course) {
-//       throw new NotFoundException('Course not found.');
-//     }
-
-//     await this.courseRepository.remove(course);
-//   } catch (error) {
-//     throw new Error('Error while removing the course.');
-//   }
-// }
 
   /* async createCourse(
     createCourseDto: CreateCourseDto,

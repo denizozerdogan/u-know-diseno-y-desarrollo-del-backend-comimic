@@ -1,6 +1,7 @@
 import {
   ConflictException,
   HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -34,22 +35,21 @@ async encrypt(password: string): Promise<string> {
 
   async register(userObject: RegisterAuthDto) {
     try {
-
-
       const hashedPassword = await this.encrypt(userObject.password);
       const createUser = await this.userService.createUser({
         ...userObject,
         password: hashedPassword,
       });
-      
+  
       const { password, ...rest } = createUser;
-
+  
       return rest;
     } catch (error) {
-      if (error?.erno == 1062) {
-        throw ConflictException;
+      if (error) {
+        throw new HttpException('Duplicated email', 409);
+      }
+      throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
-  }
 }
 // async validateUser(loggedUser: LoginDto) {
 //   try {
