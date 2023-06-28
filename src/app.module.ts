@@ -9,7 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { CourseModule } from './course/course.module';
 import { RolesGuard } from './auth/roles.guard';
 import { APP_FILTER } from '@nestjs/core';
-import { PurchaseModule } from './purchase/purchase.module';
+
+// import { PurchaseModule } from './purchase/purchase.module';
 
 
 @Module({
@@ -26,7 +27,8 @@ import { PurchaseModule } from './purchase/purchase.module';
     UserModule,
     AuthModule,
     CourseModule,
-    PurchaseModule,
+    // PurchaseModule,
+
   ],
   controllers: [AppController],
   providers: [AppService,

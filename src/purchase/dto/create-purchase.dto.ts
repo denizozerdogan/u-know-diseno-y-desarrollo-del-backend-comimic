@@ -1,8 +1,1 @@
-export class CreatePurchaseDto {
-
-        purchaseId: number
-        Id: number;
-        courseId: number;
-
-      
-}
+// export class CreatePurchaseDto {}
