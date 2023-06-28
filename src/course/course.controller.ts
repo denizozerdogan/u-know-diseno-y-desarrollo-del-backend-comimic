@@ -61,10 +61,16 @@ export class CourseController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async getUnapprovedCourses(): Promise<Course[]> {
-    console.log("teste desde controller")
-    const unapprovedCourses = await this.courseService.getUnapproved();
-    console.log("controller" + unapprovedCourses)
+    const unapprovedCourses = await this.courseService.getAllUnapproved();
     return unapprovedCourses;
+  }
+
+  @Get('unapproved/:courseId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async getUnapCourseById(@Param('courseId', ParseIntPipe) courseId: number): Promise<Course> {
+    const unapprovedCourse = await this.courseService.getUnapprovedCourseById(courseId);
+    return unapprovedCourse;
   }
 
   @Delete('unapproved/:courseId')

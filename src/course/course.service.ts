@@ -123,18 +123,37 @@ export class CourseService {
   }
 
   // !! COURSES NOT APPROVED
-  async getUnapproved(): Promise<Course[]> {
-    console.log("teste desde service")
+  async getAllUnapproved(): Promise<Course[]> {
     try {
       const unapprovedCourses = await this.courseRepository.createQueryBuilder('course')
         .where('course.approved = :approved', { approved: false })
         .getMany();
-        console.log("service" + unapprovedCourses)
       return unapprovedCourses;
     } catch (error) {
       throw new Error('Error while fetching unapproved courses.');
     }
   }
+
+  async getUnapprovedCourseById(courseId: number): Promise<Course> {
+    try {
+      const unapprovedCourse = await this.courseRepository.createQueryBuilder('course')
+        .where('course.courseId = :courseId', { courseId })
+        .andWhere('course.approved = :approved', { approved: false })
+        .getOne();
+  
+      if (!unapprovedCourse) {
+        throw new NotFoundException(`Unapproved course with ID '${courseId}' not found.`);
+      }
+  
+      return unapprovedCourse;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error('Error while fetching unapproved course.');
+    }
+  }
+  
 
   async deleteUnapproved(courseId: number): Promise<boolean> {
     try {
@@ -277,6 +296,4 @@ export class CourseService {
     return course;
   } */
   
-  /*  async updateCourseStar(courseId: number, star: number): Promise<Course> {
-
-
+  /*  async updateCourseStar(courseId: number, star: number): Promise<Course> {*/
