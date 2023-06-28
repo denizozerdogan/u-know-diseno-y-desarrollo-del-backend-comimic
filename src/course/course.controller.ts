@@ -104,13 +104,6 @@ export class CourseController {
         throw new NotFoundException('No courses found.');
       }
     }
-    // @Get('search')
-    // async searchCoursesByContent(@Query('keyword') keyword: string): Promise<Course[]> {
-      
-    //   const courses = await this.courseService.searchCourses(keyword);
-      
-    //   return courses;
-    // }
 
     @Get(':courseId')
     async findOne(@Param('courseId', ParseIntPipe) courseId: number) {
