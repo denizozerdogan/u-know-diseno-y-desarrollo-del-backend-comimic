@@ -8,12 +8,8 @@ import {
    Delete,
    Req,
   UseGuards,
-  ExecutionContext,
-  Inject,
   NotFoundException,
   HttpStatus,
-  HttpException,
-  UseFilters,
   Res,
   UnauthorizedException,
   ParseIntPipe,
@@ -21,16 +17,13 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { Request, Response } from 'express';
-import { AuthGuard } from '@nestjs/passport';
-
+import { Request } from 'express';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { User } from 'src/user/entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { UserService } from '../user/user.service';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../user/entities/role.enum';
@@ -41,8 +34,7 @@ import { Role } from '../user/entities/role.enum';
 @ApiTags('course')
 @Controller('course')
 export class CourseController {
-  constructor(private readonly courseService: CourseService,
-    private readonly userService: UserService) {}
+  constructor(private readonly courseService: CourseService) {}
 
 
     @Post('course-creation')
@@ -62,6 +54,33 @@ export class CourseController {
       throw error;
     }
   }
+      // !! COURSES NOT APPROVED
+  @Get('unapproved')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async getUnapprovedCourses(): Promise<Course[]> {
+    console.log("teste desde controller")
+    const unapprovedCourses = await this.courseService.getUnapprovedCourses();
+    console.log("controller" + unapprovedCourses)
+    return unapprovedCourses;
+  }
+
+  @Delete('unapproved/:courseId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async deleteUnapprovedCourse(@Param('courseId', ParseIntPipe) courseId: number): Promise<boolean> {
+    const deleted = await this.courseService.deleteUnapprovedCourse(courseId);
+    return deleted;
+  }
+
+  @Delete('unapproved/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async deleteAllUnapprovedCourses(): Promise<boolean> {
+    const deleted = await this.courseService.deleteAllUnapprovedCourses();
+    return deleted;
+  }
+
 
     @Get('')
     async findAll() {
@@ -107,6 +126,9 @@ export class CourseController {
         }
         return updatedCourse;
       } catch (error) {
+        if (error instanceof NotFoundException) {
+          throw new NotFoundException('Course not found.');
+        }
         throw new Error('Failed to update the course.');
       }
     }
@@ -120,35 +142,38 @@ export class CourseController {
       }
       return this.courseService.removeCourse(courseId);
     }
-  
 
-  @Patch(':courseId/approve')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async approveCourse(
-    @Param('courseId') courseId: string,
-  ): Promise<Course> {
-    try {
-      const updatedCourse = await this.courseService.updateApproval(+courseId, true);
-      if (!updatedCourse) {
-        throw new NotFoundException('Course not found.');
+    @Patch(':courseId/approve')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async approveCourse(
+      @Param('courseId') courseId: string,
+    ): Promise<Course> {
+      try {
+        const updatedCourse = await this.courseService.updateApproval(+courseId, true);
+        if (!updatedCourse) {
+          throw new NotFoundException('Course not found.');
+        }
+        return updatedCourse;
+      } catch (error) {
+        throw new Error('Failed to update the course.');
+   
       }
-      return updatedCourse;
-    } catch (error) {
-      throw new Error('Failed to update the course.');
     }
+      @Get(':id/mycourses')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
+    return this.courseService.findUserCourses(userId);
+  }
 }
-}
 
 
 
 
 
 
-// * IMPORTANT / WORKED
-//TODO
-//!! WARNING error - dont touch!!
-// ? QUESTION
+
 
 
 

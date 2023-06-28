@@ -123,6 +123,11 @@ async getUserById(id: number): Promise<User> {
     
     return this.userRepository.save(user);
   }
+  
+
+ 
+}
+
 
 /* 
   async updateUserWallet(id: number, amount: number): Promise<User> {
@@ -138,8 +143,6 @@ async getUserById(id: number): Promise<User> {
     }
   }  */
 
- 
-}
 
   //delete
   // async removeUser(id: number): Promise<void> {
