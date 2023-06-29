@@ -94,24 +94,6 @@ describe('UserService', () => {
     expect(service).toBeDefined();
   });
 
- /*  it('should create a new user and return the user', async () => {
-    const newUser = {
-      id: 2,
-      name: 'Diego',
-      surname: 'Monsalve',
-      wallet: 1000,
-      password: 'password1234',
-      email: 'diego@example.com',
-      bio: 'I am Future Diegooo',
-      created_at: new Date(2023, 7, 16),
-      updated_at: new Date (),
-    };
-
-    expect(await service.createUser(newUser)).toMatchObject({
-      id: expect.any(Number),
-    });
-  }); */
-
   it('should create a new user and return the user', async () => {
     const newUser = {
       id: 2,
@@ -149,22 +131,7 @@ describe('UserService', () => {
     await expect(authService.register(existingUser)).rejects.toThrowError('User with the same email already exists');
   });
 
-  /* it('should throw an error when creating a user with an existing email', async () => {
-    const existingUser = {
-      id: 3,
-      name: 'John',
-      surname: 'Doe',
-      wallet: 2000,
-      password: 'password5678',
-      email: 'diego@example.com', // Same email as the newUser
-      bio: 'I am John Doe',
-      created_at: new Date(2023, 7, 17),
-      updated_at: new Date(),
-    };
-    jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(existingUser);
-    await expect(service.createUser(existingUser)).rejects.toThrowError('User with the same email already exists');
-  });
- */
+
 
   it('should return a list of all users', async () => {
     expect(await service.getUser()).toMatchObject({ users });

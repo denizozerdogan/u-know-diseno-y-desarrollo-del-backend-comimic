@@ -10,7 +10,7 @@ import { UserService } from '../user/user.service';
 describe('CourseController', () => {
   let controller: CourseController;
 
-  const mockCourseRepository = {};
+  const mockCourseService = {};
   const mockJwtService = {};
   const mockUserService = {};
 
@@ -18,7 +18,7 @@ describe('CourseController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CourseController],
       providers: [
-        CourseService, 
+       /*  CourseService,  */
         {
           provide: UserService,
           useValue: mockUserService,
@@ -28,8 +28,10 @@ describe('CourseController', () => {
           useValue: mockJwtService,
         },
         {
-          provide: getRepositoryToken(Course),
-          useValue: mockCourseRepository,
+          provide: CourseService,
+          useValue: mockCourseService,
+        /*   provide: getRepositoryToken(Course),
+          useValue: mockCourseRepository, */
         },
 
       ],
