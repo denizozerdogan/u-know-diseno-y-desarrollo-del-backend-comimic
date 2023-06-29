@@ -19,13 +19,24 @@ const users: any = [
     bio: 'I am Eiji',
     created_at: new Date(2023, 7, 16),
     updated_at: new Date(2023, 7, 16),
-  },
+    role: Role.USER  },
 ];
 
 describe('AuthService', () => {
   let authService: AuthService;
 
-  const mockJwtService = {};
+  const mockJwtService = {
+    sign: jest.fn().mockReturnValue('mocked-token'),
+  };
+
+  const mockCompare = jest.fn(async (data: string | Buffer, encrypted: string) => {
+    return false; // Mocking the password comparison
+  });
+  
+  // Mock the bcrypt.compare function
+  jest.mock('bcrypt', () => ({
+    compare: mockCompare,
+  }));
 
   const mockUserService = {
     //should have all the methods from service and use them in the test
@@ -37,6 +48,9 @@ describe('AuthService', () => {
       };
       users.push(newUser);
       return Promise.resolve(newUser);
+    }),
+    getUserByEmail: jest.fn().mockImplementation((email: string) => {
+      return Promise.resolve(users.find((user: any) => user.email === email));
     }),
   }
 
@@ -52,6 +66,10 @@ describe('AuthService', () => {
           provide: JwtService,
           useValue: mockJwtService,
         },
+        {
+          provide: 'compare',
+          useValue: mockCompare,
+        }, 
     ], 
     }).compile();
 
@@ -166,5 +184,68 @@ describe('AuthService', () => {
     // Call the register function and expect it to throw an exception with status code 500
     await expect(authService.register(user)).rejects.toThrow(HttpException);
   });
+  it('should retrieve the user by email when login function is called with valid credentials', async () => {
+    const user = {
+      email: 'Eiji@example.com',
+      password: 'password1234',
+    };
+  
+    const hashedPassword = await hash('password1234', 10); // Hash the password for comparison
+  
+    const findUser = {
+      ...users[0],
+      password: hashedPassword,
+    };
+  
+    // Mock the getUserByEmail function to return the findUser object
+    mockUserService.getUserByEmail.mockResolvedValue(findUser);
+  
+    const loginResult = await authService.login(user);
+  
+    // Ensure that the getUserByEmail function was called with the correct email
+    expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(user.email);
+  
+    // Exclude the password field from the findUser object
+    const { password: _, ...expectedUser } = findUser;
+  
+    // Ensure that the login result contains the expected data
+    expect(loginResult.user).toEqual(expectedUser);
 
+  });
+
+  it('should throw HttpException with status 404 if user is not found', async () => {
+    const user = {
+      email: 'nonexistent@example.com',
+      password: 'password1234',
+    };
+
+    mockUserService.getUserByEmail.mockResolvedValue(null);
+
+    await expect(authService.login(user)).rejects.toThrow(
+      new HttpException('User not Found', 404)
+    );
+
+    expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(user.email);
+  });
+  
+  it('should throw HttpException with status 403 if password is invalid', async () => {
+    const user = {
+      email: 'existing@example.com',
+      password: 'incorrectpassword',
+    };
+  
+    const existingUser = {
+      email: 'existing@example.com',
+      password: 'correctpassword',
+    };
+  
+    mockUserService.getUserByEmail.mockResolvedValue(existingUser);
+  
+    expect(authService.login(user)).rejects.toThrow(
+      new HttpException('Password invalid', HttpStatus.FORBIDDEN)
+    );
+  
+    expect(mockUserService.getUserByEmail).toHaveBeenCalledWith(user.email);
+  });
 });
+  
