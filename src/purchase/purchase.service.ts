@@ -1,43 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Purchase } from './entities/purchase.entity';
 import { Course } from '../course/entities/course.entity';
 import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
+import { CourseService } from '../course/course.service';
 
 @Injectable()
 export class PurchaseService {
-  userService: any;
-  courseService: any;
+  
   constructor(
     @InjectRepository(Purchase)
     private readonly purchaseRepository: Repository<Purchase>,
-    // private userService: UserService,
+    private userService: UserService,
+    private courseService: CourseService,
   ) {}
   
-  async makePurchase(userId: number, courseId: number): Promise<Purchase> {
-    const user: User = await this.userService.findById(userId);
-    const course: Course = await this.courseService.findById(courseId);
+ 
+  async makePurchase(
+    createPurchaseDto: CreatePurchaseDto,
+    userId: User,
+  ): Promise<Purchase> {
+    
   
+    const { courseId } = createPurchaseDto;
+
+    const existingPurchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: userId,
+        course: courseId,
+      },
+    });
+  
+    if (existingPurchase) {
+      throw new ConflictException('You have already purchased this course.');
+    }
+    
     const purchase = new Purchase();
-    purchase.buyer = user;
-    purchase.course = course;
+    purchase.buyer = userId;
+    purchase.course = courseId;
   
     return this.purchaseRepository.save(purchase);
   }
-  // async makePurchase(
-  //   createPurchaseDto: CreatePurchaseDto,
-  //   user: User, 
-  //   course: Course): Promise<Purchase> {
 
-  //   // const { userId, courseId} = createPurchaseDto;
-  //   const purchase = new Purchase();
-  //   purchase.buyer = user;
-  //   purchase.course = course;
+  async countCoursePurchases(courseId: number): Promise<number> {
+    const coursePurchaseTotal = await this.purchaseRepository
+      .createQueryBuilder('purchase')
+      .where('purchase.courseId = :courseId', { courseId })
+      .getCount();
 
-  //   return this.purchaseRepository.save(purchase);
-  // }
+    return coursePurchaseTotal;
+  }
+
 
   findAll() {
     return `This action returns all purchase`;

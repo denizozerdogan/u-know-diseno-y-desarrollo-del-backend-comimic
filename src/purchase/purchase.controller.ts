@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Course } from 'src/course/entities/course.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Purchase } from './entities/purchase.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiBearerAuth()
 @ApiTags('purchase')
@@ -12,32 +13,22 @@ import { Purchase } from './entities/purchase.entity';
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
 
-  // @Post('')
-  // createPurchase(
-  //   @Body() createPurchaseDto: CreatePurchaseDto,
-  //   @Req() req: Request,
-  // ): Promise<Purchase> {
-  //   const userId: User = req['user']['userId'];
-  //   // const course: Course = req['course']['courseId'];
-  //   const courseId: number = createPurchaseDto.courseId;
-
-  //   createPurchaseDto.userId = user.id;
-   
-
-
-  //   return this.purchaseService.makePurchase(createPurchaseDto, userId, courseId);
-  // }
+  @UseGuards(JwtAuthGuard)
   @Post('')
-createPurchase(
-  @Body() createPurchaseDto: CreatePurchaseDto,
-  @Req() req: Request,
-): Promise<Purchase> {
-  const userId: number = req['user']['userId'];
-  const courseId: number = createPurchaseDto.courseId; 
+  async createPurchase(
+    @Body() createPurchaseDto: CreatePurchaseDto,
+    @Req() req: Request, 
+  ): Promise<Purchase> {
+    const user: User = req['user']['userId'];
+    createPurchaseDto.userId = user; 
+    return this.purchaseService.makePurchase(createPurchaseDto, user);
+  }
 
-  return this.purchaseService.makePurchase(userId, courseId);
-}
-
+  @Get(':courseId/count')
+  async countCoursePurchases(@Param('courseId') courseId: number): Promise<{ count: number }> {
+    const count = await this.purchaseService.countCoursePurchases(courseId);
+    return { count };
+  }
 
 
   @Get()

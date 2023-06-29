@@ -52,7 +52,7 @@ export class CourseController {
   // !! COURSES NOT APPROVED
   @Get('unapproved')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.USER)
   async getUnapprovedCourses(): Promise<Course[]> {
     const unapprovedCourses = await this.courseService.getAllUnapproved();
     return unapprovedCourses;
@@ -65,15 +65,6 @@ export class CourseController {
     const unapprovedCourse = await this.courseService.getUnapprovedCourseById(courseId);
     return unapprovedCourse;
   }
-
-  @Delete('unapproved/:courseId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async deleteUnapprovedCourse(@Param('courseId', ParseIntPipe) courseId: number): Promise<boolean> {
-    const deleted = await this.courseService.deleteUnapproved(courseId);
-    return deleted;
-  }
-
 
   @Get('')
   @UseGuards(JwtAuthGuard)
@@ -168,8 +159,42 @@ export class CourseController {
       return this.courseService.findUserCourses(userId);
     }
 
+    @Delete(':courseId')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.USER)
+    removeCourseByUser(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
+      const user: User = req['user']['userId'];
+      if (req.user.role !== Role.USER) {
+        throw new UnauthorizedException('Unauthorized');
+      }
+      return this.courseService.removeCourseByUser(courseId, user);
+    }
 
 }
+
+
+// @Delete(':courseId')
+// @UseGuards(JwtAuthGuard, RolesGuard)
+// @Roles(Role.USER)
+// async removeCourseByUser(
+//   @Param('courseId', ParseIntPipe) courseId: number,
+//   @Req() req: Request,
+// ): Promise<void> {
+//   const userId: number = req['user']['userId'];
+//   const course: Course = await this.courseService.findOne(courseId);
+
+//   if (req.user.role !== Role.USER || course.creatorId !== userId) {
+//     throw new UnauthorizedException('Unauthorized');
+//   }
+
+//   const purchaseCount: number = await this.purchaseService.countCoursePurchases(courseId);
+
+//   if (purchaseCount > 0) {
+//     throw new BadRequestException('Cannot delete the course. It has purchases associated with it.');
+//   }
+
+//   await this.courseService.removeCourseByUser(courseId, userId);
+// }
 
 
 

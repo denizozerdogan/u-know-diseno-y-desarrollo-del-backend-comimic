@@ -1,7 +1,7 @@
 import { ApiTags } from "@nestjs/swagger";
 import { Course } from "src/course/entities/course.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @ApiTags('purchase')
 @Entity()
@@ -18,10 +18,12 @@ export class Purchase {
     @JoinColumn({ name: 'courseId', referencedColumnName: 'courseId' })
     course: Course;
 
-    @Column({ default: () => 'CURRENT_TIMESTAMP' })
+    // @Column({ default: () => 'CURRENT_TIMESTAMP' })
+    @CreateDateColumn()
     created_at: Date;
 
-    @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    // @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    @UpdateDateColumn()
     updated_at: Date;
 
 }
