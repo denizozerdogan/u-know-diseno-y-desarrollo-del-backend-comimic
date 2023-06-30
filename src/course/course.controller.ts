@@ -161,7 +161,8 @@ export class CourseController {
    
       }
     }
-      @Get(':id/mycourses')
+  
+  @Get(':id/mycourses')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.USER)
   async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
