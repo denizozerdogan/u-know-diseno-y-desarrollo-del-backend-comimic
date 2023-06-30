@@ -6,22 +6,24 @@ import { Course } from 'src/course/entities/course.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Purchase } from './entities/purchase.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Role } from 'src/user/entities/role.enum';
 
 @ApiBearerAuth()
 @ApiTags('purchase')
 @Controller('purchase')
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
-
-  @UseGuards(JwtAuthGuard)
-  @Post('')
-  async createPurchase(
-    @Body() createPurchaseDto: CreatePurchaseDto,
-    @Req() req: Request, 
-  ): Promise<Purchase> {
+ 
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  async createPurchase(@Body() createPurchaseDto: CreatePurchaseDto,
+    @Req() req: Request) :Promise<Purchase> {
     const user: User = req['user']['userId'];
-    createPurchaseDto.userId = user; 
-    return this.purchaseService.makePurchase(createPurchaseDto, user);
+    createPurchaseDto.userId = user.id;
+    return this.purchaseService.createPurchase(createPurchaseDto,user);
   }
 
   @Get(':courseId/count')

@@ -6,7 +6,7 @@ import { User } from "src/user/entities/user.entity";
 export class CreatePurchaseDto {
 
     @ApiProperty({ example: 'ID User (buyer)' })
-    userId: User;
+    userId: number;
 
     @IsNotEmpty()
     @ApiProperty({ example: 'ID of the course that I bought' })

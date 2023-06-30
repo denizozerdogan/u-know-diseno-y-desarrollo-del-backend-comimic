@@ -7,6 +7,7 @@ import { Course } from './entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { Purchase } from 'src/purchase/entities/purchase.entity';
+import { PurchaseService } from '../purchase/purchase.service';
 
 
 @Injectable()
@@ -15,6 +16,7 @@ export class CourseService {
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
     private userService: UserService,
+    private purchaseService: PurchaseService
      // Inject the UserService
 
  ) {}
@@ -128,13 +130,20 @@ export class CourseService {
   
 
 
-  async removeCourse(courseId: number): Promise<boolean> {
+  async removeCoursebyAdmin(courseId: number): Promise<boolean> {
 
     const course = await this.courseRepository.findOne({ where: { courseId } });
 
     if (!course) {
       throw new NotFoundException(`Course with ID '${courseId}' not found`);
-    } const result = await this.courseRepository.delete(courseId);
+    } 
+
+    const coursePurchaseTotal = await this.purchaseService.countCoursePurchases(courseId);
+    if (coursePurchaseTotal > 0) {
+      throw new BadRequestException('This course has buyer and cannot be deleted.')
+    }
+
+    const result = await this.courseRepository.delete(courseId);
 
     if (result.affected === 0) {
       throw new InternalServerErrorException('Failed to delete course');

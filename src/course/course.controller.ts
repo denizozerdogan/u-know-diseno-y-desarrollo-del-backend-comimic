@@ -140,7 +140,7 @@ export class CourseController {
       if (req.user.role !== Role.ADMIN) {
         throw new UnauthorizedException('Unauthorized');
       }
-      return this.courseService.removeCourse(courseId);
+      return this.courseService.removeCoursebyAdmin(courseId);
     }
 
     @Patch(':courseId/approve')

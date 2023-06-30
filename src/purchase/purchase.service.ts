@@ -1,11 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Purchase } from './entities/purchase.entity';
-import { Course } from '../course/entities/course.entity';
 import { User } from '../user/entities/user.entity';
-import { UserService } from '../user/user.service';
 import { CourseService } from '../course/course.service';
 
 @Injectable()
@@ -14,37 +12,40 @@ export class PurchaseService {
   constructor(
     @InjectRepository(Purchase)
     private readonly purchaseRepository: Repository<Purchase>,
-    private userService: UserService,
-    private courseService: CourseService,
+    // private  readonly courseService : CourseService
   ) {}
-  
- 
-  async makePurchase(
-    createPurchaseDto: CreatePurchaseDto,
-    userId: User,
-  ): Promise<Purchase> {
-    
-  
-    const { courseId } = createPurchaseDto;
 
-    const existingPurchase = await this.purchaseRepository.findOne({
-      where: {
-        buyer: userId,
-        course: courseId,
-      },
-    });
+
+ 
+  async createPurchase(createPurchaseDto: CreatePurchaseDto, userId: User) {
+    const { courseId } = createPurchaseDto;
+  
+    // Verificar si el usuario ya compró el curso
+    const existingPurchase = await this.purchaseRepository
+      .createQueryBuilder('purchase')
+      .where('purchase.buyer = :userId', { userId })
+      .andWhere('purchase.course = :courseId', { courseId })
+      .getOne();
   
     if (existingPurchase) {
-      throw new ConflictException('You have already purchased this course.');
+      throw new NotFoundException('El usuario ya ha comprado este curso.');
     }
-    
+  
+    // // Verificar si el curso existe
+    // const course = await this.courseService.findOne( courseId.courseId );
+    // if (!course) {
+    //   throw new NotFoundException('El curso no existe.');
+    // }
+  
+    // Crear la nueva compra
     const purchase = new Purchase();
     purchase.buyer = userId;
-    purchase.course = courseId;
-  
+    purchase.course = courseId; // Asignar directamente el objeto del curso
     return this.purchaseRepository.save(purchase);
   }
+  
 
+  
   async countCoursePurchases(courseId: number): Promise<number> {
     const coursePurchaseTotal = await this.purchaseRepository
       .createQueryBuilder('purchase')
@@ -53,6 +54,30 @@ export class PurchaseService {
 
     return coursePurchaseTotal;
   }
+ 
+  // async makePurchase(
+  //   createPurchaseDto: CreatePurchaseDto,
+  // ): Promise<Purchase> {
+  //   const { courseId, userId } = createPurchaseDto;
+  
+  //   // Verificar si el usuario ya ha comprado el curso
+  //   const hasUserPurchasedCourse = await this.checkUserPurchasedCourse(userId.id, courseId.courseId);
+  
+  //   if (hasUserPurchasedCourse) {
+  //     throw new Error('El usuario ya ha comprado este curso.');
+  //   }
+  
+  //   const purchase = new Purchase();
+  //   purchase.buyer = userId;
+  //   purchase.course = courseId;
+  
+  //   // Guardar la nueva compra en la base de datos
+  //   return this.purchaseRepository.save(purchase);
+  // }
+  
+ 
+
+
 
 
   findAll() {
