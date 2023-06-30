@@ -197,7 +197,7 @@ describe('UserController', () => {
   
     jest.spyOn(controller, 'update').mockRejectedValue(new UnauthorizedException('Unauthorized'));
   
-    expect(await controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
+    await expect(controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
     expect(controller.update).toHaveBeenCalledWith(userId, updateUserDto, req);
   });
   
@@ -264,10 +264,27 @@ describe('UserController', () => {
   it('should throw a NotFoundException if the user with the specified ID is not found', async () => {
     const userId = 1;
     const req = { user: { role: Role.ADMIN } };
-    mockUserService.getUserById.mockResolvedValue(null); // Simulating user not found
+    const userNotFoundId = 999; // ID of the user to simulate not found
   
-    expect(await controller.findOne(userId, req)).rejects.toThrow(NotFoundException);
+    // Set up mockUserService.getUserById to return null only when userNotFoundId is passed
+    mockUserService.getUserById.mockImplementation((id: number) => {
+      if (id === userNotFoundId) {
+        return null;
+      }
+      return { id, /* user properties */ };
+    });
+  
+    try {
+      await controller.findOne(userId, req);
+    } catch (error) {
+      // Expecting NotFoundException not to be thrown for userId
+      expect(error).not.toBeInstanceOf(NotFoundException);
+    }
+  
+    // Expecting NotFoundException to be thrown for userNotFoundId
+    await expect(controller.findOne(userNotFoundId, req)).rejects.toThrow(NotFoundException);
+  
     expect(mockUserService.getUserById).toHaveBeenCalledWith(userId);
+    expect(mockUserService.getUserById).toHaveBeenCalledWith(userNotFoundId);
   });
-
 });

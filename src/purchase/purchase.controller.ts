@@ -2,10 +2,10 @@ import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards } from '@nes
 import { PurchaseService } from './purchase.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Course } from 'src/course/entities/course.entity';
-import { User } from 'src/user/entities/user.entity';
+import { Course } from '../course/entities/course.entity';
+import { User } from '../user/entities/user.entity';
 import { Purchase } from './entities/purchase.entity';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiBearerAuth()
 @ApiTags('purchase')
@@ -36,7 +36,9 @@ export class PurchaseController {
     return this.purchaseService.findAll();
   }
 
-  @Get(':id')
+}
+
+/*   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.purchaseService.findOne(+id);
   }
@@ -45,7 +47,7 @@ export class PurchaseController {
   remove(@Param('id') id: string) {
     return this.purchaseService.remove(+id);
   }
-}
+} */
 
 
 //   @Patch(':id')

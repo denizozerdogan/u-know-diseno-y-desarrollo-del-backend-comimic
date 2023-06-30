@@ -168,6 +168,23 @@ export class CourseController {
       return this.courseService.findUserCourses(userId);
     }
 
+    @Patch(':courseId/review-stars/')
+    @UseGuards(JwtAuthGuard)
+    async updateCourseStars(
+      @Param('courseId') courseId: number,
+      @Body('stars') stars: number,
+      @Req() req
+    ): Promise<Course> {
+      const userId = req.user.id; // Assuming the user ID is stored in the `id` property of the authenticated user
+      const isValidPurchase = await this.courseService.validateCoursePurchase(userId, courseId);
+      if (!isValidPurchase) {
+        throw new Error('User has not purchased the course or already reviewed it');
+      }
+    
+      const updatedCourse = await this.courseService.updateCourseStars(courseId, userId, stars);
+      return updatedCourse;
+    }
+
     // @Delete(':courseId')
     // @UseGuards(JwtAuthGuard, RolesGuard)
     // @Roles(Role.USER)

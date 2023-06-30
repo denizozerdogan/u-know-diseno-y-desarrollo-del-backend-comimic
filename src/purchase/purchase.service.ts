@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,7 +15,8 @@ export class PurchaseService {
     @InjectRepository(Purchase)
     private readonly purchaseRepository: Repository<Purchase>,
     private userService: UserService,
-    private courseService: CourseService,
+/*     private courseService: CourseService,
+ */    
   ) {}
   
  
@@ -54,18 +55,24 @@ export class PurchaseService {
     return coursePurchaseTotal;
   }
 
-
   findAll() {
     return `This action returns all purchase`;
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} purchase`;
+/* 
+  async findOneByCourseId(courseId: number): Promise<Purchase> {
+    const purchase = await this.purchaseRepository.findOne({ where: { course: { courseId } } });
+  
+    if (!purchase) {
+      throw new NotFoundException(`Purchase for course ${courseId} not found.`);
+    }
+  
+    return purchase;
   }
+ */
 
-  remove(id: number) {
+/*   remove(id: number) {
     return `This action removes a #${id} purchase`;
-  }
+  } */
 }
 
 // update(id: number, updatePurchaseDto: UpdatePurchaseDto) {

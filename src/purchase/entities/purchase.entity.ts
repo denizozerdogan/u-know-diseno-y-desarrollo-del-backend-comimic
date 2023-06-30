@@ -26,4 +26,10 @@ export class Purchase {
     @UpdateDateColumn()
     updated_at: Date;
 
+    @Column({ default:false})
+    reviewed: boolean;
+
+    @Column({ default: false })
+    commented: boolean;
+
 }

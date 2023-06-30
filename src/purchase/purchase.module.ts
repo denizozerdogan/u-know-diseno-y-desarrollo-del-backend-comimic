@@ -7,13 +7,14 @@ import { User } from '../user/entities/user.entity';
 import { UserModule } from '../user/user.module';
 import { Purchase } from './entities/purchase.entity';
 import { CourseModule } from '../course/course.module';
-import { CourseService } from 'src/course/course.service';
+import { CourseService } from '../course/course.service';
+import { UserService } from '../user/user.service';
 
 
 @Module({
   controllers: [PurchaseController],
-  providers: [PurchaseService, CourseService],
-  imports:[TypeOrmModule.forFeature([Course, User, Purchase]), UserModule, CourseModule]
+  providers: [PurchaseService, CourseService, UserService],
+  imports:[TypeOrmModule.forFeature([Course, User, Purchase]), UserModule]
 
 })
 export class PurchaseModule {}

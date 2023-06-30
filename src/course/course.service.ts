@@ -6,7 +6,8 @@ import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
-import { Purchase } from 'src/purchase/entities/purchase.entity';
+import { Purchase } from '../purchase/entities/purchase.entity';
+import { PurchaseService } from '../purchase/purchase.service';
 
 
 @Injectable()
@@ -15,7 +16,10 @@ export class CourseService {
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
     private userService: UserService,
-     // Inject the UserService
+/*     private readonly purchaseService: PurchaseService,
+ */    @InjectRepository(Purchase)
+    private readonly purchaseRepository: Repository<Purchase>,
+
 
  ) {}
 
@@ -233,17 +237,89 @@ export class CourseService {
     } catch (error) {
       throw new NotFoundException('No courses found.');
     }
-
-    
   }
 
+  // ** To validate the user bought and owns the course
+  async validateCoursePurchase(userId: number, courseId: number): Promise<boolean> {
+    const purchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: { id: userId },
+        course: { courseId },
+        reviewed: false,
+      },
+    });
+
+    return !!purchase;
+  };
+
+ // ** To update the course stars 
+  async updateCourseStars(courseId: number, userId: number, stars: number): Promise<Course> {
   
+    const course = await this.courseRepository.findOne({where: {courseId }});
+    if (!course) {
+      throw new Error('Course not found');
+    }
+    // Check if the user has already reviewed the course
+    const isReviewed = await this.purchaseRepository
+    .createQueryBuilder('purchase')
+    .where('purchase.course.courseId = :courseId', { courseId })
+    .andWhere('purchase.user.userId = :userId', { userId })
+    .andWhere('purchase.reviewed = true')
+    .getOne();
+
+    if (isReviewed) {
+      throw new Error('User has already reviewed the course');
+    }
+    course.stars = [{ value: stars }];
+    await this.courseRepository.save(course);
+
+    isReviewed.reviewed = true; // Set the reviewed column to true
+    await this.purchaseRepository.save(isReviewed);
+  
+    const updatedCourse = await this.calculateCourseRating(courseId);
+    return updatedCourse;
+  }
+
+  // ** Calculate the new value of the rating field when a new star is added 
+  private async calculateCourseRating(courseId: number): Promise<Course> {
+    const course = await this.courseRepository.findOne({where: {courseId }});
+
+    if (!course) {
+      throw new Error('Course not found');
+    }
+
+    const reviewedPurchases = await this.purchaseRepository.find({
+      where: {
+        course: {
+          courseId,
+        },
+        reviewed: true,
+      },
+    });
+
+    const totalRatings = reviewedPurchases.length;
+
+    if (totalRatings === 0) {
+      course.rating = 0;
+    } else {
+      const sumRatings = reviewedPurchases.reduce((total, purchase) => total + purchase.course.stars[0].value, 0);
+      const averageRating = (sumRatings - 4.8 * Math.min(totalRatings, 4)) / Math.max(totalRatings - 4, 1);
+      course.rating = parseFloat(averageRating.toFixed(1));
+    }
+
+    await this.courseRepository.save(course);
+
+    return course;
+  }
+
+}
+
   // async removeCourseByUser(courseId: number, userId : number){
   //   //buscar curso en purchase
   //   const course = await this.purchaseRepository.findOne({where: {courseId}})
 
   // }
-}
+
 
  
   // TODO check if the calculateRating is instantiated
