@@ -195,21 +195,32 @@ export class CourseService {
     return updatedCourse;
   }
 
+  // async findUserCourses(userId: number): Promise<Course[]> {
+  //   try {
+  //     const courses = await this.courseRepository
+  //       .createQueryBuilder('course')
+  //       .where('course.creatorId = :userId', { userId })
+  //       .getMany();
+  //       return courses;
+  //     }
+  //   catch (error) {
+  //     throw new NotFoundException('No courses found for the user.');
+  //   }
+  // }
   async findUserCourses(userId: number): Promise<Course[]> {
-    try {
-      const courses = await this.courseRepository
-        .createQueryBuilder('course')
-        .where('course.creatorId = :userId', { userId })
-        .getMany();
-
-      if (!courses || courses.length === 0) {
-        throw new NotFoundException('No courses found for the user.');
-      }
-      return courses;
-    } catch (error) {
-      throw new Error('Error while fetching the user courses.');
+    const courses = await this.courseRepository
+      .createQueryBuilder('course')
+      .where('course.creatorId = :userId', { userId })
+      .getMany();
+  
+    if (courses.length === 0) {
+      throw new NotFoundException('No courses found for the user.');
     }
+     
+    return courses;
   }
+  
+
 
   async searchByKeyword(keyword: string): Promise<Course[]> {
     try {
@@ -227,11 +238,11 @@ export class CourseService {
   }
 
   
-  async removeCourseByUser(courseId: number, userId : number){
-    //buscar curso en purchase
-    const course = await this.purchaseRepository.findOne({where: {courseId}})
+  // async removeCourseByUser(courseId: number, userId : number){
+  //   //buscar curso en purchase
+  //   const course = await this.purchaseRepository.findOne({where: {courseId}})
 
-  }
+  // }
 }
 
  
