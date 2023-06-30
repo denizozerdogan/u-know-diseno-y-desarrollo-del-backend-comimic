@@ -300,7 +300,7 @@ describe('UserService', () => {
   
     expect(user).toEqual(expectedUser);
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } });
-  
+    })  
   
   /* it('should return a user when a valid email is provided', async () => {
     const email = 'diego@example.com';
@@ -312,26 +312,62 @@ describe('UserService', () => {
 
     expect(user).toEqual(expectedUser);
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } }); */
-  })  
-  it('should throw an error if the user ID does not exist', async () => {
-    const error = new Error('Failed to get user');
 
-    jest.spyOn(mockUserRepositoryService, 'findOne').mockRejectedValue(error);
+    it('should throw an error if the user ID does not exist', async () => {
+      const nonExistingUserId = 999;
+      const error = new NotFoundException('User not found');
+    
+      jest.spyOn(mockUserRepositoryService, 'findOne').mockRejectedValue(error);
+      
+      try {
+        await service.getUserById(nonExistingUserId);
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error.message).toEqual('User not found');
+      }
+    
+      expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: nonExistingUserId } });
+    });
 
-    await expect(service.getUserById(1)).rejects.toThrowError(error);
-    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-  });
-
-  it('should return an error if the user ID does not exist when updating a user', async () => {
+/*   it('should return an error if the user ID does not exist when updating a user', async () => {
 
     const error = new Error('Failed to update user');
 
     jest.spyOn(mockUserRepositoryService, 'update').mockResolvedValue(error);
 
-    await expect(service.updateUser).rejects.toThrowError(error);
+    expect(await service.updateUser).rejects.toThrowError(error);
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-  });
+  }); */
+  it('should throw a NotFoundException if the user ID does not exist when updating a user', async () => {
 
-  
+  const nonExistingUserId = 999;
+  jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(null);
+
+  try {
+    await service.updateUser(nonExistingUserId, UpdateUserDto);
+    fail('Expected an exception to be thrown');
+  } catch (error) {
+    expect(error).toBeInstanceOf(NotFoundException);
+    expect(error.message).toEqual('User not found');
+  }
+
+  expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: nonExistingUserId } });
 });
+
+it('should throw an error if any other error occurs when updating a user', async () => {
+  const error = new Error('Failed to update user');
+  jest.spyOn(mockUserRepositoryService, 'findOne').mockRejectedValue(error);
+
+  try {
+    await service.updateUser(1, UpdateUserDto);
+    fail('Expected an exception to be thrown');
+  } catch (error) {
+    expect(error).toBeInstanceOf(Error);
+    expect(error.message).toEqual('Failed to update user');
+  }
+
+  expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
+});
+}); 
+
 

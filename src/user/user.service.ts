@@ -57,44 +57,53 @@ async getUserById(id: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (user) {
       return user;
-    } else {
-      throw new NotFoundException();
-    }
+    } 
   } catch (error) {
-    //console.error(error);
-    throw new Error('Failed to get user');
+    throw new NotFoundException('User not found');
   }
 }
 
  /*  getUserByEmail(email: string) {
     return this.userRepository.findOne({where: {email}}) */
 
-    getUserByEmail(email: string) {
+  async getUserByEmail(email: string) {
     if (!email) {
       throw new NotFoundException('Email not found');
     }
   
-    return this.userRepository.findOne({where: {email}})
+    return await this.userRepository.findOne({where: {email}})
   } 
 
 
-
-
   //update
+/*   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    try {
+      const toUpdate = await this.userRepository.findOne({ where: { id } });
+  
+      Object.assign(toUpdate, updateUserDto);
+  
+      return await this.userRepository.save(toUpdate);
+    } catch (error) {
+      throw new NotFoundException ('User not found');
+    }
+  } */
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
       const toUpdate = await this.userRepository.findOne({ where: { id } });
   
       if (!toUpdate) {
-        throw new NotFoundException;
+        throw new NotFoundException('User not found');
       }
   
       Object.assign(toUpdate, updateUserDto);
   
       return await this.userRepository.save(toUpdate);
     } catch (error) {
-      //console.error(error);
-      throw new Error('Failed to update user');
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new Error('Failed to update user');
+      }
     }
   }
 

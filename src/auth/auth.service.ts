@@ -20,7 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   
   constructor(private readonly userService: UserService,
-    private jwtService: JwtService) {}
+    private jwtService: JwtService, ) {}
 
 
 
@@ -51,24 +51,6 @@ async encrypt(password: string): Promise<string> {
       throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-// async validateUser(loggedUser: LoginDto) {
-//   try {
-//     const user = await this.userService.findOneByEmail(loggedUser.email);
-//     //verificar la password
-//     if (await this.passwordVerify(loggedUser.password, user.password))
-//       return {
-//         accessToken: await this.jwtService.signAsync({
-//           email: loggedUser.email,
-//         }), //'esto es un token', //to-do: generación del token
-//       };
-
-//     throw new UnauthorizedException();
-//   } catch (error) {
-//     throw error;
-//   }
-// }
-
-
 
 
 async login(userObjectLogin: LoginAuthDto) {
@@ -95,6 +77,22 @@ async login(userObjectLogin: LoginAuthDto) {
 }
 }
 
+// async validateUser(loggedUser: LoginDto) {
+//   try {
+//     const user = await this.userService.findOneByEmail(loggedUser.email);
+//     //verificar la password
+//     if (await this.passwordVerify(loggedUser.password, user.password))
+//       return {
+//         accessToken: await this.jwtService.signAsync({
+//           email: loggedUser.email,
+//         }), //'esto es un token', //to-do: generación del token
+//       };
+
+//     throw new UnauthorizedException();
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 /* 
 async getCurrentUser(req: Request): Promise<User> {

@@ -13,6 +13,7 @@ import {
   Res,
   UnauthorizedException,
   ParseIntPipe,
+  ConflictException,
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -36,20 +37,19 @@ import { Role } from '../user/entities/role.enum';
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
-
-    @Post('course-creation')
-    @UseGuards(JwtAuthGuard)
-    async createCourse(
-      @Body() createCourseDto: CreateCourseDto,
-      @Req() req: Request,
-    ): Promise<Course> {
-      const user: User = req['user']['userId'];
-      createCourseDto.creatorId = user.id;
-      
-      return this.courseService.createCourse(createCourseDto, user);
-    } 
+  @Post('course-creation')
+  @UseGuards(JwtAuthGuard)
+  async createCourse(
+    @Body() createCourseDto: CreateCourseDto,
+    @Req() req: Request,
+  ): Promise<Course> {
+    const user: User = req['user']['userId'];
+    createCourseDto.creatorId = user.id;
     
-  // !! COURSES NOT APPROVED
+    return this.courseService.createCourse(createCourseDto, user);
+  } 
+  
+      // !! COURSES NOT APPROVED
   @Get('unapproved')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.USER)
@@ -98,7 +98,16 @@ export class CourseController {
 
     @Get(':courseId')
     async findOne(@Param('courseId', ParseIntPipe) courseId: number) {
-        return this.courseService.findOne(courseId);
+
+      try {
+        return await this.courseService.findOne(courseId);
+      }   
+      catch (error) { 
+        if (error instanceof NotFoundException) {
+          throw new NotFoundException(error.message);
+      }
+        throw error;
+      }
     }
     
 

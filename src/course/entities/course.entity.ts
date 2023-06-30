@@ -16,10 +16,10 @@ export class Course {
     @PrimaryGeneratedColumn()
     courseId: number;
 
-    @Column()
+    @Column({ unique: true })
     title: string;
 
-    @Column()
+    @Column({ unique: true })
     description: string;
 
     @Column({default: 200})

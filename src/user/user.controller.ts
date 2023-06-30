@@ -35,23 +35,36 @@ export class UserController {
   @Get('')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  findAll(@Req() req) {
+  async findAll(@Req() req) {
     if (req.user.role !== Role.ADMIN) {
       throw new UnauthorizedException('Unauthorized')   
      }
-    return this.userService.getUser();
+    return await this.userService.getUser();
   }
 
+  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    const user = await this.userService.getUserById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID '${id}' not found`);
+    }
+    if (req.user.role === Role.ADMIN || req.user.id === id) {
+      // Return the user details
+      return user;
+    } else {
+      throw new UnauthorizedException('Unauthorized');
+    }
+  }
+/* 
   @Get(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.USER)
-  findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
+  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
   if (req.user.role === Role.ADMIN || req.user.id === id) {
-    return this.userService.getUserById(id);
+    return await this.userService.getUserById(id);
   } else {
     throw new UnauthorizedException('Unauthorized');
   }
-}
+} */
 
   @Patch(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -67,11 +80,11 @@ export class UserController {
   @Delete(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  removeUser(@Param('id', ParseIntPipe) id: number, @Req() req) {
+  async removeUser(@Param('id', ParseIntPipe) id: number, @Req() req) {
     if (req.user.role !== Role.ADMIN) {
       throw new UnauthorizedException('Unauthorized');
     }
-    const result = this.userService.removeUser(id);
+    const result = await this.userService.removeUser(id);
     if (!result) {
       throw new NotFoundException(`User with ID '${id}' not found`);
     }

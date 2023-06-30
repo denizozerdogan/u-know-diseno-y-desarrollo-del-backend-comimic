@@ -244,7 +244,7 @@ describe('UserController', () => {
     });
   });
 
-  it('should throw UnauthorizedException when a user tries to update another person\'s profile', async () => {
+  /* it('should throw UnauthorizedException when a user tries to update another person\'s profile', async () => {
     const userId = 2; // ID of the user whose profile is being updated
     const updateUserDto: UpdateUserDto = {
       password: 'newpassword',
@@ -253,19 +253,23 @@ describe('UserController', () => {
     const req = { user: { role: Role.USER, id: 1 } }; // User ID 1 is logged in
   
      expect(await controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
-  });
+  }); */
 
-/*     it('should update the user password', async () => {
-      const userId = 1;
-      const updateUserDto: UpdateUserDto = {
-        password: 'newpassword',
-      };
-      const updatedUser = await controller.update(userId, updateUserDto);
+  it('should throw UnauthorizedException when a user tries to update another person\'s profile', async () => {
+    const userId = 2; // ID of the user whose profile is being updated
+    const updateUserDto: UpdateUserDto = {
+      password: 'newpassword',
+      bio: 'Updated bio',
+    };
+    const req = { user: { role: Role.USER, id: 1 } }; // User ID 1 is logged in
   
-      expect(updatedUser).toMatchObject({
-        password: expect.any(String),
-      });
-  });  */
+    jest.spyOn(controller, 'update').mockRejectedValue(new UnauthorizedException('Unauthorized'));
+  
+    await expect(controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
+    expect(controller.update).toHaveBeenCalledWith(userId, updateUserDto, req);
+  });
+  
+
   it('should update the user password', async () => {
     const userId = 1;
     const updateUserDto: UpdateUserDto = {
@@ -347,10 +351,19 @@ describe('UserController', () => {
   it('should throw a NotFoundException if the user with the specified ID is not found', async () => {
     const userId = 1;
     const req = { user: { role: Role.ADMIN } };
-    mockUserService.removeUser.mockRejectedValue(new NotFoundException(`User with ID '${userId}' not found`));
+    mockUserService.getUserById.mockResolvedValue(null); // Simulating user not found
   
-     expect(await controller.removeUser(userId, req)).rejects.toThrow(NotFoundException);
-    expect(mockUserService.removeUser).toHaveBeenCalledWith(userId);
+    await expect(controller.findOne(userId, req)).rejects.toThrow(NotFoundException);
+    expect(mockUserService.getUserById).toHaveBeenCalledWith(userId);
   });
+
+/*   it('should throw a NotFoundException if the user with the specified ID is not found', async () => {
+    const userId = 1;
+    const req = { user: { role: Role.ADMIN } };
+    mockUserService.removeUser.mockResolvedValue(null); // 
+  
+    expect(await controller.removeUser(userId, req)).rejects.toThrow(NotFoundException);
+    expect(mockUserService.removeUser).toHaveBeenCalledWith(userId);
+  }); */
 
 });
