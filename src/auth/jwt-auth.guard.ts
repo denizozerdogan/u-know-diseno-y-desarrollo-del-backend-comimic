@@ -29,14 +29,17 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   
       if (token) {
         try {
+         
           const decodedToken = this.jwtService.verify(token,  {
               secret: jwtConstants.secret,
             });
           const user = await this.userService.getUserById(decodedToken.id);
   
           if (user) {
+            
             request.user = user;
             request.user['userId'] = decodedToken.id;
+            
             return true;
           }
         } catch (error) {

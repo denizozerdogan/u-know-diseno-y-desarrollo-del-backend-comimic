@@ -14,6 +14,7 @@ import {
   UnauthorizedException,
   ParseIntPipe,
   ConflictException,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -22,7 +23,7 @@ import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
-import { User } from 'src/user/entities/user.entity';
+import { User } from '../user/entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -36,28 +37,22 @@ import { Role } from '../user/entities/role.enum';
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
-
-    @Post('course-creation')
-    @UseGuards(JwtAuthGuard)
-    async createCourse(
-      @Body() createCourseDto: CreateCourseDto,
-      @Req() req: Request,
-    ): Promise<Course> {
-      const user: User = req['user']['userId'];
-      createCourseDto.creatorId = user.id;
-      try {
-      return this.courseService.createCourse(createCourseDto, user);
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        throw new ConflictException(error.message);
-      }
-      throw error;
-    }
-  }
+  @Post('course-creation')
+  @UseGuards(JwtAuthGuard)
+  async createCourse(
+    @Body() createCourseDto: CreateCourseDto,
+    @Req() req: Request,
+  ): Promise<Course> {
+    const user: User = req['user']['userId'];
+    createCourseDto.creatorId = user.id;
+    
+    return this.courseService.createCourse(createCourseDto, user);
+  } 
+  
       // !! COURSES NOT APPROVED
   @Get('unapproved')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.USER)
   async getUnapprovedCourses(): Promise<Course[]> {
     const unapprovedCourses = await this.courseService.getAllUnapproved();
     return unapprovedCourses;
@@ -70,15 +65,6 @@ export class CourseController {
     const unapprovedCourse = await this.courseService.getUnapprovedCourseById(courseId);
     return unapprovedCourse;
   }
-
-  @Delete('unapproved/:courseId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  async deleteUnapprovedCourse(@Param('courseId', ParseIntPipe) courseId: number): Promise<boolean> {
-    const deleted = await this.courseService.deleteUnapproved(courseId);
-    return deleted;
-  }
-
 
   @Get('')
   @UseGuards(JwtAuthGuard)
@@ -96,6 +82,19 @@ export class CourseController {
     }
   }
     
+    @Get('search')
+    async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
+      try {
+        const courses = await this.courseService.searchByKeyword(keyword);
+        if (!courses || courses.length === 0) {
+          throw new NotFoundException('No courses found.');
+        }
+        return courses;
+      } catch (error) {
+        
+        throw new NotFoundException('No courses found.');
+      }
+    }
 
     @Get(':courseId')
     async findOne(@Param('courseId', ParseIntPipe) courseId: number) {
@@ -161,14 +160,50 @@ export class CourseController {
    
       }
     }
-  
-  @Get(':id/mycourses')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.USER)
-  async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
-    return this.courseService.findUserCourses(userId);
-  }
+
+    @Get(':id/mycourses')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.USER)
+    async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
+      return this.courseService.findUserCourses(userId);
+    }
+
+    // @Delete(':courseId')
+    // @UseGuards(JwtAuthGuard, RolesGuard)
+    // @Roles(Role.USER)
+    // removeCourseByUser(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
+    //   const user: User = req['user']['userId'];
+    //   if (req.user.role !== Role.USER) {
+    //     throw new UnauthorizedException('Unauthorized');
+    //   }
+    //   return this.courseService.removeCourseByUser(courseId, user);
+    // }
+
 }
+
+
+// @Delete(':courseId')
+// @UseGuards(JwtAuthGuard, RolesGuard)
+// @Roles(Role.USER)
+// async removeCourseByUser(
+//   @Param('courseId', ParseIntPipe) courseId: number,
+//   @Req() req: Request,
+// ): Promise<void> {
+//   const userId: number = req['user']['userId'];
+//   const course: Course = await this.courseService.findOne(courseId);
+
+//   if (req.user.role !== Role.USER || course.creatorId !== userId) {
+//     throw new UnauthorizedException('Unauthorized');
+//   }
+
+//   const purchaseCount: number = await this.purchaseService.countCoursePurchases(courseId);
+
+//   if (purchaseCount > 0) {
+//     throw new BadRequestException('Cannot delete the course. It has purchases associated with it.');
+//   }
+
+//   await this.courseService.removeCourseByUser(courseId, userId);
+// }
 
 
 

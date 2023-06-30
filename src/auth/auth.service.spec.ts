@@ -5,10 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { hash, compare } from 'bcrypt';
-import { UserController } from 'src/user/user.controller';
-import { Role } from '../user/entities/role.enum';
+import { HttpException } from '@nestjs/common';
 
 
 const users: any = [

@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
+import { Purchase } from 'src/purchase/entities/purchase.entity';
 
 
 @Injectable()
@@ -13,7 +14,8 @@ export class CourseService {
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
-    private userService: UserService, // Inject the UserService
+    private userService: UserService,
+     // Inject the UserService
 
  ) {}
 
@@ -174,31 +176,6 @@ export class CourseService {
   }
   
 
-  async deleteUnapproved(courseId: number): Promise<boolean> {
-    try {
-      const course = await this.courseRepository.createQueryBuilder('course')
-        .where('course.courseId = :courseId', { courseId })
-        .andWhere('course.approved = :approved', { approved: false })
-        .getOne();
-
-      if (!course) {
-        throw new NotFoundException(`Unapproved course with ID '${courseId}' not found.`);
-      }
-
-      const result = await this.courseRepository.delete(courseId);
-
-      if (result.affected === 0) {
-        throw new InternalServerErrorException('Failed to delete unapproved course.');
-      }
-
-      return true;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new Error('Error while deleting unapproved course.');
-    }
-  }
 
 
   //!! WARNING arreglar wallet!
@@ -218,35 +195,56 @@ export class CourseService {
     return updatedCourse;
   }
 
+  // async findUserCourses(userId: number): Promise<Course[]> {
+  //   try {
+  //     const courses = await this.courseRepository
+  //       .createQueryBuilder('course')
+  //       .where('course.creatorId = :userId', { userId })
+  //       .getMany();
+  //       return courses;
+  //     }
+  //   catch (error) {
+  //     throw new NotFoundException('No courses found for the user.');
+  //   }
+  // }
   async findUserCourses(userId: number): Promise<Course[]> {
-    try {
-      const courses = await this.courseRepository
-        .createQueryBuilder('course')
-        .where('course.creatorId = :userId', { userId })
-        .getMany();
+    const courses = await this.courseRepository
+      .createQueryBuilder('course')
+      .where('course.creatorId = :userId', { userId })
+      .getMany();
+  
+    if (courses.length === 0) {
+      throw new NotFoundException('No courses found for the user.');
+    }
+     
+    return courses;
+  }
+  
 
-      if (!courses || courses.length === 0) {
-        throw new NotFoundException('No courses found for the user.');
-      }
+
+  async searchByKeyword(keyword: string): Promise<Course[]> {
+    try {
+      const courses = await this.courseRepository.createQueryBuilder('course')
+        .select(['course.title', 'course.topic', 'course.price', 'course.rating'])
+        .where('course.content LIKE :keyword', { keyword: `%${keyword}%` })
+        .getMany();
+  
       return courses;
     } catch (error) {
-      throw new Error('Error while fetching the user courses.');
+      throw new NotFoundException('No courses found.');
     }
+
+    
   }
+
+  
+  // async removeCourseByUser(courseId: number, userId : number){
+  //   //buscar curso en purchase
+  //   const course = await this.purchaseRepository.findOne({where: {courseId}})
+
+  // }
 }
 
-
-
-  /* async createCourse(
-    createCourseDto: CreateCourseDto,
-    user: User,
-  ): Promise<Course> {
-    const course = this.courseRepository.create({
-      ...createCourseDto,
-      creator: user.id,
-    });
-    return this.courseRepository.save(course);
-  } */
  
   // TODO check if the calculateRating is instantiated
   // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
