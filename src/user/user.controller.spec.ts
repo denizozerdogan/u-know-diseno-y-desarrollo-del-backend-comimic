@@ -197,7 +197,7 @@ describe('UserController', () => {
   
     jest.spyOn(controller, 'update').mockRejectedValue(new UnauthorizedException('Unauthorized'));
   
-    await expect(controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
+    expect(await controller.update(userId, updateUserDto, req)).rejects.toThrow(UnauthorizedException);
     expect(controller.update).toHaveBeenCalledWith(userId, updateUserDto, req);
   });
   
@@ -266,7 +266,7 @@ describe('UserController', () => {
     const req = { user: { role: Role.ADMIN } };
     mockUserService.getUserById.mockResolvedValue(null); // Simulating user not found
   
-    await expect(controller.findOne(userId, req)).rejects.toThrow(NotFoundException);
+    expect(await controller.findOne(userId, req)).rejects.toThrow(NotFoundException);
     expect(mockUserService.getUserById).toHaveBeenCalledWith(userId);
   });
 
