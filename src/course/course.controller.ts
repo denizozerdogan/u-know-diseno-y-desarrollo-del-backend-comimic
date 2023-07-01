@@ -67,7 +67,7 @@ export class CourseController {
   }
 
   @Get('')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async findAll(@Req() req: Request): Promise<Course[]> {
     try {
       const user = req.user as User;

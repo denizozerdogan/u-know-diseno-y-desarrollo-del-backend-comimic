@@ -19,7 +19,7 @@ export class PurchaseController {
     @Body() createPurchaseDto: CreatePurchaseDto,
     @Req() req: Request, 
   ): Promise<Purchase> {
-    const user: User = req['user']['userId'];
+    const user: User = req['user'];
     createPurchaseDto.userId = user.id; 
     return this.purchaseService.makePurchase(createPurchaseDto, user);
   }

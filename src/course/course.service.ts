@@ -84,7 +84,7 @@ export class CourseService {
   // Curso sin contenido (publico)
   async findOne(courseId: number): Promise<Course> {
    
-      const course = await this.courseRepository.findOne({ where: { courseId }, select: ['title','topic', 'price', 'rating', 'description', 'stars', 'comments'] });
+      const course = await this.courseRepository.findOne({ where: { courseId }, select: ['courseId','title','topic', 'price', 'rating', 'description', 'stars', 'comments'] });
       
       if (!course) {
         throw new NotFoundException(`Course ${courseId} not found.`);
