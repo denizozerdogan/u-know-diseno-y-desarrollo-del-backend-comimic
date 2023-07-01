@@ -55,14 +55,14 @@ export class CourseService {
   
 
   //Todo los cursos pero sin contenido (publico)
-  async findAll(userRole: string): Promise<Course[]> {
+  async findAll(): Promise<Course[]> {
     try {
-      if (userRole === 'admin') {
+   /*    if (userRole === 'admin') {
         return this.courseRepository.find({
           order: { rating: 'DESC' },
           select: ['title', 'topic', 'price', 'rating'],
         });
-      } else {
+      } else { */
         const courses = await this.courseRepository.find({
           where: { approved: true },
           order: { rating: 'DESC' },
@@ -75,7 +75,7 @@ export class CourseService {
   
         return courses;
       }
-    } catch (error) {
+     catch (error) {
       throw new Error('Error while fetching the courses.');
     }
   }
@@ -94,9 +94,6 @@ export class CourseService {
    //   throw new Error('Error while fetching the course.');
    // }
   }
-
-
-
 
 
   async update(courseId: number, updateCourseDto: UpdateCourseDto, id: number): Promise<Course> {
@@ -322,7 +319,6 @@ export class CourseService {
 
 
  
-  // TODO check if the calculateRating is instantiated
   // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
   //   const course = await this.courseRepository
   //     .createQueryBuilder('course')

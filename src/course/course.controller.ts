@@ -18,8 +18,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
-import { CourseService } from './course.service';
+/* import { Request } from 'express';
+ */import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
@@ -41,7 +41,7 @@ export class CourseController {
   @UseGuards(JwtAuthGuard)
   async createCourse(
     @Body() createCourseDto: CreateCourseDto,
-    @Req() req: Request,
+    @Req() req,
   ): Promise<Course> {
     const user: User = req['user']['userId'];
     createCourseDto.creatorId = user.id;
@@ -67,33 +67,28 @@ export class CourseController {
   }
 
   @Get('')
-  @UseGuards(JwtAuthGuard)
-  async findAll(@Req() req: Request): Promise<Course[]> {
-    try {
-      const user = req.user as User;
-      const userRole = user.role;
-      const courses = await this.courseService.findAll(userRole);
-      if (!courses) {
-        throw new NotFoundException('No courses found.');
-      }
+/*   @UseGuards(JwtAuthGuard)
+ */  async findAll(): Promise<Course[]> {
+  try {
+      const courses = await this.courseService.findAll();
       return courses;
-    } catch (error) {
-      throw new NotFoundException('No courses found.');
+  } catch (error) {
+      throw new NotFoundException('No approved courses found.');
     }
-  }
+ }
     
     @Get('search')
     async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
-      try {
+      try { 
         const courses = await this.courseService.searchByKeyword(keyword);
-        if (!courses || courses.length === 0) {
+       /*  if (!courses || courses.length === 0) {
           throw new NotFoundException('No courses found.');
-        }
+        } */
         return courses;
       } catch (error) {
         
         throw new NotFoundException('No courses found.');
-      }
+      } 
     }
 
     @Get(':courseId')

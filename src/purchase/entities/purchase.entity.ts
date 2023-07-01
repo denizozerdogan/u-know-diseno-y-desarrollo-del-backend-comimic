@@ -1,6 +1,6 @@
 import { ApiTags } from "@nestjs/swagger";
-import { Course } from "src/course/entities/course.entity";
-import { User } from "src/user/entities/user.entity";
+import { Course } from "../../course/entities/course.entity";
+import { User } from "../../user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @ApiTags('purchase')
