@@ -6,6 +6,9 @@ import { Course } from 'src/course/entities/course.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Purchase } from './entities/purchase.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Role } from 'src/user/entities/role.enum';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @ApiBearerAuth()
 @ApiTags('purchase')
@@ -13,7 +16,8 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
   @Post('')
   async createPurchase(
     @Body() createPurchaseDto: CreatePurchaseDto,

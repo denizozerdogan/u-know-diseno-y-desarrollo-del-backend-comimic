@@ -25,9 +25,6 @@ export class PurchaseService {
     // const course = await this.courseService.findOne(courseId);
     const course: Course = await this.courseService.findOne(courseId);
 
-    console.log(courseId)
-    console.log(user)
-
     const existingPurchase = await this.purchaseRepository.findOne({
       where: {
         buyer: { id: user.id },
