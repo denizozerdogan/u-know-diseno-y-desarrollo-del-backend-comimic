@@ -18,7 +18,6 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -43,7 +42,7 @@ export class CourseController {
     @Body() createCourseDto: CreateCourseDto,
     @Req() req: Request,
   ): Promise<Course> {
-    const user: User = req['user']['userId'];
+    const user: User = req['user'];
     createCourseDto.creatorId = user.id;
     
     return this.courseService.createCourse(createCourseDto, user);
@@ -70,7 +69,7 @@ export class CourseController {
   // @UseGuards(JwtAuthGuard)
   async findAll(@Req() req: Request): Promise<Course[]> {
     try {
-      const user = req.user as User;
+      const user = req['user'];
       const userRole = user.role;
       const courses = await this.courseService.findAll(userRole);
       if (!courses) {
@@ -142,6 +141,17 @@ export class CourseController {
       }
       return this.courseService.removeCoursebyAdmin(courseId);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(':courseId')
+    async deleteCourse(
+      @Param('courseId') courseId: number,
+      @Req() req: Request,
+    ): Promise<void> {
+      const user: User= req['user'];
+      await this.courseService.deleteCourseIfNoPurchases(courseId, user.id);
+    }
+
 
     // @Delete('user/:courseId')
     // @UseGuards(JwtAuthGuard, RolesGuard)

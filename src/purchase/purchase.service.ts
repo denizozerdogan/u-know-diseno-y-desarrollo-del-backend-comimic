@@ -13,7 +13,8 @@ export class PurchaseService {
   constructor(
     @InjectRepository(Purchase)
     private readonly purchaseRepository: Repository<Purchase>,
-    private readonly courseService: CourseService,
+    @InjectRepository(Course)
+    private readonly courseRepository: Repository<Course>,
   ) {}
  
   async makePurchase(
@@ -23,7 +24,7 @@ export class PurchaseService {
     const { courseId } = createPurchaseDto;
 
     // const course = await this.courseService.findOne(courseId);
-    const course: Course = await this.courseService.findOne(courseId);
+    const course: Course = await this.courseRepository.findOne({where: {courseId}});
 
     const existingPurchase = await this.purchaseRepository.findOne({
       where: {
@@ -53,11 +54,39 @@ export class PurchaseService {
     return coursePurchaseTotal;
   }
 
+  //All courses
+  async getUserPurchasedCourses(user: User): Promise<Course[]> {
+    const purchases = await this.purchaseRepository.find({
+      where: {
+        buyer: { id: user.id },
+      },
+      relations: ['course'],
+    });
 
-  findAll() {
-    return `This action returns all purchase`;
+    if (purchases.length === 0) {
+      throw new NotFoundException('No purchased courses found for the user.');
+    }
+
+    return purchases.map((purchase) => purchase.course);
   }
 
+  //Just one course
+  async getUserPurchasedCourse(user: User, courseId: number): Promise<Course> {
+    const purchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: { id: user.id },
+        course: { courseId },
+      },
+      relations: ['course'],
+    });
+
+    if (!purchase) {
+      throw new NotFoundException('The user has not purchased this course.');
+    }
+
+    return purchase.course;
+  }
+  
   findOne(id: number) {
     return `This action returns a #${id} purchase`;
   }

@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, Optional, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Optional, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,12 +11,13 @@ import { PurchaseService } from '../purchase/purchase.service';
 
 @Injectable()
 export class CourseService {
-  private purchaseService: PurchaseService;
+  // private purchaseService: PurchaseService;
 
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
     private userService: UserService,
+    private purchaseService: PurchaseService,
   ) {}
 
   setPurchaseService(purchaseService: PurchaseService) {
@@ -149,6 +150,23 @@ export class CourseService {
     }
 
     return true;
+  }
+
+  //user (author) can remove own course if no one has bought it
+  async deleteCourseIfNoPurchases(courseId: number, creatorId: number): Promise<void> {
+    
+    const course = await this.courseRepository.findOne({where: {courseId}});
+    const purchaseCount = await this.purchaseService.countCoursePurchases(courseId);
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID '${courseId}' not found.`);
+    }
+
+    if (purchaseCount === 0) {
+      await this.courseRepository.delete({ courseId, creator: { id: creatorId } });
+    } else {
+      throw new ForbiddenException('This course cannot be deleted as it has been purchased by users.');
+    }
   }
 
   // !! COURSES NOT APPROVED

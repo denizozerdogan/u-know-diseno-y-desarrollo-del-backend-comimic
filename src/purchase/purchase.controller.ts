@@ -34,10 +34,25 @@ export class PurchaseController {
     return { count };
   }
 
+  //User can see all courses purchased
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  @Get('user-courses')
+    async getUserCourses(@Req() req: Request): Promise<Course[]> {
+    const user: User = req['user'];
+    return this.purchaseService.getUserPurchasedCourses(user);
+  }
 
-  @Get()
-  findAll() {
-    return this.purchaseService.findAll();
+  //User can choose see one course purchased
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  @Get('user-courses/:courseId')
+  async getUserPurchase(
+    @Req() req: Request,
+    @Param('courseId') courseId: number,
+  ): Promise<Course> {
+    const user: User = req['user'];
+    return this.purchaseService.getUserPurchasedCourse(user, courseId);
   }
 
   @Get(':id')
