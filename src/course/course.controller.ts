@@ -133,15 +133,26 @@ export class CourseController {
       }
     }
 
-    @Delete(':courseId')
+    @Delete('admin/:courseId')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     removeCourse(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
       if (req.user.role !== Role.ADMIN) {
         throw new UnauthorizedException('Unauthorized');
       }
-      return this.courseService.removeCourse(courseId);
+      return this.courseService.removeCoursebyAdmin(courseId);
     }
+
+    // @Delete('user/:courseId')
+    // @UseGuards(JwtAuthGuard, RolesGuard)
+    // @Roles(Role.USER)
+    // removeCourseByUser(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
+    //   const user: User = req['user']['userId'];
+    //   if (req.user.role !== Role.USER) {
+    //     throw new UnauthorizedException('Unauthorized');
+    //   }
+    //   return this.courseService.removeCourseByUser(courseId, user);
+    // }
 
     @Patch(':courseId/approve')
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -168,16 +179,7 @@ export class CourseController {
       return this.courseService.findUserCourses(userId);
     }
 
-    // @Delete(':courseId')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Roles(Role.USER)
-    // removeCourseByUser(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
-    //   const user: User = req['user']['userId'];
-    //   if (req.user.role !== Role.USER) {
-    //     throw new UnauthorizedException('Unauthorized');
-    //   }
-    //   return this.courseService.removeCourseByUser(courseId, user);
-    // }
+
 
 }
 

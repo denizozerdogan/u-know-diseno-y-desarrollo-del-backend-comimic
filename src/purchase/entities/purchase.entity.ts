@@ -16,14 +16,14 @@ export class Purchase {
 
     @ManyToOne(() => Course, course => course.courseId)
     @JoinColumn({ name: 'courseId', referencedColumnName: 'courseId' })
-    course: Course;
+    course: number;
 
-    // @Column({ default: () => 'CURRENT_TIMESTAMP' })
-    @CreateDateColumn()
+    @Column({ default: () => 'CURRENT_TIMESTAMP' })
+    // @CreateDateColumn()
     created_at: Date;
 
-    // @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    @UpdateDateColumn()
+    @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    // @UpdateDateColumn()
     updated_at: Date;
 
 }

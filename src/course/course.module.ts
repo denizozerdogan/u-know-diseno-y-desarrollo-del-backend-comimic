@@ -3,13 +3,17 @@ import { CourseService } from './course.service';
 import { CourseController } from './course.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Course } from './entities/course.entity';
-import { UserModule } from 'src/user/user.module';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { User } from 'src/user/entities/user.entity';
+import { UserModule } from '../user/user.module';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from '../user/entities/user.entity';
+import { Purchase } from '../purchase/entities/purchase.entity';
+import { PurchaseService } from 'src/purchase/purchase.service';
+import { PurchaseModule } from '../purchase/purchase.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Course, User]), UserModule],
+  imports:[TypeOrmModule.forFeature([Course, User, Purchase]),
+  UserModule, PurchaseModule],
   controllers: [CourseController],
-  providers: [CourseService, JwtAuthGuard]
+  providers: [CourseService, JwtAuthGuard],
 })
 export class CourseModule {}

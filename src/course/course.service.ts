@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, Optional, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,18 +6,22 @@ import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
-import { Purchase } from 'src/purchase/entities/purchase.entity';
+import { PurchaseService } from '../purchase/purchase.service';
 
 
 @Injectable()
 export class CourseService {
+  private purchaseService: PurchaseService;
+
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
     private userService: UserService,
-     // Inject the UserService
+  ) {}
 
- ) {}
+  setPurchaseService(purchaseService: PurchaseService) {
+    this.purchaseService = purchaseService;
+  }
 
  async createCourse(createCourseDto: CreateCourseDto, user: User): Promise<Course> {
   const { title, description, difficulty, topic, content } = createCourseDto;
@@ -50,7 +54,7 @@ export class CourseService {
 }
   
 
-  //Todo los cursos pero sin contenido (publico)
+  //los cursos pero sin contenido (publico)
   async findAll(userRole: string): Promise<Course[]> {
     try {
       if (userRole === 'admin') {
@@ -79,16 +83,13 @@ export class CourseService {
 
   // Curso sin contenido (publico)
   async findOne(courseId: number): Promise<Course> {
-    //try {
+   
       const course = await this.courseRepository.findOne({ where: { courseId }, select: ['title','topic', 'price', 'rating', 'description', 'stars', 'comments'] });
       
       if (!course) {
         throw new NotFoundException(`Course ${courseId} not found.`);
       }
       return course;
-   // } catch (error) {
-   //   throw new Error('Error while fetching the course.');
-   // }
   }
 
 
@@ -128,13 +129,20 @@ export class CourseService {
   
 
 
-  async removeCourse(courseId: number): Promise<boolean> {
+  async removeCoursebyAdmin(courseId: number): Promise<boolean> {
 
     const course = await this.courseRepository.findOne({ where: { courseId } });
 
     if (!course) {
       throw new NotFoundException(`Course with ID '${courseId}' not found`);
-    } const result = await this.courseRepository.delete(courseId);
+    } 
+
+    const coursePurchaseTotal = await this.purchaseService.countCoursePurchases(courseId);
+    if (coursePurchaseTotal > 0) {
+      throw new BadRequestException('This course has buyer and cannot be deleted.')
+    }
+
+    const result = await this.courseRepository.delete(courseId);
 
     if (result.affected === 0) {
       throw new InternalServerErrorException('Failed to delete course');
@@ -195,18 +203,6 @@ export class CourseService {
     return updatedCourse;
   }
 
-  // async findUserCourses(userId: number): Promise<Course[]> {
-  //   try {
-  //     const courses = await this.courseRepository
-  //       .createQueryBuilder('course')
-  //       .where('course.creatorId = :userId', { userId })
-  //       .getMany();
-  //       return courses;
-  //     }
-  //   catch (error) {
-  //     throw new NotFoundException('No courses found for the user.');
-  //   }
-  // }
   async findUserCourses(userId: number): Promise<Course[]> {
     const courses = await this.courseRepository
       .createQueryBuilder('course')
@@ -233,16 +229,7 @@ export class CourseService {
     } catch (error) {
       throw new NotFoundException('No courses found.');
     }
-
-    
   }
-
-  
-  // async removeCourseByUser(courseId: number, userId : number){
-  //   //buscar curso en purchase
-  //   const course = await this.purchaseRepository.findOne({where: {courseId}})
-
-  // }
 }
 
  
