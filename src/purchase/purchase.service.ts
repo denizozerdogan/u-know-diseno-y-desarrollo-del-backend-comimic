@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException} from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -30,6 +30,10 @@ export class PurchaseService {
 
     if (!course) {
       throw new NotFoundException(`Course ${courseId} not found.`);
+    }
+
+    if (user.wallet < course.price) {
+      throw new BadRequestException('Insufficient balance to purchase the course.');
     }
 
     //Update user wallet (-course price)
