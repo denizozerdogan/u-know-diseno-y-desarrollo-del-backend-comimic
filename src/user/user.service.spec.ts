@@ -128,7 +128,7 @@ describe('UserService', () => {
 
     jest.spyOn(authService, 'register').mockRejectedValueOnce(new ConflictException('User with the same email already exists'));
 
-    await expect(authService.register(existingUser)).rejects.toThrowError('User with the same email already exists');
+    expect(await authService.register(existingUser)).rejects.toThrowError('User with the same email already exists');
   });
 
 
@@ -142,7 +142,7 @@ describe('UserService', () => {
       throw new Error('Some error'); // Simula un error al llamar a find()
     });
   
-    await expect(service.getUser()).rejects.toThrowError(ForbiddenException);
+    expect(await service.getUser()).rejects.toThrowError(ForbiddenException);
   });
   
 

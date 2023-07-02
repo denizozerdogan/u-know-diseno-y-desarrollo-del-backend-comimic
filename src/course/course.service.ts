@@ -54,16 +54,34 @@ export class CourseService {
   return this.courseRepository.save(course);
 }
   
+async findAll(userRole: string): Promise<Course[]> {
+  try {
+    if (userRole === 'admin') {
+      return this.courseRepository.find({
+        order: { rating: 'DESC' },
+        select: ['title', 'topic', 'price', 'rating'],
+      });
+    } else {
+      const courses = await this.courseRepository.find({
+        where: { approved: true },
+        order: { rating: 'DESC' },
+        select: ['title', 'topic', 'price', 'rating'],
+      });
 
+      if (!courses || courses.length === 0) {
+        throw new NotFoundException('No approved courses found.');
+      }
+
+      return courses;
+    }
+  } catch (error) {
+    throw new Error('Error while fetching the courses.');
+  }
+}
   //Todo los cursos pero sin contenido (publico)
-  async findAll(): Promise<Course[]> {
+ /*  async findAll(): Promise<Course[]> {
     try {
-   /*    if (userRole === 'admin') {
-        return this.courseRepository.find({
-          order: { rating: 'DESC' },
-          select: ['title', 'topic', 'price', 'rating'],
-        });
-      } else { */
+  
         const courses = await this.courseRepository.find({
           where: { approved: true },
           order: { rating: 'DESC' },
@@ -79,7 +97,7 @@ export class CourseService {
      catch (error) {
       throw new Error('Error while fetching the courses.');
     }
-  }
+  } */
 
 
   // Curso sin contenido (publico)
@@ -136,7 +154,7 @@ export class CourseService {
 
     const coursePurchaseTotal = await this.purchaseService.countCoursePurchases(courseId);
     if (coursePurchaseTotal > 0) {
-      throw new BadRequestException('This course has buyer and cannot be deleted.')
+      throw new BadRequestException('This course has buyers and cannot be deleted.')
     }
 
     const result = await this.courseRepository.delete(courseId);
@@ -303,7 +321,7 @@ export class CourseService {
 
   // ** Calculate the new value of the rating field when a new star is added 
 
-  private async calculateCourseRating(courseId: number): Promise<Course> {
+  async calculateCourseRating(courseId: number): Promise<Course> {
     const course = await this.courseRepository.findOne({ where: { courseId } });
     if (!course) {
       throw new Error('Course not found');
@@ -321,12 +339,10 @@ export class CourseService {
         return total + star.value;
       }, 0);
   
-      
-    const averageRating = (sumRatings - 4.8 * Math.min(totalRatings, 4)) / Math.max(totalRatings - 4, 1);
-    course.rating = parseFloat(averageRating.toFixed(1));
+      const averageRating = sumRatings / totalRatings;
+      course.rating = parseFloat(averageRating.toFixed(1));
     }
-
-    
+  
     if (course.rating < 3) {
       course.price = 100; // Set price to 100 if rating is below 3
     } else {
