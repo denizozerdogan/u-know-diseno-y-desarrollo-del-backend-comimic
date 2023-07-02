@@ -15,6 +15,8 @@ export class PurchaseService {
     private readonly purchaseRepository: Repository<Purchase>,
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
  
   async makePurchase(
@@ -25,6 +27,18 @@ export class PurchaseService {
 
     // const course = await this.courseService.findOne(courseId);
     const course: Course = await this.courseRepository.findOne({where: {courseId}});
+
+    if (!course) {
+      throw new NotFoundException(`Course ${courseId} not found.`);
+    }
+
+    //Update user wallet (-course price)
+    user.wallet -= course.price;
+    await this.userRepository.save(user);
+
+    // update the price of the course (-1%)
+    course.price = course.price * 0.99;
+    await this.courseRepository.save(course);
 
     const existingPurchase = await this.purchaseRepository.findOne({
       where: {

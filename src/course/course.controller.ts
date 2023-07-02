@@ -66,7 +66,7 @@ export class CourseController {
   }
 
   @Get('')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async findAll(@Req() req: Request): Promise<Course[]> {
     try {
       const user = req['user'];
@@ -81,19 +81,19 @@ export class CourseController {
     }
   }
     
-    @Get('search')
-    async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
-      try {
-        const courses = await this.courseService.searchByKeyword(keyword);
-        if (!courses || courses.length === 0) {
-          throw new NotFoundException('No courses found.');
-        }
-        return courses;
-      } catch (error) {
-        
+  @Get('search')
+  async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
+    try {
+      const courses = await this.courseService.searchByKeyword(keyword);
+      if (!courses || courses.length === 0) {
         throw new NotFoundException('No courses found.');
       }
+      return courses;
+    } catch (error) {
+      
+      throw new NotFoundException('No courses found.');
     }
+  }
 
     @Get(':courseId')
     async findOne(@Param('courseId', ParseIntPipe) courseId: number) {

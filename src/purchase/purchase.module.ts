@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Course } from '../course/entities/course.entity';
 import { UserModule } from '../user/user.module';
 import { Purchase } from './entities/purchase.entity';
+import { User } from 'src/user/entities/user.entity';
 
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Course, Purchase]),
+  imports:[TypeOrmModule.forFeature([Course, Purchase, User]),
   UserModule],
   controllers: [PurchaseController],
   providers: [PurchaseService],
