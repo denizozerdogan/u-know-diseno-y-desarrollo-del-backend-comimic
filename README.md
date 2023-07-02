@@ -4,6 +4,7 @@
 
 * [Project Description](#descripcion-del-proyecto)
 * [Key Features](#key-features)
+* [Swagger](#swagger)
 * [Logical Data Model](#ddbb-model)
 * [Technologies](#tecnologias)
 * [Project Developers](#autores)
@@ -56,6 +57,13 @@ U-Know is the new collaborative learning platform. Our goal is to create a commu
 * Updates the price of content when the average rating falls below or equal to 3.
 * Can update a user's information.
 
+<h2 align="center" class="swagger">Swagger</h2>
+<p align="center">
+<img src="assets/swagger1.JPG">
+<img src="assets/swagger-course.JPG">
+<img src="assets/swagger-purchase.JPG">
+</p>
+
 <h2 align="center" class="ddbb-model">Logical Data Model</h2>
 <p align="center">
 <img src="assets/logical%20data%20model.png" align="center">
@@ -88,6 +96,7 @@ U-Know is the new collaborative learning platform. Our goal is to create a commu
 
 * Presentation:
 * Trello: https://trello.com/invite/b/1ayGpBfw/ATTIe5b8416899e11aff79a3daf3e129aa3d258160DD/u-know-api
+* Swagger: http://localhost:3000/docs
 
 
 ---
