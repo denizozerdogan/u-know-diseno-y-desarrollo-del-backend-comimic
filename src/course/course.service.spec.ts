@@ -828,6 +828,7 @@ describe('CourseService', () => {
       expect(service.calculateCourseRating).toHaveBeenCalledWith(courseId);
       expect(result).toEqual(mockCourse);
     });
+    
     it('should throw a NotFoundException when the course is not found', async () => {
       const courseId = 1;
       const userId = 123;
