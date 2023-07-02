@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ExecutionContext, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Optional, UnauthorizedException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,22 +6,23 @@ import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
-import { Purchase } from '../purchase/entities/purchase.entity';
 import { PurchaseService } from '../purchase/purchase.service';
 
 
 @Injectable()
 export class CourseService {
+  // private purchaseService: PurchaseService;
+
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
     private userService: UserService,
-/*     private readonly purchaseService: PurchaseService,
- */    @InjectRepository(Purchase)
-    private readonly purchaseRepository: Repository<Purchase>,
+    private purchaseService: PurchaseService,
+  ) {}
 
-
- ) {}
+  setPurchaseService(purchaseService: PurchaseService) {
+    this.purchaseService = purchaseService;
+  }
 
  async createCourse(createCourseDto: CreateCourseDto, user: User): Promise<Course> {
   const { title, description, difficulty, topic, content } = createCourseDto;
@@ -83,18 +84,14 @@ export class CourseService {
 
   // Curso sin contenido (publico)
   async findOne(courseId: number): Promise<Course> {
-    //try {
-      const course = await this.courseRepository.findOne({ where: { courseId }, select: ['title','topic', 'price', 'rating', 'description', 'stars', 'comments'] });
+   
+      const course = await this.courseRepository.findOne({ where: { courseId }, select: ['courseId','title','topic', 'price', 'rating', 'description', 'stars', 'comments'] });
       
       if (!course) {
         throw new NotFoundException(`Course ${courseId} not found.`);
       }
       return course;
-   // } catch (error) {
-   //   throw new Error('Error while fetching the course.');
-   // }
   }
-
 
   async update(courseId: number, updateCourseDto: UpdateCourseDto, id: number): Promise<Course> {
     const course = await this.courseRepository.findOne({ where: { courseId }, relations: ['creator'] });
@@ -129,19 +126,43 @@ export class CourseService {
   
 
 
-  async removeCourse(courseId: number): Promise<boolean> {
+  async removeCoursebyAdmin(courseId: number): Promise<boolean> {
 
     const course = await this.courseRepository.findOne({ where: { courseId } });
 
     if (!course) {
       throw new NotFoundException(`Course with ID '${courseId}' not found`);
-    } const result = await this.courseRepository.delete(courseId);
+    } 
+
+    const coursePurchaseTotal = await this.purchaseService.countCoursePurchases(courseId);
+    if (coursePurchaseTotal > 0) {
+      throw new BadRequestException('This course has buyer and cannot be deleted.')
+    }
+
+    const result = await this.courseRepository.delete(courseId);
 
     if (result.affected === 0) {
       throw new InternalServerErrorException('Failed to delete course');
     }
 
     return true;
+  }
+
+  //user (author) can remove own course if no one has bought it
+  async deleteCourseIfNoPurchases(courseId: number, creatorId: number): Promise<void> {
+
+    const course = await this.courseRepository.findOne({where: {courseId}});
+    const purchaseCount = await this.purchaseService.countCoursePurchases(courseId);
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID '${courseId}' not found.`);
+    }
+
+    if (purchaseCount === 0) {
+      await this.courseRepository.delete({ courseId, creator: { id: creatorId } });
+    } else {
+      throw new ForbiddenException('This course cannot be deleted as it has been purchased by users.');
+    }
   }
 
   // !! COURSES NOT APPROVED
@@ -196,18 +217,6 @@ export class CourseService {
     return updatedCourse;
   }
 
-  // async findUserCourses(userId: number): Promise<Course[]> {
-  //   try {
-  //     const courses = await this.courseRepository
-  //       .createQueryBuilder('course')
-  //       .where('course.creatorId = :userId', { userId })
-  //       .getMany();
-  //       return courses;
-  //     }
-  //   catch (error) {
-  //     throw new NotFoundException('No courses found for the user.');
-  //   }
-  // }
   async findUserCourses(userId: number): Promise<Course[]> {
     const courses = await this.courseRepository
       .createQueryBuilder('course')
@@ -236,6 +245,34 @@ export class CourseService {
     }
   }
 
+  async addCommentToCourse(courseId: number, userId: number, comment: string): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+  
+    if (!course) {
+      throw new NotFoundException(`Course ${courseId} not found.`);
+    }
+  
+    const existingComment = course.comments?.find((c) => c.userId === userId);
+    const hasPurchased = await this.purchaseService.hasPurchasedCourse(courseId, userId);
+  
+    if (!hasPurchased) {
+      throw new ForbiddenException('You can only comment on courses you have purchased.');
+    }
+  
+    if (course.comments === null) {
+      course.comments = [];
+    }
+  
+    if (existingComment) {
+      throw new BadRequestException('You have already commented on this course.');
+    }
+  
+    course.comments.push({ userId, value: comment });
+  
+    return this.courseRepository.save(course);
+  }
+  
+  
   // ** To validate the user bought and owns the course
   async validateCoursePurchase(userId: number, courseId: number): Promise<boolean> {
     const purchase = await this.purchaseRepository.findOne({
@@ -307,16 +344,7 @@ export class CourseService {
     await this.courseRepository.save(course);
 
     return course;
-  }
-
 }
-
-  // async removeCourseByUser(courseId: number, userId : number){
-  //   //buscar curso en purchase
-  //   const course = await this.purchaseRepository.findOne({where: {courseId}})
-
-  // }
-
 
  
   // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {

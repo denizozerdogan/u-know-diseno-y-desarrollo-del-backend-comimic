@@ -5,7 +5,10 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Course } from '../course/entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { Purchase } from './entities/purchase.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Role } from 'src/user/entities/role.enum';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @ApiBearerAuth()
 @ApiTags('purchase')
@@ -13,14 +16,15 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
   @Post('')
   async createPurchase(
     @Body() createPurchaseDto: CreatePurchaseDto,
     @Req() req: Request, 
   ): Promise<Purchase> {
-    const user: User = req['user']['userId'];
-    createPurchaseDto.userId = user; 
+    const user: User = req['user'];
+    createPurchaseDto.userId = user.id; 
     return this.purchaseService.makePurchase(createPurchaseDto, user);
   }
 
@@ -30,10 +34,25 @@ export class PurchaseController {
     return { count };
   }
 
+  //User can see all courses purchased
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  @Get('user-courses')
+    async getUserCourses(@Req() req: Request): Promise<Course[]> {
+    const user: User = req['user'];
+    return this.purchaseService.getUserPurchasedCourses(user);
+  }
 
-  @Get()
-  findAll() {
-    return this.purchaseService.findAll();
+  //User can choose see one course purchased
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  @Get('user-courses/:courseId')
+  async getUserPurchase(
+    @Req() req: Request,
+    @Param('courseId') courseId: number,
+  ): Promise<Course> {
+    const user: User = req['user'];
+    return this.purchaseService.getUserPurchasedCourse(user, courseId);
   }
 
 }

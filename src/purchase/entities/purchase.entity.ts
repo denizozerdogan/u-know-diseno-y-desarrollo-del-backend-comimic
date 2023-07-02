@@ -18,11 +18,11 @@ export class Purchase {
     @JoinColumn({ name: 'courseId', referencedColumnName: 'courseId' })
     course: Course;
 
-    // @Column({ default: () => 'CURRENT_TIMESTAMP' })
+    //@Column({ default: () => 'CURRENT_TIMESTAMP' })
     @CreateDateColumn()
     created_at: Date;
 
-    // @Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    //@Column({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     @UpdateDateColumn()
     updated_at: Date;
 

@@ -18,8 +18,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
-/* import { Request } from 'express';
- */import { CourseService } from './course.service';
+import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
@@ -43,7 +42,7 @@ export class CourseController {
     @Body() createCourseDto: CreateCourseDto,
     @Req() req,
   ): Promise<Course> {
-    const user: User = req['user']['userId'];
+    const user: User = req['user'];
     createCourseDto.creatorId = user.id;
     
     return this.courseService.createCourse(createCourseDto, user);
@@ -128,14 +127,24 @@ export class CourseController {
       }
     }
 
-    @Delete(':courseId')
+    @Delete('admin/:courseId')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     removeCourse(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
       if (req.user.role !== Role.ADMIN) {
         throw new UnauthorizedException('Unauthorized');
       }
-      return this.courseService.removeCourse(courseId);
+      return this.courseService.removeCoursebyAdmin(courseId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(':courseId')
+    async deleteCourse(
+      @Param('courseId') courseId: number,
+      @Req() req: Request,
+    ): Promise<void> {
+      const user: User= req['user'];
+      await this.courseService.deleteCourseIfNoPurchases(courseId, user.id);
     }
 
     @Patch(':courseId/approve')
@@ -180,16 +189,21 @@ export class CourseController {
       return updatedCourse;
     }
 
-    // @Delete(':courseId')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Roles(Role.USER)
-    // removeCourseByUser(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
-    //   const user: User = req['user']['userId'];
-    //   if (req.user.role !== Role.USER) {
-    //     throw new UnauthorizedException('Unauthorized');
-    //   }
-    //   return this.courseService.removeCourseByUser(courseId, user);
-    // }
+    //a buyer can comment once one course that he bought
+    @Post(':courseId/comment')
+    @UseGuards(JwtAuthGuard)
+    async addComment(
+      @Param('courseId') courseId: number,
+      @Req() req: Request,
+      @Body('comment') comment: string,
+    ): Promise<Course> {
+      const user: User = req['user'];
+
+      return this.courseService.addCommentToCourse(courseId, user.id, comment);
+    }
+
+
+
 
 }
 

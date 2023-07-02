@@ -1,47 +1,46 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException} from '@nestjs/common';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Purchase } from './entities/purchase.entity';
-import { Course } from '../course/entities/course.entity';
 import { User } from '../user/entities/user.entity';
-import { UserService } from '../user/user.service';
 import { CourseService } from '../course/course.service';
+import { Course } from 'src/course/entities/course.entity';
 
 @Injectable()
 export class PurchaseService {
-  
+
   constructor(
     @InjectRepository(Purchase)
     private readonly purchaseRepository: Repository<Purchase>,
-    private userService: UserService,
-/*     private courseService: CourseService,
- */    
+    @InjectRepository(Course)
+    private readonly courseRepository: Repository<Course>,
   ) {}
-  
  
   async makePurchase(
     createPurchaseDto: CreatePurchaseDto,
-    userId: User,
+    user: User,
   ): Promise<Purchase> {
-    
-  
     const { courseId } = createPurchaseDto;
+
+    // const course = await this.courseService.findOne(courseId);
+    const course: Course = await this.courseRepository.findOne({where: {courseId}});
 
     const existingPurchase = await this.purchaseRepository.findOne({
       where: {
-        buyer: userId,
-        course: courseId,
+        buyer: { id: user.id },
+        course: { courseId: courseId },
       },
     });
+
   
     if (existingPurchase) {
       throw new ConflictException('You have already purchased this course.');
     }
-    
+
     const purchase = new Purchase();
-    purchase.buyer = userId;
-    purchase.course = courseId;
+    purchase.buyer = user;
+    purchase.course = course;
   
     return this.purchaseRepository.save(purchase);
   }
@@ -55,25 +54,61 @@ export class PurchaseService {
     return coursePurchaseTotal;
   }
 
-  findAll() {
-    return `This action returns all purchase`;
-  }
-/* 
-  async findOneByCourseId(courseId: number): Promise<Purchase> {
-    const purchase = await this.purchaseRepository.findOne({ where: { course: { courseId } } });
-  
-    if (!purchase) {
-      throw new NotFoundException(`Purchase for course ${courseId} not found.`);
-    }
-  
-    return purchase;
-  }
- */
+  //All courses
+  async getUserPurchasedCourses(user: User): Promise<Course[]> {
+    const purchases = await this.purchaseRepository.find({
+      where: {
+        buyer: { id: user.id },
+      },
+      relations: ['course'],
+    });
 
-/*   remove(id: number) {
+    if (purchases.length === 0) {
+      throw new NotFoundException('No purchased courses found for the user.');
+    }
+
+    return purchases.map((purchase) => purchase.course);
+  }
+
+  //Just one course
+  async getUserPurchasedCourse(user: User, courseId: number): Promise<Course> {
+    const purchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: { id: user.id },
+        course: { courseId },
+      },
+      relations: ['course'],
+    });
+
+    if (!purchase) {
+      throw new NotFoundException('The user has not purchased this course.');
+    }
+
+    return purchase.course;
+  }
+  
+  findOne(id: number) {
+    return `This action returns a #${id} purchase`;
+  }
+
+  remove(id: number) {
     return `This action removes a #${id} purchase`;
-  } */
-}
+  }
+
+  async hasPurchasedCourse(courseId: number, userId: number): Promise<boolean> {
+    const purchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: { id: userId },
+        course: { courseId },
+      },
+    });
+    return !!purchase;
+  }
+  
+  
+  }
+  
+
 
 // update(id: number, updatePurchaseDto: UpdatePurchaseDto) {
 //     return `This action updates a #${id} purchase`;
