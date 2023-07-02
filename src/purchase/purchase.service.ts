@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Purchase } from './entities/purchase.entity';
 import { User } from '../user/entities/user.entity';
 import { CourseService } from '../course/course.service';
-import { Course } from 'src/course/entities/course.entity';
+import { Course } from '../course/entities/course.entity';
 
 @Injectable()
 export class PurchaseService {

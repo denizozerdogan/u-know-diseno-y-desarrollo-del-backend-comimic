@@ -325,6 +325,13 @@ export class CourseService {
     const averageRating = (sumRatings - 4.8 * Math.min(totalRatings, 4)) / Math.max(totalRatings - 4, 1);
     course.rating = parseFloat(averageRating.toFixed(1));
     }
+
+    
+    if (course.rating < 3) {
+      course.price = 100; // Set price to 100 if rating is below 3
+    } else {
+      course.price = 200; // Set price back to default 200 if rating is 3 or above
+    }
   
     await this.courseRepository.save(course);
   

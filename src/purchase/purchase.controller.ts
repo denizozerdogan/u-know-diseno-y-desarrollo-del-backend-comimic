@@ -5,10 +5,10 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Course } from '../course/entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { Purchase } from './entities/purchase.entity';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Role } from 'src/user/entities/role.enum';
-import { RolesGuard } from 'src/auth/roles.guard';
-import { Roles } from 'src/auth/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Role } from '../user/entities/role.enum';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiBearerAuth()
 @ApiTags('purchase')

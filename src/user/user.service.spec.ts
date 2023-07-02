@@ -268,17 +268,6 @@ describe('UserService', () => {
     expect(user).toEqual(expectedUser);
     expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } });
     })  
-  
-  /* it('should return a user when a valid email is provided', async () => {
-    const email = 'diego@example.com';
-    const expectedUser = { id: 1, email: 'diego@example.com' };
-
-    jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValue(expectedUser);
-
-    const user = await mockUserRepositoryService.findOne(email);
-
-    expect(user).toEqual(expectedUser);
-    expect(mockUserRepositoryService.findOne).toHaveBeenCalledWith({ where: { email } }); */
 
     it('should throw an error if the user ID does not exist', async () => {
       const nonExistingUserId = 999;

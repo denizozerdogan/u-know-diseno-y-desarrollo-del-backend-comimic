@@ -141,7 +141,7 @@ export class CourseController {
     @Delete(':courseId')
     async deleteCourse(
       @Param('courseId') courseId: number,
-      @Req() req: Request,
+      @Req() req,
     ): Promise<void> {
       const user: User= req['user'];
       await this.courseService.deleteCourseIfNoPurchases(courseId, user.id);
@@ -179,10 +179,14 @@ export class CourseController {
       @Body('stars') stars: number,
       @Req() req
     ): Promise<Course> {
-      const userId = req.user.id; 
-    
-      const updatedCourse = await this.courseService.updateCourseStars(courseId, userId, stars);
-      return updatedCourse;
+      try {
+        const userId = req.user.id;
+        const updatedCourse = await this.courseService.updateCourseStars(courseId, userId, stars);
+        return updatedCourse;
+      } catch (error) {
+        // Catch any errors thrown by the service and propagate them through the controller
+        throw error;
+      }
     }
 
     //a buyer can comment once one course that he bought
@@ -190,7 +194,7 @@ export class CourseController {
     @UseGuards(JwtAuthGuard)
     async addComment(
       @Param('courseId') courseId: number,
-      @Req() req: Request,
+      @Req() req,
       @Body('comment') comment: string,
     ): Promise<Course> {
       const user: User = req['user'];

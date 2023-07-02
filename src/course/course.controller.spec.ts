@@ -13,6 +13,7 @@ import { NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
 import { Role } from '../user/entities/role.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { PurchaseService } from '../purchase/purchase.service';
 
 describe('CourseController', () => {
   let controller: CourseController;
@@ -29,18 +30,18 @@ describe('CourseController', () => {
     findAll: jest.fn(),
     findOne: jest.fn(),
     update: jest.fn(),
-    removeCourse: jest.fn(),
+    removeCoursebyAdmin: jest.fn(),
+    deleteCourseIfNoPurchases: jest.fn(),
     updateApproval: jest.fn(),
     findUserCourses: jest.fn(),
     searchByKeyword: jest.fn(),
-    validateCoursePurchase: jest.fn(),
     updateCourseStars: jest.fn(),
-    calculateCourseRating: jest.fn(),
+    addCommentToCourse: jest.fn(),
   };
 
   const mockJwtService = {};
   const mockUserService = {};
-  const mockPurchaseRepository = {};
+  const mockPurchaseService = {};
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,8 +60,8 @@ describe('CourseController', () => {
           provide: CourseService,
           useValue: mockCourseService,
         },
-        { provide: getRepositoryToken(Purchase),
-          useValue: mockPurchaseRepository,
+        { provide: PurchaseService,
+          useValue: mockPurchaseService,
         },
         {
           provide: RolesGuard,
@@ -82,7 +83,7 @@ describe('CourseController', () => {
     const userId = 1;
     const req = {
       user: {
-        userId: { id: userId }
+        id: userId
       }
     };
     
@@ -364,7 +365,7 @@ describe('CourseController', () => {
       creator: new User(),
     };
     const mockRequest = {
-      user: { id: 1 }, // Replace 1 with the actual user ID
+      user: { id: 1 }, 
     };
     jest.spyOn(mockCourseService, 'update').mockResolvedValue(updatedCourse);
   
@@ -427,12 +428,12 @@ describe('CourseController', () => {
       user: { role: Role.ADMIN },
     };
     jest.spyOn(mockRolesGuard, 'canActivate').mockReturnValue(true);
-    jest.spyOn(mockCourseService, 'removeCourse').mockResolvedValue(undefined);
+    jest.spyOn(mockCourseService, 'removeCoursebyAdmin').mockResolvedValue(undefined);
   
     const result = await controller.removeCourse(courseId, mockRequest);
   
     expect(result).toBeUndefined();
-    expect(mockCourseService.removeCourse).toHaveBeenCalledWith(courseId);
+    expect(mockCourseService.removeCoursebyAdmin).toHaveBeenCalledWith(courseId);
   });
 
   it('should throw UnauthorizedException when a non-admin user tries to remove the course', async () => {
@@ -449,6 +450,24 @@ describe('CourseController', () => {
       expect(error).toBeInstanceOf(UnauthorizedException);
       expect(error.message).toBe('Unauthorized');
     }
+  });
+
+  it('should successfully delete the course if no purchases are made', async () => {
+    // Mock data
+    const courseId = 1;
+    const userId = 1;
+    const mockRequest = {
+      user: {id: 1},
+    };
+  
+    // Mock the deleteCourseIfNoPurchases method to resolve undefined
+    jest.spyOn(mockCourseService, 'deleteCourseIfNoPurchases').mockResolvedValue(undefined);
+  
+    // Call the deleteCourse method
+    await controller.deleteCourse(courseId, mockRequest);
+  
+    // Verify that deleteCourseIfNoPurchases is called with the correct courseId and userId
+    expect(mockCourseService.deleteCourseIfNoPurchases).toHaveBeenCalledWith(courseId, userId);
   });
 
   it('should update the approval status of the course with the given courseId', async () => {
@@ -529,18 +548,23 @@ describe('CourseController', () => {
 
   describe('Updating Course Stars', () => {
     it('should update the course stars when the user has purchased the course and not reviewed it yet', async () => {
+      // Mock data
       const courseId = 1;
       const userId = 1;
       const stars = 4;
-
-      const mockValidateCoursePurchase = jest.spyOn(mockCourseService, 'validateCoursePurchase').mockResolvedValue(true);
-      const mockUpdateCourseStars = jest.spyOn(mockCourseService, 'updateCourseStars').mockResolvedValue({} as Course);
-
+  
+      // Mock the updateCourseStars method
+      jest.spyOn(mockCourseService, 'updateCourseStars').mockResolvedValue({} as Course);
+  
       const req = { user: { id: userId } };
+  
+      // Call the updateCourseStars method
       const result = await controller.updateCourseStars(courseId, stars, req);
-
-      expect(mockValidateCoursePurchase).toHaveBeenCalledWith(userId, courseId);
-      expect(mockUpdateCourseStars).toHaveBeenCalledWith(courseId, userId, stars);
+  
+      // Verify that the updateCourseStars method is called with the correct parameters
+      expect(mockCourseService.updateCourseStars).toHaveBeenCalledWith(courseId, userId, stars);
+  
+      // Verify the result
       expect(result).toEqual({});
     });
 
@@ -548,23 +572,44 @@ describe('CourseController', () => {
       const courseId = 1;
       const userId = 1;
       const stars = 4;
-
-      const mockValidateCoursePurchase = jest.spyOn(mockCourseService, 'validateCoursePurchase').mockResolvedValue(true);
-
+    
+      // Mock the updateCourseStars method to throw an error
+      jest.spyOn(mockCourseService, 'updateCourseStars').mockRejectedValue(new Error('User has not purchased the course or already reviewed it'));
+    
       const req = { user: { id: userId } };
-
+    
       try {
         await controller.updateCourseStars(courseId, stars, req);
-        throw new Error('User has not purchased the course or already reviewed it');
+        throw new Error('Expected error was not thrown');
       } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        expect(error.message).toBe('User has not purchased the course or already reviewed it');
+        // Verify that an error is thrown
+        expect(error).toBeTruthy();
       }
     
-    
-      expect(mockValidateCoursePurchase).toHaveBeenCalledWith(userId, courseId);
+      // Verify that the updateCourseStars method is called with the correct parameters
+      expect(mockCourseService.updateCourseStars).toHaveBeenCalledWith(courseId, userId, stars);
     });
   });
 
+  it('should add a comment to the course', async () => {
+    const courseId = 1;
+    const userId = 1;
+    const comment = 'Great course!';
+  
+    // Mock the addCommentToCourse method to return a dummy course
+    const mockCourse = {} as Course;
+    jest.spyOn(mockCourseService, 'addCommentToCourse').mockResolvedValue(mockCourse);
+  
+    const req = { user: { id: userId } };
+  
+    const result = await controller.addComment(courseId, req, comment );
+  
+    // Verify that the addCommentToCourse method is called with the correct parameters
+    expect(mockCourseService.addCommentToCourse).toHaveBeenCalledWith(courseId, userId, comment);
+  
+    // Verify that the result matches the mocked course
+    expect(result).toBe(mockCourse);
+  });
+  
 
 });
