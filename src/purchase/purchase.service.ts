@@ -104,7 +104,17 @@ export class PurchaseService {
     });
     return !!purchase;
   }
+  async isCourseReviewed(courseId: number, userId: number): Promise<boolean> {
+    const purchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: { id: userId },
+        course: { courseId },
+        reviewed: true, // Assuming reviewed is a property in the Purchase entity
+      },
+    });
   
+    return !!purchase;
+  }
   
   }
   

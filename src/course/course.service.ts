@@ -273,80 +273,64 @@ export class CourseService {
   }
   
   
-  // ** To validate the user bought and owns the course
-  async validateCoursePurchase(userId: number, courseId: number): Promise<boolean> {
-    const purchase = await this.purchaseRepository.findOne({
-      where: {
-        buyer: { id: userId },
-        course: { courseId },
-        reviewed: false,
-      },
-    });
 
-    return !!purchase;
-  };
-
- // ** To update the course stars 
+  // ** To update the course stars 
   async updateCourseStars(courseId: number, userId: number, stars: number): Promise<Course> {
-  
-    const course = await this.courseRepository.findOne({where: {courseId }});
+    const course = await this.courseRepository.findOne({ where: { courseId } });
     if (!course) {
       throw new Error('Course not found');
     }
-    // Check if the user has already reviewed the course
-    const isReviewed = await this.purchaseRepository
-    .createQueryBuilder('purchase')
-    .where('purchase.course.courseId = :courseId', { courseId })
-    .andWhere('purchase.user.userId = :userId', { userId })
-    .andWhere('purchase.reviewed = true')
-    .getOne();
-
-    if (isReviewed) {
-      throw new Error('User has already reviewed the course');
+  
+    const hasPurchased = await this.purchaseService.hasPurchasedCourse(courseId, userId);
+  
+    if (!hasPurchased) {
+      throw new ForbiddenException('You can only rate courses you have purchased.');
     }
+  
+    const isReviewed = await this.purchaseService.isCourseReviewed(courseId, userId);
+  
+    if (isReviewed) {
+      throw new BadRequestException('You have already rated this course.');
+    }
+  
+    // Update the course stars
     course.stars = [{ value: stars }];
     await this.courseRepository.save(course);
-
-    isReviewed.reviewed = true; // Set the reviewed column to true
-    await this.purchaseRepository.save(isReviewed);
   
     const updatedCourse = await this.calculateCourseRating(courseId);
     return updatedCourse;
   }
 
   // ** Calculate the new value of the rating field when a new star is added 
-  private async calculateCourseRating(courseId: number): Promise<Course> {
-    const course = await this.courseRepository.findOne({where: {courseId }});
 
+  private async calculateCourseRating(courseId: number): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
     if (!course) {
       throw new Error('Course not found');
     }
-
-    const reviewedPurchases = await this.purchaseRepository.find({
-      where: {
-        course: {
-          courseId,
-        },
-        reviewed: true,
-      },
-    });
-
-    const totalRatings = reviewedPurchases.length;
-
+  
+    const totalRatings = course.stars?.length || 0;
+  
     if (totalRatings === 0) {
       course.rating = 0;
     } else {
-      const sumRatings = reviewedPurchases.reduce((total, purchase) => total + purchase.course.stars[0].value, 0);
-      const averageRating = (sumRatings - 4.8 * Math.min(totalRatings, 4)) / Math.max(totalRatings - 4, 1);
-      course.rating = parseFloat(averageRating.toFixed(1));
+      const sumRatings = course.stars.reduce((total, star, index) => {
+        if (index < 4) {
+          return total + 4.8;
+        }
+        return total + star.value;
+      }, 0);
+  
+      
+    const averageRating = (sumRatings - 4.8 * Math.min(totalRatings, 4)) / Math.max(totalRatings - 4, 1);
+    course.rating = parseFloat(averageRating.toFixed(1));
     }
-
+  
     await this.courseRepository.save(course);
-
+  
     return course;
+  }
 }
-
- 
   // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
   //   const course = await this.courseRepository
   //     .createQueryBuilder('course')
