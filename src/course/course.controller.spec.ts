@@ -546,7 +546,7 @@ describe('CourseController', () => {
     expect(mockCourseService.findUserCourses).toHaveBeenCalledTimes(1);
   });
 
-  describe('Updating Course Stars', () => {
+
     it('should update the course stars when the user has purchased the course and not reviewed it yet', async () => {
       // Mock data
       const courseId = 1;
@@ -589,7 +589,6 @@ describe('CourseController', () => {
       // Verify that the updateCourseStars method is called with the correct parameters
       expect(mockCourseService.updateCourseStars).toHaveBeenCalledWith(courseId, userId, stars);
     });
-  });
 
   it('should add a comment to the course', async () => {
     const courseId = 1;
