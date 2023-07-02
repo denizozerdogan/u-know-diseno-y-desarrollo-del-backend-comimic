@@ -93,10 +93,6 @@ export class CourseService {
       return course;
   }
 
-
-
-
-
   async update(courseId: number, updateCourseDto: UpdateCourseDto, id: number): Promise<Course> {
     const course = await this.courseRepository.findOne({ where: { courseId }, relations: ['creator'] });
 
@@ -154,7 +150,7 @@ export class CourseService {
 
   //user (author) can remove own course if no one has bought it
   async deleteCourseIfNoPurchases(courseId: number, creatorId: number): Promise<void> {
-    
+
     const course = await this.courseRepository.findOne({where: {courseId}});
     const purchaseCount = await this.purchaseService.countCoursePurchases(courseId);
 
@@ -248,6 +244,35 @@ export class CourseService {
       throw new NotFoundException('No courses found.');
     }
   }
+
+  async addCommentToCourse(courseId: number, userId: number, comment: string): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+  
+    if (!course) {
+      throw new NotFoundException(`Course ${courseId} not found.`);
+    }
+  
+    const existingComment = course.comments?.find((c) => c.userId === userId);
+    const hasPurchased = await this.purchaseService.hasPurchasedCourse(courseId, userId);
+  
+    if (!hasPurchased) {
+      throw new ForbiddenException('You can only comment on courses you have purchased.');
+    }
+  
+    if (course.comments === null) {
+      course.comments = [];
+    }
+  
+    if (existingComment) {
+      throw new BadRequestException('You have already commented on this course.');
+    }
+  
+    course.comments.push({ userId, value: comment });
+  
+    return this.courseRepository.save(course);
+  }
+  
+  
 }
 
  

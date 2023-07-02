@@ -94,7 +94,21 @@ export class PurchaseService {
   remove(id: number) {
     return `This action removes a #${id} purchase`;
   }
-}
+
+  async hasPurchasedCourse(courseId: number, userId: number): Promise<boolean> {
+    const purchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: { id: userId },
+        course: { courseId },
+      },
+    });
+    return !!purchase;
+  }
+  
+  
+  }
+  
+
 
 // update(id: number, updatePurchaseDto: UpdatePurchaseDto) {
 //     return `This action updates a #${id} purchase`;

@@ -152,18 +152,6 @@ export class CourseController {
       await this.courseService.deleteCourseIfNoPurchases(courseId, user.id);
     }
 
-
-    // @Delete('user/:courseId')
-    // @UseGuards(JwtAuthGuard, RolesGuard)
-    // @Roles(Role.USER)
-    // removeCourseByUser(@Param('courseId', ParseIntPipe) courseId: number, @Req() req) {
-    //   const user: User = req['user']['userId'];
-    //   if (req.user.role !== Role.USER) {
-    //     throw new UnauthorizedException('Unauthorized');
-    //   }
-    //   return this.courseService.removeCourseByUser(courseId, user);
-    // }
-
     @Patch(':courseId/approve')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
@@ -188,6 +176,20 @@ export class CourseController {
     async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
       return this.courseService.findUserCourses(userId);
     }
+
+    //a buyer can comment once one course that he bought
+    @Post(':courseId/comment')
+    @UseGuards(JwtAuthGuard)
+    async addComment(
+      @Param('courseId') courseId: number,
+      @Req() req: Request,
+      @Body('comment') comment: string,
+    ): Promise<Course> {
+      const user: User = req['user'];
+
+      return this.courseService.addCommentToCourse(courseId, user.id, comment);
+    }
+
 
 
 

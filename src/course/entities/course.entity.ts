@@ -51,7 +51,7 @@ export class Course {
     stars: Array<{ value: number }>;
 
     @Column({ type: 'json', nullable: true })
-    comments: Array<{ value: string }>;
+    comments: Array<{ userId: number; value: string }>;
 
     @Column({ type: 'text', nullable: true })
     content: string;
