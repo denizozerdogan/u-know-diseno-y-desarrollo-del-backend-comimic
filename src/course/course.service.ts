@@ -197,22 +197,26 @@ export class CourseService {
     }
   }
   
-
-
-
-  //!! WARNING arreglar wallet!
-  async updateApproval(courseId: number, approval: boolean): Promise<Course> {
-    const course = await this.courseRepository.findOne({ where: { courseId } });
+  async updateApproval(courseId: number, approval: boolean, walletAmount): Promise<Course> {
+    const course = await this.courseRepository.findOne(
+      { 
+        where: { courseId },
+        relations: ['creator'],
+      });
     
     if (!course) {
       throw new NotFoundException('Course not found.');
+    }
+
+    if (course.approved) {
+      throw new ConflictException('Course has already been approved.');
     }
 
     course.approved = approval;
     const updatedCourse = await this.courseRepository.save(course);
 
     //Llama a la función updateUserWallet del UserService
-    await this.userService.updateUserWallet(course.creator.id, 100); 
+    await this.userService.updateUserWallet(course.creator.id, walletAmount); 
 
     return updatedCourse;
   }
@@ -272,7 +276,7 @@ export class CourseService {
     return this.courseRepository.save(course);
   }
 
-  
+
   
   
 }

@@ -1,23 +1,18 @@
 import { 
   Controller,
-   Get,
-   Post,
-   Body,
-   Patch,
-   Param,
-   Delete,
-   Req,
-  UseGuards,
+   Get,Post,
+   Body,Patch,
+   Param,Delete,
+   Req,UseGuards,
   NotFoundException,
-  HttpStatus,
-  Res,
   UnauthorizedException,
-  ParseIntPipe,
-  ConflictException,
-  Query,
+  ParseIntPipe,Query, BadRequestException, ConflictException,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -30,11 +25,14 @@ import { Role } from '../user/entities/role.enum';
 
 
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('course')
 @Controller('course')
 export class CourseController {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,)
+ {}
 
   @Post('course-creation')
   @UseGuards(JwtAuthGuard)
@@ -128,7 +126,7 @@ export class CourseController {
         if (error instanceof NotFoundException) {
           throw new NotFoundException('Course not found.');
         }
-        throw new Error('Failed to update the course.');
+        throw new NotFoundException('Failed to update the course.');
       }
     }
 
@@ -159,14 +157,24 @@ export class CourseController {
       @Param('courseId') courseId: string,
     ): Promise<Course> {
       try {
-        const updatedCourse = await this.courseService.updateApproval(+courseId, true);
+        const updatedCourse = await this.courseService.updateApproval(+courseId, true,50);
         if (!updatedCourse) {
           throw new NotFoundException('Course not found.');
         }
+
+        const creator = updatedCourse.creator;
+        creator.wallet += 50;
+        await this.userRepository.save(creator);
+
+
         return updatedCourse;
       } catch (error) {
-        throw new Error('Failed to update the course.');
-   
+
+        if (error instanceof ConflictException) {
+          throw error;
+        }
+    
+        throw new BadRequestException('Failed to update the course.');
       }
     }
 
