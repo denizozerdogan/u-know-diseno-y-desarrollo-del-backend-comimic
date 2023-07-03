@@ -95,14 +95,20 @@ async getUserById(id: number): Promise<User> {
         throw new NotFoundException('User not found');
       }
   
-      Object.assign(toUpdate, updateUserDto);
+      toUpdate.bio = updateUserDto.bio;
+
+      if (updateUserDto.bio !== undefined) {
+        toUpdate.bio = updateUserDto.bio;
+      } else {
+        throw new Error('Invalid field(s) for update');
+      }
   
       return await this.userRepository.save(toUpdate);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       } else {
-        throw new Error('Failed to update user');
+        throw new BadRequestException('Failed to update user');
       }
     }
   }

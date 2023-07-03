@@ -127,7 +127,7 @@ export class PurchaseService {
       where: {
         buyer: { id: userId },
         course: { courseId },
-        reviewed: true, // Assuming reviewed is a property in the Purchase entity
+        reviewed: true,
       },
     });
   
@@ -136,8 +136,3 @@ export class PurchaseService {
   
   }
   
-
-
-// update(id: number, updatePurchaseDto: UpdatePurchaseDto) {
-//     return `This action updates a #${id} purchase`;
-//   }

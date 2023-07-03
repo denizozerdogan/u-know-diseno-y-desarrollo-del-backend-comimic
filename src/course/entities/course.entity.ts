@@ -1,13 +1,20 @@
 import { ApiTags } from "@nestjs/swagger";
-import { IsInt, Min, Max } from "class-validator";
+import {  Min, Max } from "class-validator";
 import { User } from "../../user/entities/user.entity";
-import { ManyToMany, JoinTable, Column, Entity, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, JoinColumn, ManyToOne } from "typeorm";
+import {  Column, Entity, PrimaryGeneratedColumn,  JoinColumn, ManyToOne } from "typeorm";
+
 
 
 export enum courseDifficulty {
     Easy = 'Easy',
     Medium = 'Medium',
     Hard = 'Hard',
+}
+
+export class StarValue {
+  @Min(0)
+  @Max(5)
+  value: number;
 }
 
 @ApiTags('course')
@@ -46,9 +53,9 @@ export class Course {
 
     @Column({ type: 'decimal', precision: 2, scale: 1, default: 5 })
     rating: number;
-
+    
     @Column({ type: 'json', nullable: true })
-    stars: Array<{ value: number }>;
+    stars:StarValue[];
 
     @Column({ type: 'json', nullable: true })
     comments: Array<{ userId: number; value: string }>;

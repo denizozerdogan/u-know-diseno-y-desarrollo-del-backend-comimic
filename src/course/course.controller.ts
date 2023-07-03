@@ -40,7 +40,7 @@ export class CourseController {
     @Body() createCourseDto: CreateCourseDto,
     @Req() req,
   ): Promise<Course> {
-    const user: User = req['user'];
+    const user: User = req['user']['userId'];
     createCourseDto.creatorId = user.id;
     
     return this.courseService.createCourse(createCourseDto, user);
@@ -77,9 +77,10 @@ export class CourseController {
     async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
       try { 
         const courses = await this.courseService.searchByKeyword(keyword);
-       /*  if (!courses || courses.length === 0) {
+       
+        if (courses.length === 0) {
           throw new NotFoundException('No courses found.');
-        } */
+        }
         return courses;
       } catch (error) {
         
@@ -148,14 +149,14 @@ export class CourseController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async approveCourse(
-      @Param('courseId') courseId: number,
+      @Param('courseId') courseId: number, @Body('approved') approved: boolean
     ): Promise<Course> {
       try {
         const updatedCourse = await this.courseService.updateApproval(courseId, true);
 
-        if (!updatedCourse) {
-          throw new NotFoundException('Course not found.');
-        }
+        // if (!updatedCourse) {
+        //   throw new NotFoundException('Course not found.');
+        // }
 
         const creator = updatedCourse.creator;
         await this.userRepository.save(creator);
@@ -175,9 +176,14 @@ export class CourseController {
     @Get(':id/mycourses')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.USER)
-    async findUserCourses(@Param('id') userId: number): Promise<Course[]> {
-      return this.courseService.findUserCourses(userId);
+    async findUserCourses(@Param('id') userId: number, @Req() req): Promise<Course[]> {
+      if (req.user.id === userId) {
+        return this.courseService.findUserCourses(userId);
+      } else {
+        throw new UnauthorizedException('Unauthorized');
+      }
     }
+    
 
     //a buyer can comment once one course that he bought
     @Post(':courseId/comment')

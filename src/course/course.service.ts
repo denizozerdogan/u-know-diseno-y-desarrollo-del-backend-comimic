@@ -7,6 +7,7 @@ import { Course } from './entities/course.entity';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { PurchaseService } from '../purchase/purchase.service';
+import { validate } from 'class-validator';
 
 
 @Injectable()
@@ -25,33 +26,42 @@ export class CourseService {
   }
 
  async createCourse(createCourseDto: CreateCourseDto, user: User): Promise<Course> {
-  const { title, description, difficulty, topic, content } = createCourseDto;
+  try {
 
+    const { title, description, difficulty, topic, content } = createCourseDto;
 
-  // Check if a course with the same description already exists
-  const existingCourseWithDescription = await this.courseRepository.findOne({ where: { description } });
-  if (existingCourseWithDescription) {
-    throw new ConflictException('A course with the same description already exists.');
-  }
-  const existingCourseWithTitle = await this.courseRepository.findOne({ where: { title } });
-  if (existingCourseWithTitle) {
-    throw new ConflictException('A course with the same title already exists.');
-  }
-  const existingCourseWithContent = await this.courseRepository.findOne({ where: { content } });
-  if (existingCourseWithContent) {
-    throw new ConflictException('A course with the same content already exists.');
-  }
+    const validationErrors = await validate(createCourseDto);
+    if (validationErrors.length > 0) {
+      throw new BadRequestException('Missing required field(s).');
+    }
 
-    const course = new Course();
-    course.title = title;
-    course.description = description;
-    course.difficulty = difficulty;
-    course.topic = topic;
-    course.content = content;
-    course.creator = user; // Assign the current user as the creator of the course
-  
- 
-  return this.courseRepository.save(course);
+    // Check if a course with the same description already exists
+    const existingCourseWithDescription = await this.courseRepository.findOne({ where: { description } });
+    if (existingCourseWithDescription) {
+      throw new ConflictException('A course with the same description already exists.');
+    }
+    const existingCourseWithTitle = await this.courseRepository.findOne({ where: { title } });
+    if (existingCourseWithTitle) {
+      throw new ConflictException('A course with the same title already exists.');
+    }
+    const existingCourseWithContent = await this.courseRepository.findOne({ where: { content } });
+    if (existingCourseWithContent) {
+      throw new ConflictException('A course with the same content already exists.');
+    }
+
+      const course = new Course();
+      course.title = title;
+      course.description = description;
+      course.difficulty = difficulty;
+      course.topic = topic;
+      course.content = content;
+      course.creator = user; // Assign the current user as the creator of the course
+    
+    return this.courseRepository.save(course);
+    
+  } catch (error) {
+    throw new BadRequestException('Failed to create the course. Please check the required fields.');
+  }
 }
   
 
@@ -144,19 +154,20 @@ export class CourseService {
   }
 
   //user (author) can remove own course if no one has bought it
-  async deleteCourseIfNoPurchases(courseId: number, creatorId: number): Promise<void> {
+  async deleteCourseIfNoPurchases(courseId: number, userId: number): Promise<void> {
 
-    const course = await this.courseRepository.findOne({where: {courseId}});
+    const course = await this.courseRepository.findOne({where: {courseId}, relations: ['creator'] });
     const purchaseCount = await this.purchaseService.countCoursePurchases(courseId);
 
     if (!course) {
       throw new NotFoundException(`Course with ID '${courseId}' not found.`);
     }
 
-    if (purchaseCount === 0) {
-      await this.courseRepository.delete({ courseId, creator: { id: creatorId } });
+    if (purchaseCount === 0 && course.creator.id === userId) {
+      await this.courseRepository.delete({ courseId, creator: { id: userId } });
+      
     } else {
-      throw new ForbiddenException('This course cannot be deleted as it has been purchased by users.');
+      throw new ForbiddenException('This course cannot be deleted.');
     }
   }
 
