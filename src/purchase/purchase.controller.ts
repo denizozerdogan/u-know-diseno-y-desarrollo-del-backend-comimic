@@ -56,20 +56,3 @@ export class PurchaseController {
   }
 
 }
-
-/*   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.purchaseService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.purchaseService.remove(+id);
-  }
-} */
-
-
-//   @Patch(':id')
-//   update(@Param('id') id: string, @Body() updatePurchaseDto: UpdatePurchaseDto) {
-//     return this.purchaseService.update(+id, updatePurchaseDto);
-//   }

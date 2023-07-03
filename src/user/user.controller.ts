@@ -1,19 +1,16 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
   Delete,
   ParseIntPipe,
-  ValidationPipe,
-  UsePipes,
   NotFoundException,
   UseGuards,
   Req,
   UnauthorizedException,
-  SetMetadata,
+
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -54,17 +51,7 @@ export class UserController {
       throw new UnauthorizedException('Unauthorized');
     }
   }
-/* 
-  @Get(':id/profile')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.USER)
-  async findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
-  if (req.user.role === Role.ADMIN || req.user.id === id) {
-    return await this.userService.getUserById(id);
-  } else {
-    throw new UnauthorizedException('Unauthorized');
-  }
-} */
+
 
   @Patch(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -76,7 +63,6 @@ export class UserController {
     }
   }
 
-// !!! MAYBE ADDED the guards here? Not sure i remember doing something xD
   @Delete(':id/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)

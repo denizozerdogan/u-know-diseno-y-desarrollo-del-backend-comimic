@@ -1,12 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany, JoinColumn } from 'typeorm';
 import { ApiTags } from '@nestjs/swagger';
-import { Course } from '../../course/entities/course.entity';
 import { Role } from './role.enum';
-
-// export enum UserRole {
-//   Admin = 'admin',
-//   User = 'user',
-// }
 
 
 @ApiTags('user')

@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { error } from 'console';
+import { hash } from 'bcrypt';
 
 
 
@@ -87,31 +88,68 @@ async getUserById(id: number): Promise<User> {
       throw new NotFoundException ('User not found');
     }
   } */
-  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    try {
-      const toUpdate = await this.userRepository.findOne({ where: { id } });
-  
-      if (!toUpdate) {
-        throw new NotFoundException('User not found');
-      }
-  
-      toUpdate.bio = updateUserDto.bio;
 
-      if (updateUserDto.bio !== undefined) {
-        toUpdate.bio = updateUserDto.bio;
-      } else {
-        throw new Error('Invalid field(s) for update');
-      }
-  
-      return await this.userRepository.save(toUpdate);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new BadRequestException('Failed to update user');
-      }
+
+
+// ...
+
+async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  try {
+    const toUpdate = await this.userRepository.findOne({ where: { id } });
+
+    if (!toUpdate) {
+      throw new NotFoundException('User not found');
+    }
+
+    toUpdate.bio = updateUserDto.bio;
+
+    if (updateUserDto.bio !== undefined) {
+      toUpdate.bio = updateUserDto.bio;
+    } else {
+      throw new Error('Invalid field(s) for update');
+    }
+
+    if (updateUserDto.password !== undefined) {
+      const hashedPassword = await hash(updateUserDto.password, 10);
+      toUpdate.password = hashedPassword;
+    }
+
+    return await this.userRepository.save(toUpdate);
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      throw error;
+    } else {
+      throw new BadRequestException('Failed to update user');
     }
   }
+}
+
+  // async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  //   try {
+  //     const toUpdate = await this.userRepository.findOne({ where: { id } });
+  
+  //     if (!toUpdate) {
+  //       throw new NotFoundException('User not found');
+  //     }
+  
+  //     toUpdate.bio = updateUserDto.bio;
+  //     toUpdate.password = updateUserDto.password;
+
+  //     if (updateUserDto.bio !== undefined) {
+  //       toUpdate.bio = updateUserDto.bio;
+  //     } else {
+  //       throw new Error('Invalid field(s) for update');
+  //     }
+  
+  //     return await this.userRepository.save(toUpdate);
+  //   } catch (error) {
+  //     if (error instanceof NotFoundException) {
+  //       throw error;
+  //     } else {
+  //       throw new BadRequestException('Failed to update user');
+  //     }
+  //   }
+  // }
 
   //delete
   async removeUser(id: number): Promise<boolean> {

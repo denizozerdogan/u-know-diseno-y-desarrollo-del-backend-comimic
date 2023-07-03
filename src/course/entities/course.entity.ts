@@ -68,35 +68,3 @@ export class Course {
     creator: User;
   
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  //   @BeforeUpdate()
-  //   @BeforeInsert()
-  //   calculateRating() {
-  //   if (this.star && this.star.length > 0) {
-  //     if (this.star.length >= 5) {
-  //       const sum = this.star.reduce((total, current) => total + current, 0);
-  //       const ratingFromFifthStar = (sum - 4.8 * 4) / (this.star.length - 4);
-  //       this.rating = parseFloat(ratingFromFifthStar.toFixed(1));
-  //     } 
-  //   } 
-  // }
-
