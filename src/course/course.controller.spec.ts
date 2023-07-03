@@ -9,7 +9,7 @@ import { UserService } from '../user/user.service';
 import { Purchase } from '../purchase/entities/purchase.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { User } from '../user/entities/user.entity';
-import { NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
 import { Role } from '../user/entities/role.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -40,7 +40,9 @@ describe('CourseController', () => {
   };
 
   const mockJwtService = {};
-  const mockUserService = {};
+  const mockUserService = {
+    updateUserWallet: jest.fn(),
+  };
   const mockPurchaseService = {};
   const mockUserRepository = {
     save: jest.fn(),
@@ -517,7 +519,6 @@ describe('CourseController', () => {
     // Verify that deleteCourseIfNoPurchases is called with the correct courseId and userId
     expect(mockCourseService.deleteCourseIfNoPurchases).toHaveBeenCalledWith(courseId, userId);
   });
-
   it('should update the approval status of the course with the given courseId', async () => {
     const courseId = 1;
     const userId = 1;
@@ -572,9 +573,16 @@ describe('CourseController', () => {
 
   it('should throw NotFoundException when the course to approve is not found', async () => {
     const courseId = 1;
-    jest.spyOn(mockCourseService, 'updateApproval').mockResolvedValue(null);
+    jest.spyOn(mockCourseService, 'updateApproval').mockRejectedValueOnce(new BadRequestException('Failed to update the course.'));
   
-    await expect(controller.approveCourse(courseId)).rejects.toThrow(Error);
+    try {
+      await controller.approveCourse(courseId);
+      throw new Error('Expected error was not thrown');
+    } catch (error) {
+      // Verify that an error is thrown
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect(error.message).toBe('Failed to update the course.');
+    }
   });
   it('should return the courses of a user', async () => {
     const userId = 1; // ID of the user

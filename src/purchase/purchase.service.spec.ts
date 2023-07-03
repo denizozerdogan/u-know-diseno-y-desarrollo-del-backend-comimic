@@ -3,12 +3,14 @@ import { PurchaseService } from './purchase.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Course } from '../course/entities/course.entity';
 import { Purchase } from './entities/purchase.entity';
+import { User } from '../user/entities/user.entity';
 
   describe('PurchaseService', () => {
    let service: PurchaseService;
 
    const mockCourseRepository = {}
    const mockPurchaseRepository = {}
+   const mockUserRepository = {}
 
    beforeEach(async () => {
      const module: TestingModule = await Test.createTestingModule({
@@ -21,6 +23,10 @@ import { Purchase } from './entities/purchase.entity';
             provide: getRepositoryToken(Purchase),
             useValue: mockPurchaseRepository,
         },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepository,
+      },
     ],
      }).compile();
 

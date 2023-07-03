@@ -340,36 +340,45 @@ it('should throw an error if any other error occurs when updating a user', async
 it('should update the user wallet correctly', async () => {
   const userId = 1;
   const initialWalletAmount = 1000;
-  const amountToAdd = 500;
+  const amountToAdd = 50;
   const expectedWalletAmount = initialWalletAmount + amountToAdd;
 
-  // Mock the getUserById method to return a promise with the user object
-  jest.spyOn(service, 'getUserById').mockResolvedValueOnce({
-    id: 1,
-      name: 'Yumi',
-      surname: 'Namie',
-      wallet: 1000,
-      password: 'password1234',
-      email: 'yumi@example.com',
-      bio: 'I am Yumi',
-      created_at: new Date(2023, 7, 16),
-      updated_at: new Date (),
-      role: Role.USER,
-  })
-  // Mock the user repository's save method
-  jest.spyOn(mockUserRepositoryService, 'save').mockImplementationOnce((user) => {
-    return Promise.resolve({
-      ...user,
-      wallet: expectedWalletAmount,
-    });
+  // Mock the user repository's findOne method to return a promise with the user object
+  jest.spyOn(mockUserRepositoryService, 'findOne').mockResolvedValueOnce({
+    id: userId,
+    name: 'Yumi',
+    surname: 'Namie',
+    wallet: initialWalletAmount,
+    password: 'password1234',
+    email: 'yumi@example.com',
+    bio: 'I am Yumi',
+    created_at: new Date(2023, 7, 16),
+    updated_at: new Date(),
+    role: Role.USER,
   });
 
+  // Create a mock user object with the expected wallet amount
+  const updatedUser = {
+    id: userId,
+    name: 'Yumi',
+    surname: 'Namie',
+    wallet: expectedWalletAmount,
+    password: 'password1234',
+    email: 'yumi@example.com',
+    bio: 'I am Yumi',
+    created_at: new Date(2023, 7, 16),
+    updated_at: new Date(),
+    role: Role.USER,
+  };
+
+  // Mock the user repository's save method
+  jest.spyOn(mockUserRepositoryService, 'save').mockResolvedValueOnce(updatedUser);
+
   // Call the updateUserWallet method
-  const updatedUser = await service.updateUserWallet(userId);
+  const result = await service.updateUserWallet(userId);
 
   // Assert the updated user object and wallet amount
-  expect(updatedUser.id).toBe(userId);
-  expect(updatedUser.wallet).toBe(expectedWalletAmount);
+  expect(result).toEqual(updatedUser);
 
   // Verify that the userRepository.save method was called with the updated user
   expect(mockUserRepositoryService.save).toHaveBeenCalledWith(updatedUser);
