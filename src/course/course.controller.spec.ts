@@ -9,7 +9,7 @@ import { UserService } from '../user/user.service';
 import { Purchase } from '../purchase/entities/purchase.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { User } from '../user/entities/user.entity';
-import { NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
 import { Role } from '../user/entities/role.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -40,9 +40,13 @@ describe('CourseController', () => {
   };
 
   const mockJwtService = {};
-  const mockUserService = {};
+  const mockUserService = {
+    updateUserWallet: jest.fn(),
+  };
   const mockPurchaseService = {};
-  const mockUserRepository = {};
+  const mockUserRepository = {
+    save: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -473,10 +477,23 @@ describe('CourseController', () => {
     // Verify that deleteCourseIfNoPurchases is called with the correct courseId and userId
     expect(mockCourseService.deleteCourseIfNoPurchases).toHaveBeenCalledWith(courseId, userId);
   });
-
   it('should update the approval status of the course with the given courseId', async () => {
     const courseId = 1;
-    const updatedCourse: Course = {
+    const userId = 1;
+    const mockCreator: User = {
+      id: userId,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 200,
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date(),
+      role: Role.USER,
+    }
+
+    const mockUpdatedCourse: Course  = {
       title: 'Updated Course 1',
       description: 'Updated Description of Course 1',
       difficulty: courseDifficulty.Medium,
@@ -485,25 +502,47 @@ describe('CourseController', () => {
       created_at: new Date(),
       updated_at: new Date(),
       approved: true,
-      courseId: 1,
+      courseId: courseId,
       price: 50,
       rating: 0,
       stars: [],
       comments: [],
-      creator: new User(),  
-      };
+      creator:mockCreator,
+    };
 
-    jest.spyOn(mockCourseService, 'updateApproval').mockResolvedValue(updatedCourse);
-  
-    const result = await controller.approveCourse(courseId);
-  
-    expect(result).toEqual(updatedCourse);
-  });
-  it('should throw NotFoundException when the course to approve is not found', async () => {
+   
+  // Mock the courseService.updateApproval method to return the updated course
+  jest.spyOn(mockCourseService, 'updateApproval').mockResolvedValue(mockUpdatedCourse);
+
+  // Mock the user repository save method to return the updated creator
+  jest.spyOn(mockUserRepository, 'save').mockResolvedValue(mockCreator);
+
+  // Make the request to approve the course
+  const result = await controller.approveCourse(courseId);
+
+  // Assert that the courseService.updateApproval method was called with the correct courseId
+  expect(mockCourseService.updateApproval).toHaveBeenCalledWith(courseId, true);
+
+  // Assert that the userRepository.save method was called with the correct creator
+  expect(mockUserRepository.save).toHaveBeenCalledWith(mockCreator);
+
+  // Assert that the result is equal to the mockUpdatedCourse
+  expect(result).toEqual(mockUpdatedCourse);
+});
+
+
+  it('should throw BadRequestException when updateApproval fails', async () => {
     const courseId = 1;
-    jest.spyOn(mockCourseService, 'updateApproval').mockResolvedValue(null);
+    jest.spyOn(mockCourseService, 'updateApproval').mockRejectedValueOnce(new BadRequestException('Failed to update the course.'));
   
-    await expect(controller.approveCourse(courseId)).rejects.toThrow(Error);
+    try {
+      await controller.approveCourse(courseId);
+      throw new Error('Expected error was not thrown');
+    } catch (error) {
+      // Verify that an error is thrown
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect(error.message).toBe('Failed to update the course.');
+    }
   });
   it('should return the courses of a user', async () => {
     const userId = 1; // ID of the user

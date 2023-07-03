@@ -49,7 +49,7 @@ export class CourseController {
   // !! COURSES NOT APPROVED
   @Get('unapproved')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.USER)
+  @Roles(Role.ADMIN)
   async getUnapprovedCourses(): Promise<Course[]> {
     const unapprovedCourses = await this.courseService.getAllUnapproved();
     return unapprovedCourses;
@@ -152,10 +152,10 @@ export class CourseController {
     ): Promise<Course> {
       try {
         const updatedCourse = await this.courseService.updateApproval(courseId, true);
-
+/* 
         if (!updatedCourse) {
           throw new NotFoundException('Course not found.');
-        }
+        } */
 
         const creator = updatedCourse.creator;
         await this.userRepository.save(creator);
