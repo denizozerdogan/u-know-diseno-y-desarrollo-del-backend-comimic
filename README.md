@@ -1,4 +1,4 @@
-<img src="assets/uknow.png" align="center">
+<p align="center"><img src="assets/uknow.png" align="center"></p>
 
 <h2>Table of Contents</h2>
 
@@ -6,6 +6,7 @@
 * [Key Features](#key-features)
 * [Swagger](#swagger)
 * [Logical Data Model](#ddbb-model)
+* [Unit Test](#test)
 * [Technologies](#tecnologias)
 * [Project Developers](#autores)
 * [Links to Resources](#links)
@@ -24,7 +25,7 @@ U-Know is the new collaborative learning platform. Our goal is to create a commu
 
 ### <b>Registered User:</b>
 * Can log in to their account.
-* Can view the list of contents.
+* Can view the list of contents sorted by rating.
 * Can search for contents by keywords.
 * Can update their profile (except for name, email, and wallet).
 * Can create content.
@@ -69,6 +70,11 @@ U-Know is the new collaborative learning platform. Our goal is to create a commu
 <img src="assets/logical%20data%20model.png" align="center">
 </p>
 
+<h2 align="center" class="test">Unit Testing</h2>
+<p align="center">
+<img src="assets/testing.jpg">
+</p>
+
 <h2 align="center" class="tecnologias">Tools and Technologies</h2>
 
 * <b>NestJS:</b> A framework for building efficient and scalable server-side applications with Node.js.
@@ -94,7 +100,7 @@ U-Know is the new collaborative learning platform. Our goal is to create a commu
 
 <h2 align="center" class="links">Links to Resources</h2>
 
-* Presentation:
+* Presentation: https://www.canva.com/design/DAFmL8jctnE/FUvgYciYGCayfKbFkqPuVQ/edit
 * Trello: https://trello.com/invite/b/1ayGpBfw/ATTIe5b8416899e11aff79a3daf3e129aa3d258160DD/u-know-api
 * Swagger: http://localhost:3000/docs
 
