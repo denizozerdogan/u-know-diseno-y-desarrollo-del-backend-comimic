@@ -47,8 +47,8 @@ describe('CourseService', () => {
           provide: PurchaseService,
           useValue: mockPurchaseService
         },
-        {provide: UserService,
-        useValue: mockUserService
+        { provide: UserService,
+          useValue: mockUserService
         }
       ],
     }).compile();
@@ -200,7 +200,7 @@ describe('CourseService', () => {
       expect(mockCourseRepository.findOne).toHaveBeenCalledWith({ where: { content: createCourseDto.content } });
       });  
 
-    it('should return all approved courses ordered by rating for admin user', async () => {
+    it('should return all approved courses ordered by rating for all', async () => {
       const mockCourses = [
         { title: 'Course 1', topic: 'Programming', price: 10, rating: 4.5 },
         { title: 'Course 2', topic: 'Design', price: 20, rating: 4.2 },
@@ -208,33 +208,7 @@ describe('CourseService', () => {
       
       jest.spyOn(mockCourseRepository, 'find').mockResolvedValue(mockCourses);
       
-      const mockRequest = {
-        user: { role: 'admin' } // Provide a user role that will return courses
-      } as any;
-      
-      const result = await service.findAll(mockRequest.user.role); // Pass the user role instead of the mockRequest object
-      
-      expect(mockCourseRepository.find).toHaveBeenCalledWith({
-        order: { rating: 'DESC' },
-        select: ['title', 'topic', 'price', 'rating'],
-      });
-      expect(result).toEqual(mockCourses);
-    });
-
-    it('should return all approved courses ordered by rating for non-admin user', async () => {
-      const mockCourses = [
-        { title: 'Course 1', topic: 'Programming', price: 10, rating: 4.5 },
-        { title: 'Course 2', topic: 'Design', price: 20, rating: 4.2 },
-      ];
-      
-      jest.spyOn(mockCourseRepository, 'find').mockResolvedValue(mockCourses);
-      
-      // Simulate non-admin user by setting userRole to 'user'
-      const mockRequest = {
-        user: { role: 'user' } // Provide a user role that will return courses
-      } as any;
-      
-      const result = await service.findAll(mockRequest.user.role);
+      const result = await service.findAll();
       
       expect(mockCourseRepository.find).toHaveBeenCalledWith({
         where: { approved: true },
@@ -248,11 +222,8 @@ describe('CourseService', () => {
       
       jest.spyOn(mockCourseRepository, 'find').mockResolvedValue([]);
     
-      // Simulate non-admin user by setting userRole to 'user'
-      const userRole = 'user';
-    
       try {
-        await service.findAll(userRole);
+        await service.findAll();
         } catch (error){
           expect(error).toBeInstanceOf(Error);
           expect(error.message).toEqual('Error while fetching the courses.');

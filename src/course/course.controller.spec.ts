@@ -230,43 +230,7 @@ describe('CourseController', () => {
 
   });
 
-  it('should return all courses', async () => {
-    // Mock the findAll method
-    const courses: Course[] = [];
-    jest.spyOn(mockCourseService, 'findAll').mockResolvedValue(courses);
-  
-    // Create a mock request object with a user property
-    const mockRequest = {
-      user: { role: 'admin' } // Provide a user role that will return courses
-    };
-  
-    // Make a request to the findAll endpoint, passing the mock request object
-    const result = await controller.findAll(mockRequest);
-  
-    // Assert that the response contains the expected courses
-    expect(result).toEqual(courses);
-  });
-  
-  it('should throw NotFoundException when no courses are found', async () => {
-    // Mock the findAll method to return no courses
-    jest.spyOn(mockCourseService, 'findAll').mockResolvedValue(null);
-  
-    // Create a mock request object with a user property
-    const mockRequest = {
-      user: { role: 'admin' } // Provide a user role that should return courses
-    };
-  
-    try {
-      // Call the findAll method, passing the mock request object
-      await controller.findAll(mockRequest);
-      throw new Error('Expected NotFoundException to be thrown');
-    } catch (error) {
-      // Assert that an instance of NotFoundException is thrown with the correct message
-      expect(error).toBeInstanceOf(NotFoundException);
-      expect(error.message).toBe('No courses found.');
-    }
-  });
-  /* it('should return all courses', async () => {
+   it('should return all courses', async () => {
     // Mock the findAll method
     const courses: Course[] = [];
     jest.spyOn(mockCourseService, 'findAll').mockResolvedValue(courses);
@@ -288,7 +252,7 @@ describe('CourseController', () => {
       expect(error).toBeInstanceOf(NotFoundException);
       expect(error.message).toBe('No approved courses found.');
     }
-  }); */
+  }); 
 
   it('should return courses matching the keyword', async () => {
     // Mock the searchByKeyword method

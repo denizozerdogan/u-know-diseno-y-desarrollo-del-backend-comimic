@@ -66,22 +66,6 @@ export class CourseController {
   }
 
   @Get('')
-  @UseGuards(JwtAuthGuard)
-  async findAll(@Req() req): Promise<Course[]> {
-    try {
-      const user = req['user'];
-      const userRole = user.role;
-      const courses = await this.courseService.findAll(userRole);
-      if (!courses) {
-        throw new NotFoundException('No courses found.');
-      }
-      return courses;
-    } catch (error) {
-      throw new NotFoundException('No courses found.');
-    }
-  }
-/*   @Get('')
-   @UseGuards(JwtAuthGuard)
   async findAll(): Promise<Course[]> {
   try {
       const courses = await this.courseService.findAll();
@@ -89,7 +73,7 @@ export class CourseController {
   } catch (error) {
       throw new NotFoundException('No approved courses found.');
     }
- } */
+ } 
     
     @Get('search')
     async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
