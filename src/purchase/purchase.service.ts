@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Purchase } from './entities/purchase.entity';
 import { User } from '../user/entities/user.entity';
 import { CourseService } from '../course/course.service';
-import { Course } from 'src/course/entities/course.entity';
+import { Course } from '../course/entities/course.entity';
 
 @Injectable()
 export class PurchaseService {
@@ -122,7 +122,17 @@ export class PurchaseService {
     });
     return !!purchase;
   }
+  async isCourseReviewed(courseId: number, userId: number): Promise<boolean> {
+    const purchase = await this.purchaseRepository.findOne({
+      where: {
+        buyer: { id: userId },
+        course: { courseId },
+        reviewed: true, // Assuming reviewed is a property in the Purchase entity
+      },
+    });
   
+    return !!purchase;
+  }
   
   }
   

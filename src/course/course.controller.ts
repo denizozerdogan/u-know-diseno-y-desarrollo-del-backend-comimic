@@ -38,7 +38,7 @@ export class CourseController {
   @UseGuards(JwtAuthGuard)
   async createCourse(
     @Body() createCourseDto: CreateCourseDto,
-    @Req() req: Request,
+    @Req() req,
   ): Promise<Course> {
     const user: User = req['user'];
     createCourseDto.creatorId = user.id;
@@ -64,34 +64,28 @@ export class CourseController {
   }
 
   @Get('')
-  @UseGuards(JwtAuthGuard)
-  async findAll(@Req() req: Request): Promise<Course[]> {
-    try {
-      const user = req['user'];
-      const userRole = user.role;
-      const courses = await this.courseService.findAll(userRole);
-      if (!courses) {
-        throw new NotFoundException('No courses found.');
-      }
+  async findAll(): Promise<Course[]> {
+  try {
+      const courses = await this.courseService.findAll();
       return courses;
-    } catch (error) {
-      throw new NotFoundException('No courses found.');
+  } catch (error) {
+      throw new NotFoundException('No approved courses found.');
     }
-  }
+ } 
     
-  @Get('search')
-  async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
-    try {
-      const courses = await this.courseService.searchByKeyword(keyword);
-      if (!courses || courses.length === 0) {
+    @Get('search')
+    async searchByKeyword(@Query('keyword') keyword: string): Promise<Course[]> {
+      try { 
+        const courses = await this.courseService.searchByKeyword(keyword);
+       /*  if (!courses || courses.length === 0) {
+          throw new NotFoundException('No courses found.');
+        } */
+        return courses;
+      } catch (error) {
+        
         throw new NotFoundException('No courses found.');
-      }
-      return courses;
-    } catch (error) {
-      
-      throw new NotFoundException('No courses found.');
+      } 
     }
-  }
 
     @Get(':courseId')
     async findOne(@Param('courseId', ParseIntPipe) courseId: number) {
@@ -144,7 +138,7 @@ export class CourseController {
     @Delete(':courseId')
     async deleteCourse(
       @Param('courseId') courseId: number,
-      @Req() req: Request,
+      @Req() req,
     ): Promise<void> {
       const user: User= req['user'];
       await this.courseService.deleteCourseIfNoPurchases(courseId, user.id);
@@ -154,16 +148,16 @@ export class CourseController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async approveCourse(
-      @Param('courseId') courseId: string,
+      @Param('courseId') courseId: number,
     ): Promise<Course> {
       try {
-        const updatedCourse = await this.courseService.updateApproval(+courseId, true,50);
+        const updatedCourse = await this.courseService.updateApproval(courseId, true);
+
         if (!updatedCourse) {
           throw new NotFoundException('Course not found.');
         }
 
         const creator = updatedCourse.creator;
-        creator.wallet += 50;
         await this.userRepository.save(creator);
 
 
@@ -185,7 +179,36 @@ export class CourseController {
       return this.courseService.findUserCourses(userId);
     }
 
-}
+    //a buyer can comment once one course that he bought
+    @Post(':courseId/comment')
+    @UseGuards(JwtAuthGuard)
+    async addComment(
+      @Param('courseId') courseId: number,
+      @Req() req,
+      @Body('comment') comment: string,
+    ): Promise<Course> {
+      const user: User = req['user'];
+
+      return this.courseService.addCommentToCourse(courseId, user.id, comment);
+    }
+
+    @Post(':courseId/review-stars/')
+    @UseGuards(JwtAuthGuard)
+    async updateCourseStars(
+      @Param('courseId') courseId: number,
+      @Body('stars') stars: number,
+      @Req() req
+    ): Promise<Course> {
+      try {
+        const userId = req.user.id;
+        const updatedCourse = await this.courseService.updateCourseStars(courseId, userId, stars);
+        return updatedCourse;
+      } catch (error) {
+        // Catch any errors thrown by the service and propagate them through the controller
+        throw error;
+      }
+    }
+  }
 
 
 

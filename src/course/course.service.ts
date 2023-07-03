@@ -55,15 +55,10 @@ export class CourseService {
 }
   
 
-  //los cursos pero sin contenido (publico)
-  async findAll(userRole: string): Promise<Course[]> {
+  //Todo los cursos pero sin contenido (publico)
+  async findAll(): Promise<Course[]> {
     try {
-      if (userRole === 'admin') {
-        return this.courseRepository.find({
-          order: { rating: 'DESC' },
-          select: ['title', 'topic', 'price', 'rating'],
-        });
-      } else {
+  
         const courses = await this.courseRepository.find({
           where: { approved: true },
           order: { rating: 'DESC' },
@@ -76,10 +71,10 @@ export class CourseService {
   
         return courses;
       }
-    } catch (error) {
+     catch (error) {
       throw new Error('Error while fetching the courses.');
     }
-  }
+  } 
 
 
   // Curso sin contenido (publico)
@@ -136,7 +131,7 @@ export class CourseService {
 
     const coursePurchaseTotal = await this.purchaseService.countCoursePurchases(courseId);
     if (coursePurchaseTotal > 0) {
-      throw new BadRequestException('This course has buyer and cannot be deleted.')
+      throw new BadRequestException('This course has buyers and cannot be deleted.')
     }
 
     const result = await this.courseRepository.delete(courseId);
@@ -197,7 +192,7 @@ export class CourseService {
     }
   }
   
-  async updateApproval(courseId: number, approval: boolean, walletAmount): Promise<Course> {
+  async updateApproval(courseId: number, approval: boolean): Promise<Course> {
     const course = await this.courseRepository.findOne(
       { 
         where: { courseId },
@@ -216,7 +211,7 @@ export class CourseService {
     const updatedCourse = await this.courseRepository.save(course);
 
     //Llama a la función updateUserWallet del UserService
-    await this.userService.updateUserWallet(course.creator.id, walletAmount); 
+    await this.userService.updateUserWallet(course.creator.id); 
 
     return updatedCourse;
   }
@@ -275,10 +270,70 @@ export class CourseService {
   
     return this.courseRepository.save(course);
   }
+  
+  // ** To update the course stars 
+  async updateCourseStars(courseId: number, userId: number, stars: number): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+    if (!course) {
+      throw new Error('Course not found');
+    }
+  
+    const hasPurchased = await this.purchaseService.hasPurchasedCourse(courseId, userId);
+  
+    if (!hasPurchased) {
+      throw new ForbiddenException('You can only rate courses you have purchased.');
+    }
+  
+    const isReviewed = await this.purchaseService.isCourseReviewed(courseId, userId);
+  
+    if (isReviewed) {
+      throw new BadRequestException('You have already rated this course.');
+    }
+  
+    // Update the course stars
+    course.stars = [{ value: stars }];
+    await this.courseRepository.save(course);
+  
+    const updatedCourse = await this.calculateCourseRating(courseId);
+    return updatedCourse;
+  }
+
+  // ** Calculate the new value of the rating field when a new star is added 
+
+  async calculateCourseRating(courseId: number): Promise<Course> {
+    const course = await this.courseRepository.findOne({ where: { courseId } });
+    if (!course) {
+      throw new Error('Course not found');
+    }
+  
+    const totalRatings = course.stars?.length || 0;
+  
+    if (totalRatings === 0) {
+      course.rating = 0;
+    } else {
+      const sumRatings = course.stars.reduce((total, star, index) => {
+        if (index < 4) {
+          return total + 4.8;
+        }
+        return total + star.value;
+      }, 0);
+  
+      const averageRating = sumRatings / totalRatings;
+      course.rating = parseFloat(averageRating.toFixed(1));
+    }
+  
+    if (course.rating < 3) {
+      course.price = 100; // Set price to 100 if rating is below 3
+    } else {
+      course.price = 200; // Set price back to default 200 if rating is 3 or above
+    }
+  
+    await this.courseRepository.save(course);
+  
+    return course;
+  }
 }
 
- 
-  // TODO check if the calculateRating is instantiated
   // async updateCourseStar(courseId: number, star: number, id: number): Promise<Course> {
   //   const course = await this.courseRepository
   //     .createQueryBuilder('course')

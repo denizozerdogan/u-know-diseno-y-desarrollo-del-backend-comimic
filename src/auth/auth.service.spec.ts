@@ -3,9 +3,11 @@ import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm'; 
 import { User } from '../user/entities/user.entity';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { HttpException } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
+import { hash } from 'bcrypt';
+import { Role } from '../user/entities/role.enum';
 
 
 const users: any = [

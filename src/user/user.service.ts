@@ -124,14 +124,14 @@ async getUserById(id: number): Promise<User> {
     return true;
   }
   
-  async updateUserWallet(id: number, amount: number): Promise<User> {
+  async updateUserWallet(id: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException('User not found.');
     }
 
-    user.wallet += amount;
+    user.wallet += 50;
     const updatedUser = await this.userRepository.save(user);
 
     return updatedUser;
