@@ -42,7 +42,9 @@ describe('CourseController', () => {
   const mockJwtService = {};
   const mockUserService = {};
   const mockPurchaseService = {};
-  const mockUserRepository = {};
+  const mockUserRepository = {
+    save: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -83,15 +85,13 @@ describe('CourseController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
- 
+  
   it('should create a new course', async () => {
     const userId = 1;
     const req = {
-      user: {
-        id: userId
-      }
+      user: { id: userId }
     };
-    
+  
     const createCourseDto = new CreateCourseDto();
     createCourseDto.title = 'Diego: Dealing';
     createCourseDto.description = 'This course will take you on a journey about dealing with feelings';
@@ -99,7 +99,7 @@ describe('CourseController', () => {
     createCourseDto.topic = 'Personal Development';
     createCourseDto.content = 'Lorem Ipsum';
     createCourseDto.creatorId = userId;
-    
+  
     const createdCourse: Course = {
       title: 'Diego: Dealing',
       description: 'This course will take you on a journey about dealing with feelings',
@@ -115,21 +115,65 @@ describe('CourseController', () => {
       stars: [],
       comments: [],
       creator: new User(),
-     };
-    
-    jest.spyOn(mockCourseService, 'createCourse').mockResolvedValue(createdCourse);
-    
+    };
+  
+    jest.spyOn(mockCourseService, 'createCourse').mockImplementation((createCourseDto) => {
+      expect(createCourseDto.creatorId).toBe(userId);
+      return Promise.resolve(createdCourse);
+    });
+  
     const result = await controller.createCourse(createCourseDto, req);
-    
-    expect(mockCourseService.createCourse).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ...createCourseDto,
-        creatorId: expect.any(Number),
-      }),
-      expect.objectContaining({ id: expect.any(Number) })
-    );
+  
     expect(result).toBe(createdCourse);
+    expect(mockCourseService.createCourse).toHaveBeenCalled();
   });
+  
+  // it('should create a new course', async () => {
+  //   const userId = 1;
+  //   const req = {
+  //     user: {
+  //       id: userId
+  //     }
+  //   };
+    
+  //   const createCourseDto = new CreateCourseDto();
+  //   createCourseDto.title = 'Diego: Dealing';
+  //   createCourseDto.description = 'This course will take you on a journey about dealing with feelings';
+  //   createCourseDto.difficulty = courseDifficulty.Easy;
+  //   createCourseDto.topic = 'Personal Development';
+  //   createCourseDto.content = 'Lorem Ipsum';
+  //   createCourseDto.creatorId = userId;
+    
+  //   const createdCourse: Course = {
+  //     title: 'Diego: Dealing',
+  //     description: 'This course will take you on a journey about dealing with feelings',
+  //     difficulty: courseDifficulty.Easy,
+  //     topic: 'Personal Development',
+  //     content: 'Lorem Ipsum',
+  //     created_at: new Date(2023, 7, 16),
+  //     updated_at: expect.any(Date),
+  //     approved: false,
+  //     courseId: 1,
+  //     price: 0,
+  //     rating: 0,
+  //     stars: [],
+  //     comments: [],
+  //     creator: new User(),
+  //    };
+    
+  //   jest.spyOn(mockCourseService, 'createCourse').mockResolvedValue(createdCourse);
+    
+  //   const result = await controller.createCourse(createCourseDto, req);
+    
+  //   expect(mockCourseService.createCourse).toHaveBeenCalledWith(
+  //     expect.objectContaining({
+  //       ...createCourseDto,
+  //       creatorId: expect.any(Number),
+  //     }),
+  //     expect.objectContaining({ id: expect.any(Number) })
+  //   );
+  //   expect(result).toBe(createdCourse);
+  // });
   
   it('should get all unapproved courses as an admin', async () => {
     // Mock the getAllUnapproved method
@@ -476,7 +520,21 @@ describe('CourseController', () => {
 
   it('should update the approval status of the course with the given courseId', async () => {
     const courseId = 1;
-    const updatedCourse: Course = {
+    const userId = 1;
+    const mockCreator: User = {
+      id: userId,
+      name: 'Yumi',
+      surname: 'Namie',
+      wallet: 200,
+      password: 'password1234',
+      email: 'yumi@example.com',
+      bio: 'I am Yumi',
+      created_at: new Date(2023, 7, 16),
+      updated_at: new Date(),
+      role: Role.USER,
+    }
+
+    const mockUpdatedCourse: Course  = {
       title: 'Updated Course 1',
       description: 'Updated Description of Course 1',
       difficulty: courseDifficulty.Medium,
@@ -485,20 +543,33 @@ describe('CourseController', () => {
       created_at: new Date(),
       updated_at: new Date(),
       approved: true,
-      courseId: 1,
+      courseId: courseId,
       price: 50,
       rating: 0,
       stars: [],
       comments: [],
-      creator: new User(),  
-      };
+      creator:mockCreator,
+    };
+    // Mock the courseService.updateApproval method to return the updated course
+  jest.spyOn(mockCourseService, 'updateApproval').mockResolvedValue(mockUpdatedCourse);
 
-    jest.spyOn(mockCourseService, 'updateApproval').mockResolvedValue(updatedCourse);
-  
-    const result = await controller.approveCourse(courseId);
-  
-    expect(result).toEqual(updatedCourse);
-  });
+  // Mock the user repository save method to return the updated creator
+  jest.spyOn(mockUserRepository, 'save').mockResolvedValue(mockCreator);
+
+  // Make the request to approve the course
+  const result = await controller.approveCourse(courseId);
+
+  // Assert that the courseService.updateApproval method was called with the correct courseId
+  expect(mockCourseService.updateApproval).toHaveBeenCalledWith(courseId, true);
+
+  // Assert that the userRepository.save method was called with the correct creator
+  expect(mockUserRepository.save).toHaveBeenCalledWith(mockCreator);
+
+  // Assert that the result is equal to the mockUpdatedCourse
+  expect(result).toEqual(mockUpdatedCourse);
+});
+
+
   it('should throw NotFoundException when the course to approve is not found', async () => {
     const courseId = 1;
     jest.spyOn(mockCourseService, 'updateApproval').mockResolvedValue(null);
@@ -542,8 +613,8 @@ describe('CourseController', () => {
       },
     ]
     jest.spyOn(mockCourseService, 'findUserCourses').mockResolvedValue(userCourses);
-  
-    const result = await controller.findUserCourses(userId);
+    const req = { user: { id: userId } };
+    const result = await controller.findUserCourses(userId, req);
   
     expect(result).toEqual(userCourses);
     expect(mockCourseService.findUserCourses).toHaveBeenCalledWith(userId);

@@ -202,7 +202,7 @@ describe('UserService', () => {
   it('should update the password of user and return the updated user', async () => {
     const userId = 1;
     const updateUserDto: UpdateUserDto = {
-      password: 'newpassword',
+      password: 'password1234',
     };
 
     const existingUser = {
@@ -365,7 +365,7 @@ it('should update the user wallet correctly', async () => {
   });
 
   // Call the updateUserWallet method
-  const updatedUser = await service.updateUserWallet(userId, amountToAdd);
+  const updatedUser = await service.updateUserWallet(userId);
 
   // Assert the updated user object and wallet amount
   expect(updatedUser.id).toBe(userId);

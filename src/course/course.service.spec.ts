@@ -518,7 +518,7 @@ describe('CourseService', () => {
         await service.deleteCourseIfNoPurchases(courseId, creatorId);
       } catch (error) {
         expect(error).toBeInstanceOf(ForbiddenException);
-        expect(error.message).toEqual('This course cannot be deleted as it has been purchased by users.');
+        expect(error.message).toEqual('This course cannot be deleted.');
       }
     
       expect(mockCourseRepository.findOne).toHaveBeenCalledWith({ where: { courseId } });

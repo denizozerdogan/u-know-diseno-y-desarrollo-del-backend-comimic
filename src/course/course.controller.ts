@@ -40,7 +40,7 @@ export class CourseController {
     @Body() createCourseDto: CreateCourseDto,
     @Req() req,
   ): Promise<Course> {
-    const user: User = req['user']['userId'];
+    const user: User = req['user'];
     createCourseDto.creatorId = user.id;
     
     return this.courseService.createCourse(createCourseDto, user);
@@ -149,7 +149,7 @@ export class CourseController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.ADMIN)
     async approveCourse(
-      @Param('courseId') courseId: number, @Body('approved') approved: boolean
+      @Param('courseId') courseId: number,
     ): Promise<Course> {
       try {
         const updatedCourse = await this.courseService.updateApproval(courseId, true);

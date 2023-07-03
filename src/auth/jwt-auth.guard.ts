@@ -37,7 +37,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   
           if (user) {
             
-            request.user = user;
+            const { password, ...userWithoutPassword } = user;
+            request.user = userWithoutPassword;
             request.user['userId'] = decodedToken.id;
             
             return true;
