@@ -24,17 +24,15 @@ export class CourseService {
   setPurchaseService(purchaseService: PurchaseService) {
     this.purchaseService = purchaseService;
   }
-
- async createCourse(createCourseDto: CreateCourseDto, user: User): Promise<Course> {
-  try {
-
+  
+  async createCourse(createCourseDto: CreateCourseDto, user: User): Promise<Course> {
     const { title, description, difficulty, topic, content } = createCourseDto;
-
+  
     const validationErrors = await validate(createCourseDto);
     if (validationErrors.length > 0) {
-      throw new BadRequestException('Missing required field(s).');
+      throw new ConflictException('Missing required field(s).');
     }
-
+  
     // Check if a course with the same description already exists
     const existingCourseWithDescription = await this.courseRepository.findOne({ where: { description } });
     if (existingCourseWithDescription) {
@@ -48,21 +46,17 @@ export class CourseService {
     if (existingCourseWithContent) {
       throw new ConflictException('A course with the same content already exists.');
     }
-
-      const course = new Course();
-      course.title = title;
-      course.description = description;
-      course.difficulty = difficulty;
-      course.topic = topic;
-      course.content = content;
-      course.creator = user; // Assign the current user as the creator of the course
-    
+  
+    const course = new Course();
+    course.title = title;
+    course.description = description;
+    course.difficulty = difficulty;
+    course.topic = topic;
+    course.content = content;
+    course.creator = user; // Assign the current user as the creator of the course
+  
     return this.courseRepository.save(course);
-    
-  } catch (error) {
-    throw new BadRequestException('Failed to create the course. Please check the required fields.');
   }
-}
   
 
   //Todo los cursos pero sin contenido (publico)
